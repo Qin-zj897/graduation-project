@@ -1,0 +1,89 @@
+{
+  "problems": {
+    "2910": {
+      "stats": {
+        "success_dir_total": 81,
+        "failure_dir_total": 100,
+        "total_files": 181,
+        "success_dir_stats": {
+          "syntax_error": 0,
+          "standard_test_failed": 2,
+          "timeout_error": 0,
+          "execution_error": 0,
+          "pseudo_correct": 2,
+          "truly_correct": 77
+        },
+        "failure_dir_stats": {
+          "syntax_error": 0,
+          "standard_test_passed": 2,
+          "standard_test_failed": 98
+        }
+      },
+      "failed_standard_count": 2,
+      "pseudo_correct_count": 2,
+      "truly_correct_count": 77,
+      "summary": {
+        "success_dir_files": 81,
+        "failure_dir_files": 100,
+        "total_files": 181,
+        "success_dir_valid": 81,
+        "failed_standard_tests": 2,
+        "pseudo_correct": 2,
+        "truly_correct": 77,
+        "success_dir_pseudo_ratio": 2.4691358024691357,
+        "overall_pseudo_ratio": 2.5316455696202533
+      }
+    },
+    "3039": {
+      "stats": {
+        "success_dir_total": 200,
+        "failure_dir_total": 100,
+        "total_files": 300,
+        "success_dir_stats": {
+          "syntax_error": 0,
+          "standard_test_failed": 9,
+          "timeout_error": 0,
+          "execution_error": 0,
+          "pseudo_correct": 0,
+          "truly_correct": 191
+        },
+        "failure_dir_stats": {
+          "syntax_error": 0,
+          "standard_test_passed": 0,
+          "standard_test_failed": 100
+        }
+      },
+      "failed_standard_count": 9,
+      "pseudo_correct_count": 0,
+      "truly_correct_count": 191,
+      "summary": {
+        "success_dir_files": 200,
+        "failure_dir_files": 100,
+        "total_files": 300,
+        "success_dir_valid": 200,
+        "failed_standard_tests": 9,
+        "pseudo_correct": 0,
+        "truly_correct": 191,
+        "success_dir_pseudo_ratio": 0.0,
+        "overall_pseudo_ratio": 0.0
+      }
+    }
+  },
+  "overall_stats": {
+    "total_files": 481,
+    "success_dir_files": 281,
+    "failure_dir_files": 200,
+    "failed_standard_tests": 11,
+    "truly_correct": 268,
+    "pseudo_correct": 2,
+    "total_correct": 270,
+    "pseudo_ratio": 0.7407407407407408
+  },
+  "output_files": [
+    "pseudo_correct_2910.json",
+    "pseudo_correct_3039.json",
+    "failed_standard_2910.json",
+    "failed_standard_3039.json"
+  ],
+  "timestamp": "2026-01-08T20:15:26.585456"
+}
