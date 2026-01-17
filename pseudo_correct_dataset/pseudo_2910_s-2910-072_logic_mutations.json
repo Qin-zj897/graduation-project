@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_2910_009.py",
+  "code_content": "h = eval(input())\nn = eval(input())\nx = h\nfor i in range(n):\n    if i == 0:\n        pass\n    else:\n        pass\n    if i > 0:\n        x += h * 0.5 ** (i - 1)\nprint('{:.2f}'.format(x))",
+  "is_pseudo_correct": true,
+  "problem_id": "2910",
+  "mutation_type": "logic_mutations",
+  "original_filename": "s-2910-072.py",
+  "original_size": 144
+}

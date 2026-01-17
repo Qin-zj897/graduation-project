@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_2910_009.py",
+  "code_content": "h = eval(input())\nn = eval(input()) - 1\neva = h\nif n == 1:\n    print('%.2f' % h)\nelse:\n    while n > 0:\n        eva += h * 0.51 * 2\n        h *= 0.49\n        n -= 1\n    print('%0.2f' % eva)",
+  "is_pseudo_correct": true,
+  "problem_id": "2910",
+  "mutation_type": "constant_mutations",
+  "original_filename": "s-2910-054.py",
+  "original_size": 161
+}

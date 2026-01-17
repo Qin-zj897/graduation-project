@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_2910_002.py",
+  "code_content": "h = int(input())\nn = int(input())\nsums = h\nfor x in range(n - 1):\n    sums += h * 0.5 ** x\nprint('%.3f' % sums)",
+  "is_pseudo_correct": true,
+  "problem_id": "2910",
+  "mutation_type": "constant_mutations",
+  "original_filename": "s-2910-052.py",
+  "original_size": 101
+}

@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_3039_003.py",
+  "code_content": "\"\"\"a=eval(input())\nb=a.count(max(a))\nc=a.count(min(a))\nif len(a)>0:\n    for x in range(b):\n        a.remove(max(a))\nif len(a)>0:\n    for x in range(c):\n        a.remove(min(a))\nprint(a)\"\"\"\n'a=eval(input())\\nfor x in a:\\n    if x==max(a) or x==min(a):\\n        for i in range(a.count(x)):\\n            a.remove(x)\\nprint(a)'\na = eval(input())\nb = []\nfor x in a:\n    if x != max(a) and x != min(a):\n        b.append(x)\n    else:\n        pass\nprint(b)",
+  "is_pseudo_correct": true,
+  "problem_id": "3039",
+  "mutation_type": "logic_mutations",
+  "original_filename": "s-3039-039.py",
+  "original_size": 418
+}

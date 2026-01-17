@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_2910_005.py",
+  "code_content": "h = eval(input())\nn = eval(input())\na = h\nif n == 1:\n    print('{:.2f}'.format(h))\nelse:\n    for i in range(1, n):\n        a = a + 2 * h * 0.5 ** i\n    print('%.2f' % a)",
+  "is_pseudo_correct": true,
+  "problem_id": "2910",
+  "mutation_type": "condition_mutations",
+  "original_filename": "s-2910-078.py",
+  "original_size": 166
+}

@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_2910_004.py",
+  "code_content": "h = float(input())\nn = int(input())\nkong = [h]\nif n == 1:\n    print(h)\nelse:\n    for i in range(n - 1):\n        h = h * 0.5\n        kong.append(h * 2)\nprint('%.2f' % sum(kong))",
+  "is_pseudo_correct": true,
+  "problem_id": "2910",
+  "mutation_type": "condition_mutations",
+  "original_filename": "s-2910-033.py",
+  "original_size": 168
+}

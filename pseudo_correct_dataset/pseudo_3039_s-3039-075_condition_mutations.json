@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_3039_000.py",
+  "code_content": "lst = eval(input())\na = max(lst)\nb = min(lst)\nlst1 = []\nfor x in lst:\n    if x != a and x != b:\n        lst1.append(x)\n    else:\n        pass\nprint(lst1)",
+  "is_pseudo_correct": true,
+  "problem_id": "3039",
+  "mutation_type": "condition_mutations",
+  "original_filename": "s-3039-075.py",
+  "original_size": 149
+}

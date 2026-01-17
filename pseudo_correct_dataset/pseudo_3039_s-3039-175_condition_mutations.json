@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_3039_001.py",
+  "code_content": "lis = eval(input())\nnum_max = lis.count(max(lis))\nnum_min = lis.count(min(lis))\nfor i in range(num_max):\n    lis.remove(max(lis))\nif lis != []:\n    for b in range(num_min):\n        lis.remove(min(lis))\nelse:\n    pass\nprint(lis)",
+  "is_pseudo_correct": true,
+  "problem_id": "3039",
+  "mutation_type": "condition_mutations",
+  "original_filename": "s-3039-175.py",
+  "original_size": 212
+}

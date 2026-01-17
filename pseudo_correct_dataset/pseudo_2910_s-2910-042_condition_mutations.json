@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_2910_007.py",
+  "code_content": "h = eval(input())\nN = eval(input())\nif N == 1:\n    print('%.2f' % h)\nelse:\n    pass\nwhile N > 1:\n    d = h\n    for x in range(N - 1):\n        c = h / 2\n        d = d + 2 * c\n        h = h / 2\n    break\nprint('%.2f' % d)",
+  "is_pseudo_correct": true,
+  "problem_id": "2910",
+  "mutation_type": "condition_mutations",
+  "original_filename": "s-2910-042.py",
+  "original_size": 178
+}

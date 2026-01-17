@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_2910_006.py",
+  "code_content": "a = float(input())\nb = int(input())\nd = a\nif b > 1:\n    for x in range(1, b):\n        c = a * (1 / 2) ** x\n        d = d + c * 2\n    print('%.2f' % d)\nelse:\n    print('%.2f' % d)",
+  "is_pseudo_correct": true,
+  "problem_id": "2910",
+  "mutation_type": "condition_mutations",
+  "original_filename": "s-2910-001.py",
+  "original_size": 163
+}

@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_2910_004.py",
+  "code_content": "h = eval(input())\nN = eval(input())\nres = 0\nwhile N > 1:\n    res += h * 3 / 2\n    h = h / 2\n    N -= 1\nres += h\nprint('%.3f' % res)",
+  "is_pseudo_correct": true,
+  "problem_id": "2910",
+  "mutation_type": "constant_mutations",
+  "original_filename": "s-2910-069.py",
+  "original_size": 109
+}

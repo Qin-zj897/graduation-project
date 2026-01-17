@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_3039_002.py",
+  "code_content": "n = eval(input())\ns = n.copy()\nmax_num = max(n)\nmin_num = min(n)\nfor num in n:\n    if num == max_num or num == min_num:\n        s.remove(num)\n    else:\n        pass\nprint(s)",
+  "is_pseudo_correct": true,
+  "problem_id": "3039",
+  "mutation_type": "condition_mutations",
+  "original_filename": "s-3039-199.py",
+  "original_size": 138
+}

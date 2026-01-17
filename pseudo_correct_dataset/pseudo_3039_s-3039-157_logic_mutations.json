@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_3039_009.py",
+  "code_content": "Li = eval(input())\nImax = int(max(Li))\nImin = int(min(Li))\nNmax = Li.count(Imax)\nNmin = Li.count(Imin)\na = 0\nb = 0\nif Imax != Imin:\n    while a < Nmax:\n        Li.remove(Imax)\n        a += 1\n    while b < Nmin:\n        Li.remove(Imin)\n        b += 1\n    print(Li)\nelif Imax == Imin:\n    Li.clear()\n    print(Li)\nelse:\n    pass",
+  "is_pseudo_correct": true,
+  "problem_id": "3039",
+  "mutation_type": "logic_mutations",
+  "original_filename": "s-3039-157.py",
+  "original_size": 307
+}

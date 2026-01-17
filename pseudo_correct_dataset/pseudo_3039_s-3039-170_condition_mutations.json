@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_3039_001.py",
+  "code_content": "list = eval(input())\na = max(list)\nb = min(list)\nlist1 = list.copy()\nfor x in list:\n    if x == a or x == b:\n        list1.remove(x)\n    else:\n        pass\nprint(list1)",
+  "is_pseudo_correct": true,
+  "problem_id": "3039",
+  "mutation_type": "condition_mutations",
+  "original_filename": "s-3039-170.py",
+  "original_size": 133
+}

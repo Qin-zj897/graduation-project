@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_2910_009.py",
+  "code_content": "h = float(input())\nN = int(input())\nd = h\nif N >= 1:\n    for i in range(1, N):\n        c = h * (1 / 2) ** i\n        d = d + 2 * c\n    print(f'{d:.2f}')\nelse:\n    print(f'{d:.2f}')",
+  "is_pseudo_correct": true,
+  "problem_id": "2910",
+  "mutation_type": "condition_mutations",
+  "original_filename": "s-2910-006.py",
+  "original_size": 157
+}

@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_2910_004.py",
+  "code_content": "h = float(input())\nn = int(input()) - 1\ns = h\nif n == 1:\n    print('%.2f' % h)\nelse:\n    while n > 0:\n        s += 2 * h * 0.5\n        h = h / 2\n        n -= 1\nprint('%.2f' % s)",
+  "is_pseudo_correct": true,
+  "problem_id": "2910",
+  "mutation_type": "condition_mutations",
+  "original_filename": "s-2910-029.py",
+  "original_size": 153
+}

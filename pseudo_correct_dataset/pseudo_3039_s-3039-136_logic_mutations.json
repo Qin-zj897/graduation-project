@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_3039_008.py",
+  "code_content": "str1 = input()\nlist1 = [int(x) for x in str1[1:-1].split(',')]\nmax1 = 0\nmin1 = 100\nfor i in range(len(list1)):\n    if list1[i] > max1:\n        max1 = list1[i]\n    if list1[i] < min1:\n        min1 = list1[i]\n    else:\n        pass\nfor j in range(len(list1) - 1, -1, -1):\n    if list1[j] == min1 or list1[j] == max1:\n        del list1[j]\nprint(list1)",
+  "is_pseudo_correct": true,
+  "problem_id": "3039",
+  "mutation_type": "logic_mutations",
+  "original_filename": "s-3039-136.py",
+  "original_size": 326
+}

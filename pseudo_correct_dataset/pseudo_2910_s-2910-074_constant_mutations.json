@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_2910_000.py",
+  "code_content": "h = eval(input())\na = eval(input())\nt = h * (3 - 2.1 * 0.5 ** (a - 1))\nprint('{:.2f}'.format(t))",
+  "is_pseudo_correct": true,
+  "problem_id": "2910",
+  "mutation_type": "constant_mutations",
+  "original_filename": "s-2910-074.py",
+  "original_size": 80
+}

@@ -1,0 +1,9 @@
+{
+  "filename": "pseudo_2910_001.py",
+  "code_content": "from tkinter import N\nh = eval(input())\nn = eval(input())\nif n == 1:\n    s = h\nelse:\n    s = h\n    for i in range(n - 1):\n        s += h / 2 ** i\nprint('%.2f' % s)",
+  "is_pseudo_correct": true,
+  "problem_id": "2910",
+  "mutation_type": "condition_mutations",
+  "original_filename": "s-2910-016.py",
+  "original_size": 149
+}
