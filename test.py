@@ -1,12 +1,20 @@
 # test.py
 import ast
-from static_analyzer import StaticAnalyzer
+from static_analyzer import StaticAnalyzer, VariableFinder
 
-source_code = '''
-h=eval(input())
+source_code = '''h=eval(input())
 n=eval(input())
+x=input().split()
 alp=0.5
 sum1=h
+if h % 11 == 0:
+    pass
+if h and n:
+    pass
+if n > 10:
+    print("n>10")
+if 20 > n > 10:
+    print("yes")
 for i in range(1,n):
     sum1+=h*alp*2
     h=h*alp
@@ -22,181 +30,213 @@ def test_static_analyzer():
     try:
         # 1. 创建静态分析器实例
         analyzer = StaticAnalyzer(source_code=source_code)
-        print("✓ 静态分析器实例创建成功")
+        print("[OK] 静态分析器实例创建成功")
         
         # 2. 测试常量提取
         print("\n1. 提取常量与比较值:")
-        constants = analyzer.extract_constants_and_comparisons()
-        for var, values in constants.items():
-            print(f"  变量 '{var}':")
-            for val_info in values:
-                print(f"    值: {val_info['value']} (类型: {val_info['type']}, 来源: {val_info['source']})")
+        constants_result = analyzer.extract_constants_and_comparisons()
+        if constants_result:
+            for var, values in constants_result.items():
+                print(f"  变量 '{var}':")
+                for val_info in values:
+                    print(f"    值: {val_info['value']} (类型: {val_info['type']})")
+        else:
+            print("  未提取到常量")
         
         # 3. 测试控制流图构建
         print("\n2. 构建控制流图:")
-        cfg = analyzer.build_control_flow_graph()
-        print(f"  节点数量: {len(cfg.nodes())}")
-        print(f"  边数量: {len(cfg.edges())}")
-        print("  节点列表:")
-        for node in sorted(cfg.nodes()):
-            node_type = cfg.nodes[node].get('type', 'unknown')
-            print(f"    - {node} (类型: {node_type})")
+        cfg_result = analyzer.build_control_flow_graph()
+        if cfg_result:
+            print(f"  节点数量: {cfg_result['graph_metrics']['num_nodes']}")
+            print(f"  边数量: {cfg_result['graph_metrics']['num_edges']}")
+            print(f"  函数数量: {cfg_result['graph_metrics']['num_functions']}")
+            
+            # CFG 详细验证
+            print("\n  CFG 结构验证:")
+            nodes = cfg_result['nodes']
+            edges = cfg_result['edges']
+            
+            # 统计节点类型
+            node_types = {}
+            for node_id, node_attrs in nodes:
+                node_type = node_attrs.get('type', 'unknown')
+                node_types[node_type] = node_types.get(node_type, 0) + 1
+            
+            print(f"    节点类型分布: {dict(node_types)}")
+            
+            # 检查函数定义是否重复
+            func_entry_count = node_types.get('func_entry', 0)
+            func_exit_count = node_types.get('func_exit', 0)
+            if func_entry_count > 0:
+                print(f"    函数入口块: {func_entry_count} 个")
+                print(f"    函数出口块: {func_exit_count} 个")
+                
+                # 验证函数块数量是否匹配
+                expected_func_count = cfg_result['graph_metrics']['num_functions']
+                if func_entry_count == expected_func_count and func_exit_count == expected_func_count:
+                    print(f"    [OK] 函数块数量正确，无重复")
+                else:
+                    print(f"    [WARN] 函数块数量异常: 期望{expected_func_count}个，实际入口{func_entry_count}个，出口{func_exit_count}个")
+            
+            # 统计边类型
+            edge_types = {}
+            edge_labels = {}
+            for from_node, to_node, edge_attrs in edges:
+                edge_type = edge_attrs.get('type', 'normal')
+                edge_label = edge_attrs.get('label', 'unlabeled')
+                edge_types[edge_type] = edge_types.get(edge_type, 0) + 1
+                edge_labels[edge_label] = edge_labels.get(edge_label, 0) + 1
+            
+            print(f"    边类型分布: {dict(edge_types)}")
+            
+            # 检查 return 边
+            return_edge_count = edge_labels.get('return', 0)
+            if return_edge_count > 0:
+                print(f"    return 边: {return_edge_count} 个")
+                
+                # 检查 return 边是否正确连接到函数出口
+                return_edges_valid = True
+                for from_node, to_node, edge_attrs in edges:
+                    if edge_attrs.get('label') == 'return':
+                        # 检查目标节点是否是函数出口块
+                        to_node_type = None
+                        for node_id, node_attrs in nodes:
+                            if node_id == to_node:
+                                to_node_type = node_attrs.get('type')
+                                break
+                        
+                        if to_node_type and 'func_exit' not in to_node_type and 'main_entry' not in to_node_type:
+                            return_edges_valid = False
+                            break
+                
+                if return_edges_valid:
+                    print(f"    [OK] return 边正确连接")
+                else:
+                    print(f"    [WARN] 部分 return 边连接异常")
+            
+            # 检查函数调用边和返回边
+            call_edge_count = edge_types.get('call_edge', 0)
+            return_edge_type_count = edge_types.get('return_edge', 0)
+            if call_edge_count > 0 or return_edge_type_count > 0:
+                print(f"    函数调用边: {call_edge_count} 个")
+                print(f"    函数返回边: {return_edge_type_count} 个")
+                
+                if call_edge_count == return_edge_type_count:
+                    print(f"    [OK] 调用边和返回边数量匹配")
+                else:
+                    print(f"    [WARN] 调用边({call_edge_count})和返回边({return_edge_type_count})数量不匹配")
+            
+            # 检查循环结构
+            has_loop = any('while' in t or 'for' in t for t in node_types.keys())
+            if has_loop:
+                has_continue_edge = 'continue' in edge_labels
+                if has_continue_edge:
+                    print(f"    [OK] 检测到循环结构，包含回边")
+                else:
+                    print(f"    [WARN] 检测到循环结构，但缺少回边")
+            
+            # 检查条件分支
+            has_if = any('if' in t for t in node_types.keys())
+            if has_if:
+                has_true_edge = 'true' in edge_labels
+                has_false_edge = 'false' in edge_labels
+                if has_true_edge and has_false_edge:
+                    print(f"    [OK] 检测到条件分支，包含 true/false 边")
+                else:
+                    print(f"    [WARN] 检测到条件分支，但缺少 true/false 边")
+            
+            print(f"  [OK] CFG 构建成功并通过验证")
+        else:
+            print(f"  [FAIL] 控制流图构建失败")
         
         # 4. 测试谓词挖掘
         print("\n3. 谓词挖掘:")
-        predicates = analyzer.predicate_mining()
-        for i, pred in enumerate(predicates, 1):
-            print(f"  谓词 {i}:")
-            print(f"    表达式: {pred['expression']}")
-            print(f"    类型: {pred['type']}")
-            print(f"    位置: 第{pred['lineno']}行")
-            if 'boundary_info' in pred and pred['boundary_info']:
-                print(f"    边界信息: {pred['boundary_info']}")
-        
-        # 5. 测试数据依赖分析
-        print("\n4. 数据依赖分析:")
-        data_deps = analyzer.build_data_dependency_graph()
-        if data_deps:
-            for var, deps in data_deps.items():
-                if deps:  # 只显示有依赖关系的变量
-                    print(f"  变量 '{var}' 的依赖:")
-                    for dep in deps:
-                        if dep['type'] == 'def-use':
-                            print(f"    定义在第{dep['from_line']}行，使用在第{dep['to_line']}行")
-                        elif dep['type'] == 'data_dependency':
-                            print(f"    依赖变量: {dep['depends_on']} (在第{dep['line']}行)")
-        else:
-            print("  未发现数据依赖关系")
-        
-        # 6. 测试输入结构推断
-        print("\n5. 输入结构推断:")
-        try:
-            input_struct = analyzer.infer_input_structure()
+        predicates_result = analyzer.predicate_mining()
+        if predicates_result:
+            print(f"  发现 {len(predicates_result)} 个谓词")
             
-            has_info = False
-            
-            # 显示函数信息
-            if input_struct['functions']:
-                has_info = True
-                print("  函数信息:")
-                for func in input_struct['functions']:
-                    print(f"    函数: {func['name']}")
-                    if func['args']:
-                        print("      参数:")
-                        for arg in func['args']:
-                            type_info = arg['type'] if arg['type'] else "未知类型"
-                            print(f"        - {arg['name']}: {type_info}")
-                    
-                    if func['returns']:
-                        print(f"      返回值: {func['returns']}")
-            
-            # 显示全局输入（没有函数定义时）
-            if input_struct.get('global_inputs'):
-                has_info = True
-                print("  输入分析:")
-                for inp in input_struct['global_inputs']:
-                    print(f"    第{inp['line']}行: {inp.get('description', '输入')}")
-                    if inp.get('variable'):
-                        print(f"      赋值给变量: {inp['variable']}")
-            
-            # 显示检测到的变量类型
-            if input_struct.get('detected_types'):
-                has_info = True
-                print("  检测到的变量类型:")
-                for var, types in input_struct['detected_types'].items():
-                    print(f"    {var}: {', '.join(types)}")
-            
-            if not has_info:
-                print("  未发现明显的输入结构模式")
+            for i, pred in enumerate(predicates_result, 1):
+                print(f"\n  谓词 {i}:")
+                print(f"    表达式: {pred['expression']}")
                 
-        except Exception as e:
-            print(f"  输入结构推断出错: {e}")
+                if 'var' in pred:
+                    print(f"    主要变量: {pred['var']}")
+                
+                if 'value' in pred:
+                    print(f"    比较值: {pred['value']}")
+                        
+                if 'boundary_values' in pred:
+                    print(f"    边界测试建议: {pred['boundary_values']}")
+        else:
+            print(f"  未发现谓词")
+        
+        # 5. 测试链式比较分析
+        print("\n4. 链式比较分析:")
+        chained_result = analyzer.analyze_chained_comparisons()
+        if chained_result:
+            print(f"  发现 {len(chained_result)} 个链式比较")
+            for i, comp in enumerate(chained_result, 1):
+                print(f"\n  链式比较 {i}:")
+                print(f"    表达式: {comp['expression']}")
+                print(f"    主变量: {comp['main_variable']}")
+                print(f"    边界: {comp['boundaries']}")
+                if comp.get('test_values'):
+                    print(f"    测试值建议: {comp['test_values']}")
+        else:
+            print(f"  未发现链式比较")
+        
+        # 6. 测试数据依赖分析
+        print("\n5. 数据依赖分析:")
+        data_deps_result = analyzer.build_data_dependency_graph()
+        if data_deps_result:
+            print(f"  发现 {len(data_deps_result)} 个变量的依赖关系")
+            for var, depends_on in data_deps_result.items():
+                if depends_on:  # 只显示有依赖关系的变量
+                    print(f"  变量 '{var}' 依赖于: {', '.join(depends_on)}")
+                else:
+                    print(f"  变量 '{var}' 无依赖")
+        else:
+            print(f"  未发现数据依赖关系")
         
         # 7. 测试变量类型推断
         print("\n6. 变量类型推断:")
-        try:
-            var_types = analyzer.get_variable_types()
-            if var_types:
-                print("  所有变量类型推断:")
-                
-                # 收集所有变量
-                all_vars = list(var_types.keys())
-                
-                if all_vars:
-                    # 按字母排序显示
-                    for var in sorted(all_vars):
-                        var_type = var_types[var]
-                        
-                        # 提供更友好的类型描述
-                        type_desc = {
-                            'Unknown': '未知类型',
-                            'Any': '任意类型',
-                            'list': '列表',
-                            'list_element': '列表元素',
-                            'int': '整数',
-                            'str': '字符串',
-                            'bool': '布尔值',
-                            'float': '浮点数'
-                        }.get(var_type, var_type)
-                        # 查找变量在代码中的使用位置
-                        usage_lines = []
-                        for node in ast.walk(analyzer.ast_tree):
-                            if isinstance(node, ast.Name) and node.id == var:
-                                if hasattr(node, 'lineno'):
-                                    usage_lines.append(node.lineno)
-                        
-                        usage_info = ""
-                        if usage_lines:
-                            unique_lines = sorted(set(usage_lines))
-                            if len(unique_lines) <= 3:
-                                usage_info = f" (使用于第{', '.join(map(str, unique_lines))}行)"
-                            else:
-                                usage_info = f" (使用于第{unique_lines[0]}, {unique_lines[1]}, ... 行)"
-                        
-                        print(f"    {var:10} : {type_desc:15}{usage_info}")
-                else:
-                    print("  未发现变量")
-            else:
-                print("  未推断出变量类型")
-        except Exception as e:
-            print(f"  变量类型推断失败: {e}")
-            import traceback
-            traceback.print_exc()
+        var_types_result = analyzer.get_variable_types()
+        if var_types_result:
+            print(f"  发现 {len(var_types_result)} 个变量的类型:")
+            for var, var_type in var_types_result.items():
+                print(f"    {var}: {var_type}")
+        else:
+            print(f"  未推断出变量类型")
+        
+        # 8. 测试输入结构推断
+        print("\n7. 输入结构推断:")
+        input_result = analyzer.infer_input_structure()
+        if input_result:
+            print(f"  发现 {len(input_result)} 个需要变异的数据:")
+            for var, var_type in input_result.items():
+                print(f"    {var}: {var_type}")
+        else:
+            print(f"  未发现需要变异的数据")
         
         # 8. 测试后向切片
-        print("\n7. 后向切片测试:")
-        try:
-            # 动态发现所有变量
-            all_variables = set()
+        print("\n8. 后向切片测试:")
+        # 动态发现所有变量
+        all_variables = set()
+
+        finder = VariableFinder()
+        finder.visit(analyzer.ast_tree)
+
+        # 排除明显的函数名
+        function_names = {'eval', 'input', 'print', 'range'}
+        true_variables = [v for v in finder.variables if v not in function_names]
+
+        if true_variables:
+            print(f"  发现 {len(true_variables)} 个变量: {', '.join(sorted(true_variables))}")
             
-            class VariableFinder(ast.NodeVisitor):
-                def __init__(self):
-                    self.variables = set()
-                    
-                def visit_Assign(self, node):
-                    for target in node.targets:
-                        if isinstance(target, ast.Name):
-                            self.variables.add(target.id)
-                    
-                def visit_For(self, node):
-                    if isinstance(node.target, ast.Name):
-                        self.variables.add(node.target.id)
-                    
-                def visit_Name(self, node):
-                    if isinstance(node.ctx, ast.Store):  # 只关心被赋值的变量
-                        self.variables.add(node.id)
-            
-            finder = VariableFinder()
-            finder.visit(analyzer.ast_tree)
-            
-            # 排除明显的函数名
-            function_names = {'eval', 'input', 'print', 'range'}
-            true_variables = [v for v in finder.variables if v not in function_names]
-            
-            if true_variables:
-                print(f"  发现 {len(true_variables)} 个变量: {', '.join(sorted(true_variables))}")
-                
-                for var_name in sorted(true_variables):
+            # 使用analyzer的_backward_slice方法，它会返回需要边界测试的变量
+            test_vars = ['h', 'n', 'sum1']  # 测试关键变量
+            for var_name in test_vars:
+                if var_name in true_variables:
                     # 找到变量的使用位置
                     usage_lines = []
                     
@@ -215,75 +255,60 @@ def test_static_analyzer():
                     
                     if finder.lines:
                         unique_lines = sorted(set(finder.lines))
-                        print(f"\n  变量 '{var_name}' 分析:")
-                        print(f"    使用位置: 第{', '.join(map(str, unique_lines))}行")
+                        # 对最后一个使用位置进行切片
+                        last_line = unique_lines[-1]
+                        print(f"\n  变量 '{var_name}' 后向切片 (在第{last_line}行):")
                         
-                        # 对重要的使用位置进行切片（选择第一个和最后一个）
-                        if len(unique_lines) > 0:
-                            # 第一个使用位置
-                            first_line = unique_lines[0]
-                            try:
-                                slice_result = analyzer.backward_slice(var_name, first_line)
-                                if slice_result:
-                                    affected = sorted(slice_result)
-                                    if len(affected) > 1:
-                                        print(f"    在第{first_line}行定义的后向切片: 影响 {len(affected)} 行")
-                                        # 显示关键的几行
-                                        source_lines = analyzer.source_code.split('\n')
-                                        for line_no in affected[:3]:  # 只显示前3行
-                                            if 1 <= line_no <= len(source_lines):
-                                                code = source_lines[line_no-1].strip()
-                                                if code:
-                                                    print(f"      第{line_no:2d}行: {code}")
-                                        if len(affected) > 3:
-                                            print(f"      ... 还有 {len(affected)-3} 行")
-                                    else:
-                                        print(f"    在第{first_line}行: 仅影响当前行")
-                            except Exception as e:
-                                print(f"    切片分析失败: {e}")
-                    else:
-                        print(f"\n  变量 '{var_name}' 未找到使用位置")
-            else:
-                print("  未发现变量")
-                
-            # 分析主要的数据流依赖
-            print("\n  数据流依赖分析:")
-            
-            # 查找输入变量
-            input_vars = []
-            for node in ast.walk(analyzer.ast_tree):
-                if isinstance(node, ast.Assign):
-                    if isinstance(node.value, ast.Call):
-                        if isinstance(node.value.func, ast.Name):
-                            if node.value.func.id == 'eval':
-                                for target in node.targets:
-                                    if isinstance(target, ast.Name):
-                                        input_vars.append(target.id)
-            
-            if input_vars:
-                print(f"    输入变量: {', '.join(input_vars)}")
-            
-            # 查找输出
-            output_lines = []
-            for node in ast.walk(analyzer.ast_tree):
-                if isinstance(node, ast.Call):
-                    if isinstance(node.func, ast.Name):
-                        if node.func.id == 'print':
-                            output_lines.append(node.lineno)
-            
-            if output_lines:
-                print(f"    输出位置: 第{', '.join(map(str, output_lines))}行")
-                
-        except Exception as e:
-            print(f"  切片测试失败: {e}")
-            import traceback
-            traceback.print_exc()
+                        slice_result = analyzer.backward_slice(var_name, last_line, include_all_defs=True)
+                        if slice_result:
+                            # 显示数据流路径
+                            data_flow_paths = slice_result.get('data_flow_paths', [])
+                            print(f"    数据流路径: {len(data_flow_paths)} 条")
+                            
+                            if data_flow_paths:
+                                print(f"    具体路径:")
+                                for i, path in enumerate(data_flow_paths[:5], 1):  # 只显示前5条路径
+                                    from_var, from_line = path['from']
+                                    to_var, to_line = path['to']
+                                    def_type = path.get('def_type', 'unknown')
+                                    print(f"      路径 {i}: {from_var}(第{from_line}行) -> {to_var}(第{to_line}行) ")
+                            
+                            # 显示需要边界测试的变量
+                            boundary_vars = slice_result.get('boundary_variables', [])
+                            if boundary_vars:
+                                print(f"    需要边界测试的变量:")
+                                for bv in boundary_vars:
+                                    if bv['variable'] == var_name:  # 只显示当前变量
+                                        print(f"      * {bv['variable']}:")
+                                        
+                                        # 显示边界值
+                                        if 'boundary_values' in bv and bv['boundary_values']:
+                                            bv_info = bv['boundary_values']
+                                            if bv_info.get('values'):
+                                                print(f"        边界值: {bv_info['values']}")
+                                            if bv_info.get('lower') is not None:
+                                                print(f"        下界: {bv_info['lower']}")
+                                            if bv_info.get('upper') is not None:
+                                                print(f"        上界: {bv_info['upper']}")
+                                        
+                                        # 显示建议测试值
+                                        if 'suggested_test_values' in bv and bv['suggested_test_values']:
+                                            test_vals = bv['suggested_test_values']
+                                            print(f"        建议测试值 (前10个): {test_vals[:10]}")
+                                        else:
+                                            print(f"        建议测试值: 未生成或为空")
+                            else:
+                                print(f"    无需边界测试")
+                        else:
+                            print(f"    切片失败")
+        else:
+            print("  未发现变量")
         
         print("\n" + "="*60)
-        print("✓ 所有测试完成")
+        print("[OK] 所有测试完成")
         
     except Exception as e:
-        print(f"✗ 测试失败: {e}")
+        print(f"[FAIL] 测试失败: {e}")
         import traceback
         traceback.print_exc()
         
