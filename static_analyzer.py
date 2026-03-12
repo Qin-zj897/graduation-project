@@ -38,7 +38,38 @@ class StaticAnalyzer:
         self._variable_types = None
         self._def_use_chains = None
         self._input_structure = None
-        self._mutation_rules = None
+        self._mutation_rules = None        
+        # 统一标识符计数器
+        self._pred_counter = 0
+        self._pred_id_map = {}  # (lineno, col_offset) -> pred_id
+        
+    def _make_stmt_id(self, lineno: int, col_offset: int = 0) -> str:
+        """生成统一的语句标识符: L{lineno}:C{col_offset}"""
+        return f"L{lineno}:C{col_offset}"
+    
+    def _make_pred_id(self, lineno: int, col_offset: int = 0) -> str:
+        """生成统一的谓词标识符: P{n}"""
+        key = (lineno, col_offset)
+        if key not in self._pred_id_map:
+            self._pred_counter += 1
+            self._pred_id_map[key] = f"P{self._pred_counter}"
+        return self._pred_id_map[key]
+        
+        # 统一标识符计数器
+        self._pred_counter = 0
+        self._pred_id_map = {}  # (lineno, col_offset) -> pred_id
+        
+    def _make_stmt_id(self, lineno: int, col_offset: int = 0) -> str:
+        """生成统一的语句标识符"""
+        return f"L{lineno}:C{col_offset}"
+    
+    def _make_pred_id(self, lineno: int, col_offset: int = 0) -> str:
+        """生成统一的谓词标识符"""
+        key = (lineno, col_offset)
+        if key not in self._pred_id_map:
+            self._pred_counter += 1
+            self._pred_id_map[key] = f"P{self._pred_counter}"
+        return self._pred_id_map[key]
         
 
         
@@ -1003,48 +1034,91 @@ class StaticAnalyzer:
                         lineno=call_edge['lineno']
                     )
             
-            # 生成可序列化的CFG信息
-            cfg_info = {
-                'nodes': list(self._cfg.nodes(data=True)),
-                'edges': list(self._cfg.edges(data=True)),
-                'graph_metrics': {
+            # 生成简化的CFG信息：只保留分支点、谓词、边
+            cfg_simplified = {
+                'branches': [],  # 分支点信息
+                'edges': [],     # 边信息
+                'metrics': {
                     'num_nodes': self._cfg.number_of_nodes(),
                     'num_edges': self._cfg.number_of_edges(),
                     'is_directed': self._cfg.is_directed(),
                     'functions': list(builder.function_blocks.keys()),
                     'num_functions': len(builder.function_blocks),
                     'num_call_edges': len(builder.call_edges)
-                },
-                'functions': builder.function_blocks,
-                'call_edges': builder.call_edges
+                }
             }
             
-            return cfg_info
+            # 提取分支点和谓词
+            for node_id, node_data in self._cfg.nodes(data=True):
+                if node_data.get('type') == 'if_condition':
+                    cfg_simplified['branches'].append({
+                        'node_id': node_id,
+                        'type': 'if_condition',
+                        'condition': node_data.get('condition', {}),
+                        'pred_id': self._make_pred_id(node_data.get('condition', {}).get('lineno', 0), 0) if node_data.get('condition', {}).get('lineno') else None,
+                        'lineno': node_data.get('condition', {}).get('lineno')
+                    })
+                elif node_data.get('type') == 'for_header':
+                    cfg_simplified['branches'].append({
+                        'node_id': node_id,
+                        'type': 'for_loop',
+                        'loop': node_data.get('loop', {}),
+                        'lineno': node_data.get('loop', {}).get('lineno')
+                    })
+                elif node_data.get('type') == 'while_header':
+                    cfg_simplified['branches'].append({
+                        'node_id': node_id,
+                        'type': 'while_loop',
+                        'condition': node_data.get('condition', {}),
+                        'lineno': node_data.get('condition', {}).get('lineno')
+                    })
+            
+            # 提取边信息（简化格式）
+            for src, dst, edge_data in self._cfg.edges(data=True):
+                edge_info = {
+                    'from': src,
+                    'to': dst
+                }
+                if 'label' in edge_data:
+                    edge_info['label'] = edge_data['label']
+                cfg_simplified['edges'].append(edge_info)
+            
+            return cfg_simplified
             
         except Exception as e:
             return {}
     
-    def predicate_mining(self) -> Dict[str, Any]:
+    def extract_predicates_and_constraints(self) -> Dict[str, Any]:
         """
-        谓词挖掘
+        谓词/约束提取
         - 识别边界条件和特殊值, 通过谓词组合覆盖, 而不是路径覆盖, 减少测试数量
+        - 统一处理单个比较和链式比较
         
         Returns:
             list, 谓词列表, 每个谓词包含:
                 - expression: 表达式
                 - var: 变量名(如果有)
-                - value: 比较值(如果有)
+                - value: 比较值
+                    - 单个比较: 单个值, 如 10
+                    - 链式比较: 值列表, 如 [0, 100] 表示 0 < x < 100
                 - boundary_values: 边界测试建议值(如果有)
-            例如: [{'expression': 'n > 10', 'var': 'n', 'value': 10, 'boundary_values': [9, 10, 11]}, ...]
+            例如: [
+                {'expression': 'n > 10', 'var': 'n', 'value': 10, 'boundary_values': [9, 10, 11]},
+                {'expression': '0 < x < 100', 'var': 'x', 'value': [0, 100], 'boundary_values': [-1, -0.5, 0, 1, ...]},
+                ...
+            ]
             失败时返回空列表 []
         """
         try:
             self._predicates = []
+            self._chained_comparisons = []
             
             class PredicateVisitor(ast.NodeVisitor):
-                def __init__(self, predicates_list):
+                def __init__(self, predicates_list, chained_list, analyzer):
                     self.predicates = predicates_list
+                    self.chained_comparisons = chained_list
                     self._current_function = None
+                    self.analyzer = analyzer  # 保存analyzer引用
                     
                 def visit_FunctionDef(self, node):
                     """记录当前函数"""
@@ -1055,26 +1129,32 @@ class StaticAnalyzer:
                 
                 def visit_If(self, node):
                     """提取if语句的条件谓词"""
-                    self._extract_predicate(node.test, 'if_condition', node.lineno)
+                    self._extract_predicate(node.test, 'if_condition', node.lineno, node.col_offset)
                     self.generic_visit(node)
                     
                 def visit_While(self, node):
                     """提取while循环的条件谓词"""
-                    self._extract_predicate(node.test, 'while_condition', node.lineno)
+                    self._extract_predicate(node.test, 'while_condition', node.lineno, node.col_offset)
                     self.generic_visit(node)
                     
                 def visit_Assert(self, node):
                     """提取断言语句"""
-                    self._extract_predicate(node.test, 'assert', node.lineno)
+                    self._extract_predicate(node.test, 'assert', node.lineno, node.col_offset)
                     self.generic_visit(node)
                 
-                def _extract_predicate(self, test_node, pred_type, lineno):
+                def _extract_predicate(self, test_node, pred_type, lineno, col_offset=0):
                     """提取谓词信息"""
                     try:
                         # 获取表达式字符串
+                        # 生成统一标识符
+                        pred_id = self.analyzer._make_pred_id(lineno, col_offset)
+                        anchor_stmt = self.analyzer._make_stmt_id(lineno, col_offset)
+                        
                         expression = ast.unparse(test_node) if hasattr(ast, 'unparse') else str(test_node)
                         
                         predicate_info = {
+                            'pred_id': pred_id,
+                            'anchor_stmt': anchor_stmt,
                             'type': pred_type,
                             'expression': expression,
                             'lineno': lineno,
@@ -1090,6 +1170,7 @@ class StaticAnalyzer:
                         # 如果是逻辑表达式
                         elif isinstance(test_node, ast.BoolOp):
                             predicate_info['bool_op'] = type(test_node.op).__name__
+                            self._extract_bool_op_details(test_node, predicate_info)
                         
                         self.predicates.append(predicate_info)
                         
@@ -1116,6 +1197,9 @@ class StaticAnalyzer:
                             boundaries = self._analyze_chained_boundaries(compare_node)
                             if boundaries:
                                 predicate_info['boundary_info'] = boundaries
+                            
+                            # 同时提取详细的链式比较信息
+                            self._extract_detailed_chained_comparison(compare_node, predicate_info)
                         else:
                             # 单个比较
                             predicate_info['is_chained'] = False
@@ -1137,6 +1221,168 @@ class StaticAnalyzer:
                     except Exception:
                         pass
                 
+
+
+                def _extract_bool_op_details(self, bool_node, predicate_info):
+                    """提取布尔运算的详细信息"""
+                    try:
+                        # 提取所有涉及的变量
+                        vars_set = set()
+                        atomic_conditions = []
+                        
+                        def extract_vars_from_node(node):
+                            """递归提取节点中的变量"""
+                            if isinstance(node, ast.Name):
+                                vars_set.add(node.id)
+                            elif isinstance(node, ast.BoolOp):
+                                for value in node.values:
+                                    extract_vars_from_node(value)
+                            elif isinstance(node, ast.Compare):
+                                extract_vars_from_node(node.left)
+                                for comp in node.comparators:
+                                    extract_vars_from_node(comp)
+                            elif isinstance(node, ast.UnaryOp):
+                                extract_vars_from_node(node.operand)
+                            elif isinstance(node, (ast.BinOp, ast.Call, ast.Attribute, ast.Subscript)):
+                                for child in ast.walk(node):
+                                    if isinstance(child, ast.Name):
+                                        vars_set.add(child.id)
+                        
+                        # 提取变量
+                        extract_vars_from_node(bool_node)
+                        
+                        # 归一化为原子条件
+                        if isinstance(bool_node, ast.BoolOp):
+                            op_type = type(bool_node.op).__name__  # 'And' or 'Or'
+                            
+                            for value in bool_node.values:
+                                if isinstance(value, ast.Name):
+                                    # 简单变量，归一化为 var != 0
+                                    atomic_conditions.append({
+                                        'expression': f"{value.id} != 0",
+                                        'var': value.id,
+                                        'normalized': True
+                                    })
+                                elif isinstance(value, ast.Compare):
+                                    # 已经是比较表达式
+                                    expr = ast.unparse(value) if hasattr(ast, 'unparse') else str(value)
+                                    atomic_conditions.append({
+                                        'expression': expr,
+                                        'normalized': False
+                                    })
+                                elif isinstance(value, ast.UnaryOp) and isinstance(value.op, ast.Not):
+                                    # not 运算
+                                    if isinstance(value.operand, ast.Name):
+                                        atomic_conditions.append({
+                                            'expression': f"{value.operand.id} == 0",
+                                            'var': value.operand.id,
+                                            'normalized': True
+                                        })
+                                    else:
+                                        expr = ast.unparse(value) if hasattr(ast, 'unparse') else str(value)
+                                        atomic_conditions.append({
+                                            'expression': expr,
+                                            'normalized': False
+                                        })
+                                else:
+                                    # 其他复杂表达式
+                                    expr = ast.unparse(value) if hasattr(ast, 'unparse') else str(value)
+                                    atomic_conditions.append({
+                                        'expression': expr,
+                                        'normalized': False
+                                    })
+                        
+                        # 添加到谓词信息
+                        if vars_set:
+                            predicate_info['vars'] = sorted(list(vars_set))
+                        
+                        if atomic_conditions:
+                            predicate_info['atomic_conditions'] = atomic_conditions
+                            
+                    except Exception as e:
+                        # 提取失败，不影响主流程
+                        pass
+
+                def _extract_bool_op_details(self, bool_node, predicate_info):
+                    """提取布尔运算的详细信息"""
+                    try:
+                        # 提取所有涉及的变量
+                        vars_set = set()
+                        atomic_conditions = []
+                        
+                        def extract_vars_from_node(node):
+                            """递归提取节点中的变量"""
+                            if isinstance(node, ast.Name):
+                                vars_set.add(node.id)
+                            elif isinstance(node, ast.BoolOp):
+                                for value in node.values:
+                                    extract_vars_from_node(value)
+                            elif isinstance(node, ast.Compare):
+                                extract_vars_from_node(node.left)
+                                for comp in node.comparators:
+                                    extract_vars_from_node(comp)
+                            elif isinstance(node, ast.UnaryOp):
+                                extract_vars_from_node(node.operand)
+                            elif isinstance(node, (ast.BinOp, ast.Call, ast.Attribute, ast.Subscript)):
+                                for child in ast.walk(node):
+                                    if isinstance(child, ast.Name):
+                                        vars_set.add(child.id)
+                        
+                        # 提取变量
+                        extract_vars_from_node(bool_node)
+                        
+                        # 归一化为原子条件
+                        if isinstance(bool_node, ast.BoolOp):
+                            op_type = type(bool_node.op).__name__  # 'And' or 'Or'
+                            
+                            for value in bool_node.values:
+                                if isinstance(value, ast.Name):
+                                    # 简单变量，归一化为 var != 0
+                                    atomic_conditions.append({
+                                        'expression': f"{value.id} != 0",
+                                        'var': value.id,
+                                        'normalized': True
+                                    })
+                                elif isinstance(value, ast.Compare):
+                                    # 已经是比较表达式
+                                    expr = ast.unparse(value) if hasattr(ast, 'unparse') else str(value)
+                                    atomic_conditions.append({
+                                        'expression': expr,
+                                        'normalized': False
+                                    })
+                                elif isinstance(value, ast.UnaryOp) and isinstance(value.op, ast.Not):
+                                    # not 运算
+                                    if isinstance(value.operand, ast.Name):
+                                        atomic_conditions.append({
+                                            'expression': f"{value.operand.id} == 0",
+                                            'var': value.operand.id,
+                                            'normalized': True
+                                        })
+                                    else:
+                                        expr = ast.unparse(value) if hasattr(ast, 'unparse') else str(value)
+                                        atomic_conditions.append({
+                                            'expression': expr,
+                                            'normalized': False
+                                        })
+                                else:
+                                    # 其他复杂表达式
+                                    expr = ast.unparse(value) if hasattr(ast, 'unparse') else str(value)
+                                    atomic_conditions.append({
+                                        'expression': expr,
+                                        'normalized': False
+                                    })
+                        
+                        # 添加到谓词信息
+                        if vars_set:
+                            predicate_info['vars'] = sorted(list(vars_set))
+                        
+                        if atomic_conditions:
+                            predicate_info['atomic_conditions'] = atomic_conditions
+                            
+                    except Exception as e:
+                        # 提取失败，不影响主流程
+                        pass
+
                 def _extract_single_comparison(self, compare_node, predicate_info):
                     """提取单个比较的详细信息"""
                     try:
@@ -1278,23 +1524,23 @@ class StaticAnalyzer:
                                         right_value, 'less_than_or_equal'
                                     )
                                     
-                            elif isinstance(op, ast.Gt):  # a > b
+                            elif isinstance(op, ast.Gt):  # a > b (变量 > 常量)
                                 boundary['condition'] = 'greater_than'
-                                if left_value is not None:
-                                    boundary['value'] = left_value
+                                if right_value is not None:  # 修复：应该用right_value
+                                    boundary['value'] = right_value
                                     boundary['suggested_values'] = self._generate_single_boundary_values(
-                                        left_value, 'greater_than'
+                                        right_value, 'greater_than'
                                     )
                                     
-                            elif isinstance(op, ast.GtE):  # a >= b
+                            elif isinstance(op, ast.GtE):  # a >= b (变量 >= 常量)
                                 boundary['condition'] = 'greater_than_or_equal'
-                                if left_value is not None:
-                                    boundary['value'] = left_value
+                                if right_value is not None:  # 修复：应该用right_value
+                                    boundary['value'] = right_value
                                     boundary['suggested_values'] = self._generate_single_boundary_values(
-                                        left_value, 'greater_than_or_equal'
+                                        right_value, 'greater_than_or_equal'
                                     )
                             
-                            return boundary
+                            return boundary if boundary.get('suggested_values') else None
                             
                     except Exception:
                         return None
@@ -1368,155 +1614,68 @@ class StaticAnalyzer:
                         return [value - 1, value, value + 1]
                     else:
                         return [value - 1, value, value + 1]
-            
-            visitor = PredicateVisitor(self._predicates)
-            visitor.visit(self.ast_tree)
-            
-            # 统计信息
-            stats = {
-                'total_predicates': len(self._predicates),
-                'predicates_by_type': defaultdict(int),
-                'predicates_by_function': defaultdict(int),
-                'variables_in_predicates': set(),
-                'chained_comparisons': 0,
-                'boundary_predicates': 0
-            }
-            
-            for pred in self._predicates:
-                stats['predicates_by_type'][pred.get('type', 'unknown')] += 1
-                if 'function' in pred:
-                    stats['predicates_by_function'][pred['function']] += 1
                 
-                # 收集变量
-                if 'var' in pred:
-                    stats['variables_in_predicates'].add(pred['var'])
-                if 'var_left' in pred:
-                    stats['variables_in_predicates'].add(pred['var_left'])
-                if 'var_right' in pred:
-                    stats['variables_in_predicates'].add(pred['var_right'])
-                
-                # 统计链式比较和边界谓词
-                if pred.get('is_chained', False):
-                    stats['chained_comparisons'] += 1
-                if 'boundary_info' in pred:
-                    stats['boundary_predicates'] += 1
-            
-            # 简化谓词信息，只保留必要字段
-            simplified_predicates = []
-            for pred in self._predicates:
-                simplified = {
-                    'expression': pred.get('expression', '')
-                }
-                
-                # 添加变量（如果有）
-                if 'var' in pred:
-                    simplified['var'] = pred['var']
-                
-                # 添加比较值（如果有）
-                if 'value' in pred:
-                    simplified['value'] = pred['value']
-                
-                # 添加边界测试建议（如果有）
-                if 'boundary_info' in pred and 'suggested_values' in pred['boundary_info']:
-                    simplified['boundary_values'] = pred['boundary_info']['suggested_values']
-                
-                simplified_predicates.append(simplified)
-            
-            return simplified_predicates
-            
-        except Exception as e:
-            return []
-    
-    def analyze_chained_comparisons(self) -> Dict[str, Any]:
-        """
-        专门分析链式比较, 提取完整的边界信息
-        
-        Returns:
-            list, 链式比较列表, 每个包含:
-                - expression: 表达式
-                - main_variable: 主变量
-                - boundaries: 边界信息(lower, upper等)
-                - test_values: 测试值建议
-            例如: [{'expression': '20 > n > 10', 'main_variable': 'n', 'boundaries': {...}, 'test_values': [9, 10, 11, ...]}, ...]
-            失败时返回空列表 []
-        """
-        
-        try:
-            chained_predicates = []
-            
-            class ChainedComparisonVisitor(ast.NodeVisitor):
-                def __init__(self, result):
-                    self.result = result
-                    self._current_function = None
-                
-                def visit_FunctionDef(self, node):
-                    old_function = self._current_function
-                    self._current_function = node.name
-                    self.generic_visit(node)
-                    self._current_function = old_function
-                
-                def visit_Compare(self, node):
-                    if len(node.comparators) > 1:  # 链式比较
-                        self._analyze_chained_comparison(node)
-                    self.generic_visit(node)
-                
-                def _analyze_chained_comparison(self, node):
-                    """Analyze chained comparison in detail"""
-                    # 提取变量名和所有常量
-                    variables = set()
-                    constants = []
-                    positions = []  # 每个常量的位置信息
-                    
-                    # 分析左侧
-                    left_info = self._analyze_expression(node.left)
-                    if left_info['is_variable']:
-                        variables.add(left_info['name'])
-                    elif left_info['is_constant']:
-                        constants.append((left_info['value'], 'left'))
-                        positions.append({
-                            'value': left_info['value'],
-                            'side': 'left',
-                            'expr': ast.unparse(node.left) if hasattr(ast, 'unparse') else str(node.left)
-                        })
-                    
-                    # 分析所有比较器和操作符
-                    for i, (op, comparator) in enumerate(zip(node.ops, node.comparators)):
-                        comp_info = self._analyze_expression(comparator)
-                        if comp_info['is_variable']:
-                            variables.add(comp_info['name'])
-                        elif comp_info['is_constant']:
-                            side = f'comparator_{i}'
-                            constants.append((comp_info['value'], side))
+                def _extract_detailed_chained_comparison(self, compare_node, predicate_info):
+                    """提取链式比较的详细信息并添加到chained_comparisons列表"""
+                    try:
+                        # 提取变量名和所有常量
+                        variables = set()
+                        constants = []
+                        positions = []
+                        
+                        # 分析左侧
+                        left_info = self._analyze_expression(compare_node.left)
+                        if left_info['is_variable']:
+                            variables.add(left_info['name'])
+                        elif left_info['is_constant']:
+                            constants.append((left_info['value'], 'left'))
                             positions.append({
-                                'value': comp_info['value'],
-                                'side': side,
-                                'position': i,
-                                'op': type(op).__name__,
-                                'expr': ast.unparse(comparator) if hasattr(ast, 'unparse') else str(comparator)
+                                'value': left_info['value'],
+                                'side': 'left',
+                                'expr': ast.unparse(compare_node.left) if hasattr(ast, 'unparse') else str(compare_node.left)
                             })
+                        
+                        # 分析所有比较器和操作符
+                        for i, (op, comparator) in enumerate(zip(compare_node.ops, compare_node.comparators)):
+                            comp_info = self._analyze_expression(comparator)
+                            if comp_info['is_variable']:
+                                variables.add(comp_info['name'])
+                            elif comp_info['is_constant']:
+                                side = f'comparator_{i}'
+                                constants.append((comp_info['value'], side))
+                                positions.append({
+                                    'value': comp_info['value'],
+                                    'side': side,
+                                    'position': i,
+                                    'op': type(op).__name__,
+                                    'expr': ast.unparse(comparator) if hasattr(ast, 'unparse') else str(comparator)
+                                })
+                        
+                        # 如果只有一个主要变量,进行详细边界分析
+                        if len(variables) == 1:
+                            main_var = next(iter(variables))
+                            boundaries = self._calculate_chained_boundaries_detailed(compare_node, main_var)
+                            
+                            chained_info = {
+                                'type': 'chained_comparison',
+                                'expression': predicate_info.get('expression', ''),
+                                'main_variable': main_var,
+                                'variables': list(variables),
+                                'constants': constants,
+                                'positions': positions,
+                                'boundaries': boundaries,
+                                'lineno': predicate_info.get('lineno'),
+                                'function': self._current_function,
+                                'ops': [type(op).__name__ for op in compare_node.ops]
+                            }
+                            
+                            # 生成测试值建议
+                            chained_info['test_values'] = self._generate_chained_test_values(boundaries)
+                            
+                            self.chained_comparisons.append(chained_info)
                     
-                    # 如果只有一个主要变量,进行边界分析
-                    if len(variables) == 1:
-                        main_var = next(iter(variables))
-                        boundaries = self._calculate_chained_boundaries(node, main_var)
-                        
-                        chained_info = {
-                            'type': 'chained_comparison',
-                            'expression': ast.unparse(node) if hasattr(ast, 'unparse') else str(node),
-                            'main_variable': main_var,
-                            'variables': list(variables),
-                            'constants': constants,
-                            'positions': positions,
-                            'boundaries': boundaries,
-                            'lineno': node.lineno,
-                            'function': self._current_function,
-                            'ops': [type(op).__name__ for op in node.ops]
-                        }
-                        
-                        # 生成测试值建议
-                        chained_info['test_values'] = self._generate_chained_test_values(boundaries)
-                        
-                        self.result.append(chained_info)
+                    except Exception:
+                        pass
                 
                 def _analyze_expression(self, expr):
                     """分析表达式,提取信息"""
@@ -1550,14 +1709,14 @@ class StaticAnalyzer:
                     
                     return result
                 
-                def _calculate_chained_boundaries(self, node, main_var):
-                    """计算链式比较的边界"""
+                def _calculate_chained_boundaries_detailed(self, node, main_var):
+                    """计算链式比较的详细边界"""
                     boundaries = {
-                        'lower': None,  # 下界
-                        'upper': None,  # 上界
-                        'lower_inclusive': False,  # 下界是否包含
-                        'upper_inclusive': False,  # 上界是否包含
-                        'intervals': []  # 所有区间
+                        'lower': None,
+                        'upper': None,
+                        'lower_inclusive': False,
+                        'upper_inclusive': False,
+                        'intervals': []
                     }
                     
                     # 分析每个比较
@@ -1613,16 +1772,6 @@ class StaticAnalyzer:
                         return expr.id == target_var
                     return False
                 
-                def _extract_constant_value(self, expr):
-                    """提取常量值"""
-                    if isinstance(expr, ast.Constant):
-                        return expr.value
-                    elif isinstance(expr, ast.Num):
-                        return expr.n
-                    elif isinstance(expr, ast.UnaryOp):
-                        return self._extract_constant_value(expr.operand)
-                    return None
-                
                 def _generate_chained_test_values(self, boundaries):
                     """为链式比较生成测试值"""
                     test_values = set()
@@ -1661,44 +1810,97 @@ class StaticAnalyzer:
                     # 转换为排序列表
                     return sorted(list(test_values))
             
-            visitor = ChainedComparisonVisitor(chained_predicates)
+            visitor = PredicateVisitor(self._predicates, self._chained_comparisons, self)
             visitor.visit(self.ast_tree)
             
             # 统计信息
             stats = {
-                'total_chained_comparisons': len(chained_predicates),
-                'variables_in_chained': set(),
-                'test_value_suggestions': 0
+                'total_predicates': len(self._predicates),
+                'predicates_by_type': defaultdict(int),
+                'predicates_by_function': defaultdict(int),
+                'variables_in_predicates': set(),
+                'chained_comparisons': len(self._chained_comparisons),
+                'boundary_predicates': 0
             }
             
-            for comp in chained_predicates:
-                if 'main_variable' in comp:
-                    stats['variables_in_chained'].add(comp['main_variable'])
-                if 'test_values' in comp:
-                    stats['test_value_suggestions'] += len(comp['test_values'])
+            for pred in self._predicates:
+                stats['predicates_by_type'][pred.get('type', 'unknown')] += 1
+                if 'function' in pred:
+                    stats['predicates_by_function'][pred['function']] += 1
+                
+                # 收集变量
+                if 'var' in pred:
+                    stats['variables_in_predicates'].add(pred['var'])
+                if 'var_left' in pred:
+                    stats['variables_in_predicates'].add(pred['var_left'])
+                if 'var_right' in pred:
+                    stats['variables_in_predicates'].add(pred['var_right'])
+                
+                # 统计边界谓词
+                if 'boundary_info' in pred:
+                    stats['boundary_predicates'] += 1
             
-            stats['variables_in_chained'] = list(stats['variables_in_chained'])
-            
-            # 简化链式比较信息，只保留必要字段
-            simplified_comparisons = []
-            for comp in chained_predicates:
+            # 简化谓词信息，只保留必要字段
+            simplified_predicates = []
+            for pred in self._predicates:
                 simplified = {
-                    'expression': comp.get('expression', ''),
-                    'main_variable': comp.get('main_variable', ''),
-                    'boundaries': comp.get('boundaries', {}),
-                    'test_values': comp.get('test_values', [])
+                    'pred_id': pred.get('pred_id', ''),
+                    'anchor_stmt': pred.get('anchor_stmt', ''),
+                    'expression': pred.get('expression', '')
                 }
-                simplified_comparisons.append(simplified)
+                
+                # 添加变量列表（如果存在）
+                if 'vars' in pred:
+                    simplified['vars'] = pred['vars']
+                
+                # 添加原子条件（如果存在）
+                if 'atomic_conditions' in pred:
+                    simplified['atomic_conditions'] = pred['atomic_conditions']
+                
+                # 添加变量列表（如果存在）
+                if 'vars' in pred:
+                    simplified['vars'] = pred['vars']
+                
+                # 添加原子条件（如果存在）
+                if 'atomic_conditions' in pred:
+                    simplified['atomic_conditions'] = pred['atomic_conditions']
+                
+                # 添加变量（如果有）
+                if 'var' in pred:
+                    simplified['var'] = pred['var']
+                
+                # 处理比较值
+                if pred.get('is_chained', False):
+                    # 链式比较：从boundary_info中提取所有比较值作为list
+                    boundary_info = pred.get('boundary_info', {})
+                    values = []
+                    if boundary_info.get('lower') is not None:
+                        values.append(boundary_info['lower'])
+                    if boundary_info.get('upper') is not None:
+                        values.append(boundary_info['upper'])
+                    if values:
+                        simplified['value'] = values
+                else:
+                    # 单个比较：保持原有的单个值
+                    if 'value' in pred:
+                        simplified['value'] = pred['value']
+                
+                # 添加边界测试建议（如果有）
+                if 'boundary_info' in pred and 'suggested_values' in pred['boundary_info']:
+                    simplified['boundary_values'] = pred['boundary_info']['suggested_values']
+                
+                simplified_predicates.append(simplified)
             
-            return simplified_comparisons
+            return simplified_predicates
             
         except Exception as e:
             return []
+
     
     def backward_slice(self, variable_name: str, line_number: int, 
                     include_all_defs: bool = False) -> Dict[str, Any]:
         """
-        后向切片 - 增强版
+        后向切片
         - 识别需要边界测试的变量
         - 支持多种定义类型
         - 返回需要边界测试的变量
@@ -1825,7 +2027,7 @@ class StaticAnalyzer:
         boundary_vars = []
         
         # 获取谓词信息
-        predicates_result = self.predicate_mining()
+        predicates_result = self.extract_predicates_and_constraints()
         # predicates_result 现在直接是列表
         predicates = predicates_result if predicates_result else []
         
@@ -2552,58 +2754,6 @@ class StaticAnalyzer:
         """检查两个作用域是否相同"""
         return scope1 == scope2
     
-    def infer_input_structure(self) -> Dict[str, Any]:
-        """
-        输入结构/格式推断
-        - 支持各种input()使用模式
-        - 考虑上下文推断类型
-        - 识别循环,条件中的输入
-        - 智能推断数据结构
-        
-        Returns:
-            dict, 变量名到类型的映射, 包含输入变量和常量
-            例如: {'h': 'int', 'n': 'int', 'alp': 'float', 'x': 'list[str]'}
-            表示h和n是整数输入, alp是浮点常量, x是字符串列表
-            不包含循环变量(如for循环中的i)
-            失败时返回空字典 {}
-        """
-        
-        try:
-            # 获取完整的变量类型信息（内部方法，包含来源信息）
-            full_result = self._get_variable_types_full()
-            if not full_result or 'variable_types' not in full_result:
-                return {}
-            
-            variable_types = full_result['variable_types']
-            
-            # 识别循环变量（通过检查变量的来源）
-            loop_variables = set()
-            for var_name, type_info in variable_types.items():
-                if isinstance(type_info, dict):
-                    sources = type_info.get('sources', [])
-                    # 如果变量的来源是 for_loop，则认为是循环变量
-                    for source in sources:
-                        if source.get('source') == 'for_loop':
-                            loop_variables.add(var_name)
-                            break
-            
-            # 构建结果，排除循环变量
-            result = {}
-            for var_name, type_info in variable_types.items():
-                # 跳过循环变量
-                if var_name in loop_variables:
-                    continue
-                    
-                if isinstance(type_info, dict):
-                    var_type = type_info.get('type', 'Any')
-                    result[var_name] = var_type
-                else:
-                    result[var_name] = str(type_info)
-            
-            return result
-            
-        except Exception as e:
-            return {}
     
     def get_variable_types(self) -> Dict[str, str]:
         """
@@ -2623,7 +2773,10 @@ class StaticAnalyzer:
             # 只提取变量名和类型
             simple_types = {}
             for var_name, var_info in full_result['variable_types'].items():
-                simple_types[var_name] = var_info.get('type', 'Any')
+                if isinstance(var_info, dict):
+                    simple_types[var_name] = var_info.get('type', 'Any')
+                else:
+                    simple_types[var_name] = str(var_info)
             
             return simple_types
             
@@ -2659,7 +2812,7 @@ class StaticAnalyzer:
             self._variable_types = {}
             
             # 获取其他分析结果作为上下文
-            input_structure_result = self.infer_input_structure()
+            # input_structure_result = self.infer_input_structure()  # 已删除此方法
             def_use_chains = self._build_def_use_chains()
             constants_result = self.extract_constants_and_comparisons()
             
@@ -2669,7 +2822,7 @@ class StaticAnalyzer:
             # 1. 创建类型推断器
             inferencer = TypeInferencer(
                 variable_types=self._variable_types,
-                input_structure=input_structure_result.get('input_structure', {}) if input_structure_result else {},
+                input_structure={},  # 不再使用 input_structure
                 def_use_chains=def_use_chains,
                 constants=constants,
                 ast_tree=self.ast_tree

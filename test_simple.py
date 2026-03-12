@@ -10,23 +10,16 @@ from static_analyzer import StaticAnalyzer
 
 # 测试代码
 code = """
-h=eval(input())
-n=eval(input())
-x=input().split()
-alp=0.5
-sum1=h
-if h % 11 == 0:
-    pass
-if h and n:
-    pass
-if n > 10:
-    print("n>10")
-if 20 > n > 10:
-    print("yes")
-for i in range(1,n):
-    sum1+=h*alp*2
-    h=h*alp
-print("%.2f" %sum1)
+def search(nums):
+    for x in nums:
+        if nums.count(x) > len(nums) // 2:
+            return x
+    else:
+        return False
+
+nums = eval(input())
+y = search(nums)
+print(y)
 """
 
 def print_result(title, method_name, description, result):
@@ -86,60 +79,42 @@ result = analyzer.build_control_flow_graph()
 print_result(
     "2. 构建控制流图",
     "build_control_flow_graph()",
-    "dict - 包含nodes, edges, graph_metrics等",
+    "dict - 分支点、谓词、边",
     result
 )
 
-# 3. 谓词挖掘
-result = analyzer.predicate_mining()
+# 3. 谓词/约束提取（统一了谓词挖掘和链式比较分析）
+result = analyzer.extract_predicates_and_constraints()
 print_result(
-    "3. 谓词挖掘",
-    "predicate_mining()",
-    "list - 谓词信息列表",
+    "3. 谓词/约束提取",
+    "extract_predicates_and_constraints()",
+    "list - 谓词列表，包含pred_id、anchor_stmt、vars(布尔运算)、atomic_conditions(归一化)",
     result
 )
 
-# 4. 链式比较分析
-result = analyzer.analyze_chained_comparisons()
-print_result(
-    "4. 链式比较分析",
-    "analyze_chained_comparisons()",
-    "list - 链式比较信息列表",
-    result
-)
-
-# 5. 数据依赖分析
+# 4. 数据依赖分析
 result = analyzer.build_data_dependency_graph()
 print_result(
-    "5. 数据依赖分析",
+    "4. 数据依赖分析",
     "build_data_dependency_graph()",
     "dict - 变量名到依赖变量列表的映射",
     result
 )
 
-# 6. 变量类型推断
+# 5. 变量类型推断
 result = analyzer.get_variable_types()
 print_result(
-    "6. 变量类型推断",
+    "5. 变量类型推断",
     "get_variable_types()",
     "dict - 变量名到类型字符串的映射",
     result
 )
 
-# 7. 输入结构推断
-result = analyzer.infer_input_structure()
+# 6. 后向切片
+result = analyzer.backward_slice('sum1', 18)
 print_result(
-    "7. 输入结构推断",
-    "infer_input_structure()",
-    "dict - 变量名到类型的映射（排除循环变量）",
-    result
-)
-
-# 8. 后向切片
-result = analyzer.backward_slice('sum1', 17)
-print_result(
-    "8. 后向切片",
-    "backward_slice('sum1', 17)",
+    "6. 后向切片",
+    "backward_slice('sum1', 18)",
     "dict - 包含boundary_variables和data_flow_paths",
     result
 )
