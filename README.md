@@ -1,2 +1,7 @@
 # graduation-project
 毕业设计
+20260309-20260315
+
+提交了修改后的动态分析器dynamic_analyzer和对应测试文件test_dynamic,现在动态分析里的各个方法返回值统一为了json格式，具体可以参考ai生成的对应md文档DYNAMIC_ANALYZER
+
+测试文件现在的测试代码改为之前数据集中的文件，测试用例为对应xml文件中的输入，输出统一放在test_result文件夹中
