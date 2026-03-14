@@ -1,0 +1,1365 @@
+================================================================================
+动态分析器简化测试 - s-3226-001
+================================================================================
+
+测试代码文件: 3226/success/s-3226-001.py
+测试用例文件: 3226.xml
+
+测试代码:
+def search(nums):
+    for i in nums:
+        if nums.count(i)>len(nums)/2:
+            return(i)
+        if not nums.count(i)>len(nums)/2:
+            return('False')
+
+
+nums = eval(input())
+y = search(nums)
+print(y)
+
+
+
+================================================================================
+
+================================================================================
+第一步：静态分析
+================================================================================
+[OK] 静态分析器创建成功
+
+================================================================================
+第二步：创建动态分析器
+================================================================================
+[OK] 动态分析器创建成功
+
+================================================================================
+第三步：从XML解析测试用例
+================================================================================
+解析的测试用例 (5 个):
+  用例1: 输入=[1,1,2,2], 期望输出=False
+  用例2: 输入=[2,2,1,1,1,2,2], 期望输出=2
+  用例3: 输入=[3,3,3,3,3,3,3], 期望输出=3
+  用例4: 输入=[5,3,4,5,5,1,1,5,10,5,5,6], 期望输出=False
+  用例5: 输入=[5,3,4,5,5,1,1,5,10,5,5], 期望输出=5
+
+================================================================================
+第四步：执行测试
+================================================================================
+
+执行测试用例 1: [1,1,2,2]
+
+================================================================================
+测试用例 1 的动态分析结果
+   方法: run_with_input(['[1,1,2,2]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "False",
+    "error": null,
+    "execution_steps": 14,
+    "execution_time": 0.0006456375122070312
+  },
+  "trace": {
+    "summary": {
+      "step_count": 4,
+      "total_steps": 14
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 10,
+        "step": 6,
+        "vars": {
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "i": 1
+        }
+      },
+      {
+        "lineno": 11,
+        "step": 11,
+        "vars": {
+          "y": "False"
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 9,
+      "block_count": 11
+    },
+    "edges": {
+      "total": [
+        [
+          "if_merge_13",
+          "for_header_3"
+        ],
+        [
+          "if_condition_6",
+          "if_false_8"
+        ],
+        [
+          "if_condition_6",
+          "if_true_7"
+        ],
+        [
+          "if_merge_9",
+          "if_condition_10"
+        ],
+        [
+          "for_body_start_4",
+          "if_condition_6"
+        ],
+        [
+          "if_condition_10",
+          "if_false_12"
+        ],
+        [
+          "for_header_3",
+          "for_body_start_4"
+        ],
+        [
+          "func_entry_1",
+          "for_header_3"
+        ],
+        [
+          "if_condition_10",
+          "if_true_11"
+        ]
+      ],
+      "detail": [
+        {
+          "from": "for_body_start_4",
+          "to": "if_condition_6"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_body_start_4"
+        },
+        {
+          "from": "func_entry_1",
+          "to": "for_header_3"
+        },
+        {
+          "from": "if_condition_10",
+          "to": "if_false_12"
+        },
+        {
+          "from": "if_condition_10",
+          "to": "if_true_11"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_false_8"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_true_7"
+        },
+        {
+          "from": "if_merge_13",
+          "to": "for_header_3"
+        },
+        {
+          "from": "if_merge_9",
+          "to": "if_condition_10"
+        }
+      ]
+    },
+    "blocks": {
+      "total": [
+        "for_header_3",
+        "func_entry_1",
+        "for_body_start_4",
+        "if_false_8",
+        "if_merge_13",
+        "if_condition_10",
+        "if_true_7",
+        "if_true_11",
+        "if_false_12",
+        "if_merge_9",
+        "if_condition_6"
+      ],
+      "detail": [
+        {
+          "node_id": "for_body_start_4",
+          "lineno": null
+        },
+        {
+          "node_id": "for_header_3",
+          "lineno": 2
+        },
+        {
+          "node_id": "func_entry_1",
+          "lineno": null
+        },
+        {
+          "node_id": "if_condition_10",
+          "lineno": 5
+        },
+        {
+          "node_id": "if_condition_6",
+          "lineno": 3
+        },
+        {
+          "node_id": "if_false_12",
+          "lineno": null
+        },
+        {
+          "node_id": "if_false_8",
+          "lineno": null
+        },
+        {
+          "node_id": "if_merge_13",
+          "lineno": null
+        },
+        {
+          "node_id": "if_merge_9",
+          "lineno": null
+        },
+        {
+          "node_id": "if_true_11",
+          "lineno": null
+        },
+        {
+          "node_id": "if_true_7",
+          "lineno": null
+        }
+      ]
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 3,
+      "total_value_records": 3
+    },
+    "details": {
+      "nums": [
+        {
+          "step": 6,
+          "lineno": 10,
+          "value": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      ],
+      "i": [
+        {
+          "step": 8,
+          "lineno": 3,
+          "value": 1
+        }
+      ],
+      "y": [
+        {
+          "step": 11,
+          "lineno": 11,
+          "value": "False"
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 2
+    },
+    "details": {
+      "3": [
+        {
+          "step": 8,
+          "condition": "nums.count(i)>len(nums)/2",
+          "distance": 1.0,
+          "evaluated": false
+        }
+      ],
+      "5": [
+        {
+          "step": 9,
+          "condition": "not nums.count(i)>len(nums)/2",
+          "distance": 0.0,
+          "evaluated": true
+        }
+      ]
+    }
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "i": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "list"
+      },
+      "y": {
+        "static": "int | str",
+        "runtime": "str"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=False, 实际=False, 匹配=True
+
+执行测试用例 2: [2,2,1,1,1,2,2]
+
+================================================================================
+测试用例 2 的动态分析结果
+   方法: run_with_input(['[2,2,1,1,1,2,2]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "2",
+    "error": null,
+    "execution_steps": 13,
+    "execution_time": 0.00014352798461914062
+  },
+  "trace": {
+    "summary": {
+      "step_count": 4,
+      "total_steps": 13
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 10,
+        "step": 6,
+        "vars": {
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "i": 2
+        }
+      },
+      {
+        "lineno": 11,
+        "step": 10,
+        "vars": {
+          "y": 2
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 6,
+      "block_count": 7
+    },
+    "edges": {
+      "total": [
+        [
+          "if_merge_13",
+          "for_header_3"
+        ],
+        [
+          "if_condition_6",
+          "if_false_8"
+        ],
+        [
+          "if_condition_6",
+          "if_true_7"
+        ],
+        [
+          "for_body_start_4",
+          "if_condition_6"
+        ],
+        [
+          "for_header_3",
+          "for_body_start_4"
+        ],
+        [
+          "func_entry_1",
+          "for_header_3"
+        ]
+      ],
+      "detail": [
+        {
+          "from": "for_body_start_4",
+          "to": "if_condition_6"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_body_start_4"
+        },
+        {
+          "from": "func_entry_1",
+          "to": "for_header_3"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_false_8"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_true_7"
+        },
+        {
+          "from": "if_merge_13",
+          "to": "for_header_3"
+        }
+      ]
+    },
+    "blocks": {
+      "total": [
+        "for_header_3",
+        "func_entry_1",
+        "for_body_start_4",
+        "if_false_8",
+        "if_merge_13",
+        "if_true_7",
+        "if_condition_6"
+      ],
+      "detail": [
+        {
+          "node_id": "for_body_start_4",
+          "lineno": null
+        },
+        {
+          "node_id": "for_header_3",
+          "lineno": 2
+        },
+        {
+          "node_id": "func_entry_1",
+          "lineno": null
+        },
+        {
+          "node_id": "if_condition_6",
+          "lineno": 3
+        },
+        {
+          "node_id": "if_false_8",
+          "lineno": null
+        },
+        {
+          "node_id": "if_merge_13",
+          "lineno": null
+        },
+        {
+          "node_id": "if_true_7",
+          "lineno": null
+        }
+      ]
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 3,
+      "total_value_records": 3
+    },
+    "details": {
+      "nums": [
+        {
+          "step": 6,
+          "lineno": 10,
+          "value": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      ],
+      "i": [
+        {
+          "step": 8,
+          "lineno": 3,
+          "value": 2
+        }
+      ],
+      "y": [
+        {
+          "step": 10,
+          "lineno": 11,
+          "value": 2
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 1
+    },
+    "details": {
+      "3": [
+        {
+          "step": 8,
+          "condition": "nums.count(i)>len(nums)/2",
+          "distance": 0.0,
+          "evaluated": true
+        }
+      ]
+    }
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "i": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "list"
+      },
+      "y": {
+        "static": "int | str",
+        "runtime": "int"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=2, 实际=2, 匹配=True
+
+执行测试用例 3: [3,3,3,3,3,3,3]
+
+================================================================================
+测试用例 3 的动态分析结果
+   方法: run_with_input(['[3,3,3,3,3,3,3]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "3",
+    "error": null,
+    "execution_steps": 13,
+    "execution_time": 0.00012993812561035156
+  },
+  "trace": {
+    "summary": {
+      "step_count": 4,
+      "total_steps": 13
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 10,
+        "step": 6,
+        "vars": {
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "i": 3
+        }
+      },
+      {
+        "lineno": 11,
+        "step": 10,
+        "vars": {
+          "y": 3
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 6,
+      "block_count": 7
+    },
+    "edges": {
+      "total": [
+        [
+          "if_merge_13",
+          "for_header_3"
+        ],
+        [
+          "if_condition_6",
+          "if_false_8"
+        ],
+        [
+          "if_condition_6",
+          "if_true_7"
+        ],
+        [
+          "for_body_start_4",
+          "if_condition_6"
+        ],
+        [
+          "for_header_3",
+          "for_body_start_4"
+        ],
+        [
+          "func_entry_1",
+          "for_header_3"
+        ]
+      ],
+      "detail": [
+        {
+          "from": "for_body_start_4",
+          "to": "if_condition_6"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_body_start_4"
+        },
+        {
+          "from": "func_entry_1",
+          "to": "for_header_3"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_false_8"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_true_7"
+        },
+        {
+          "from": "if_merge_13",
+          "to": "for_header_3"
+        }
+      ]
+    },
+    "blocks": {
+      "total": [
+        "for_header_3",
+        "func_entry_1",
+        "for_body_start_4",
+        "if_false_8",
+        "if_merge_13",
+        "if_true_7",
+        "if_condition_6"
+      ],
+      "detail": [
+        {
+          "node_id": "for_body_start_4",
+          "lineno": null
+        },
+        {
+          "node_id": "for_header_3",
+          "lineno": 2
+        },
+        {
+          "node_id": "func_entry_1",
+          "lineno": null
+        },
+        {
+          "node_id": "if_condition_6",
+          "lineno": 3
+        },
+        {
+          "node_id": "if_false_8",
+          "lineno": null
+        },
+        {
+          "node_id": "if_merge_13",
+          "lineno": null
+        },
+        {
+          "node_id": "if_true_7",
+          "lineno": null
+        }
+      ]
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 3,
+      "total_value_records": 3
+    },
+    "details": {
+      "nums": [
+        {
+          "step": 6,
+          "lineno": 10,
+          "value": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      ],
+      "i": [
+        {
+          "step": 8,
+          "lineno": 3,
+          "value": 3
+        }
+      ],
+      "y": [
+        {
+          "step": 10,
+          "lineno": 11,
+          "value": 3
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 1
+    },
+    "details": {
+      "3": [
+        {
+          "step": 8,
+          "condition": "nums.count(i)>len(nums)/2",
+          "distance": 0.0,
+          "evaluated": true
+        }
+      ]
+    }
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "i": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "list"
+      },
+      "y": {
+        "static": "int | str",
+        "runtime": "int"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=3, 实际=3, 匹配=True
+
+执行测试用例 4: [5,3,4,5,5,1,1,5,10,5,5,6]
+
+================================================================================
+测试用例 4 的动态分析结果
+   方法: run_with_input(['[5,3,4,5,5,1,1,5,10,5,5,6]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "False",
+    "error": null,
+    "execution_steps": 14,
+    "execution_time": 0.0001785755157470703
+  },
+  "trace": {
+    "summary": {
+      "step_count": 4,
+      "total_steps": 14
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 10,
+        "step": 6,
+        "vars": {
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "i": 5
+        }
+      },
+      {
+        "lineno": 11,
+        "step": 11,
+        "vars": {
+          "y": "False"
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 9,
+      "block_count": 11
+    },
+    "edges": {
+      "total": [
+        [
+          "if_merge_13",
+          "for_header_3"
+        ],
+        [
+          "if_condition_6",
+          "if_false_8"
+        ],
+        [
+          "if_condition_6",
+          "if_true_7"
+        ],
+        [
+          "if_merge_9",
+          "if_condition_10"
+        ],
+        [
+          "for_body_start_4",
+          "if_condition_6"
+        ],
+        [
+          "if_condition_10",
+          "if_false_12"
+        ],
+        [
+          "for_header_3",
+          "for_body_start_4"
+        ],
+        [
+          "func_entry_1",
+          "for_header_3"
+        ],
+        [
+          "if_condition_10",
+          "if_true_11"
+        ]
+      ],
+      "detail": [
+        {
+          "from": "for_body_start_4",
+          "to": "if_condition_6"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_body_start_4"
+        },
+        {
+          "from": "func_entry_1",
+          "to": "for_header_3"
+        },
+        {
+          "from": "if_condition_10",
+          "to": "if_false_12"
+        },
+        {
+          "from": "if_condition_10",
+          "to": "if_true_11"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_false_8"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_true_7"
+        },
+        {
+          "from": "if_merge_13",
+          "to": "for_header_3"
+        },
+        {
+          "from": "if_merge_9",
+          "to": "if_condition_10"
+        }
+      ]
+    },
+    "blocks": {
+      "total": [
+        "for_header_3",
+        "func_entry_1",
+        "for_body_start_4",
+        "if_false_8",
+        "if_merge_13",
+        "if_condition_10",
+        "if_true_7",
+        "if_true_11",
+        "if_false_12",
+        "if_merge_9",
+        "if_condition_6"
+      ],
+      "detail": [
+        {
+          "node_id": "for_body_start_4",
+          "lineno": null
+        },
+        {
+          "node_id": "for_header_3",
+          "lineno": 2
+        },
+        {
+          "node_id": "func_entry_1",
+          "lineno": null
+        },
+        {
+          "node_id": "if_condition_10",
+          "lineno": 5
+        },
+        {
+          "node_id": "if_condition_6",
+          "lineno": 3
+        },
+        {
+          "node_id": "if_false_12",
+          "lineno": null
+        },
+        {
+          "node_id": "if_false_8",
+          "lineno": null
+        },
+        {
+          "node_id": "if_merge_13",
+          "lineno": null
+        },
+        {
+          "node_id": "if_merge_9",
+          "lineno": null
+        },
+        {
+          "node_id": "if_true_11",
+          "lineno": null
+        },
+        {
+          "node_id": "if_true_7",
+          "lineno": null
+        }
+      ]
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 3,
+      "total_value_records": 3
+    },
+    "details": {
+      "nums": [
+        {
+          "step": 6,
+          "lineno": 10,
+          "value": "list[12]"
+        }
+      ],
+      "i": [
+        {
+          "step": 8,
+          "lineno": 3,
+          "value": 5
+        }
+      ],
+      "y": [
+        {
+          "step": 11,
+          "lineno": 11,
+          "value": "False"
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 2
+    },
+    "details": {
+      "3": [
+        {
+          "step": 8,
+          "condition": "nums.count(i)>len(nums)/2",
+          "distance": 1.0,
+          "evaluated": false
+        }
+      ],
+      "5": [
+        {
+          "step": 9,
+          "condition": "not nums.count(i)>len(nums)/2",
+          "distance": 0.0,
+          "evaluated": true
+        }
+      ]
+    }
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "i": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "str"
+      },
+      "y": {
+        "static": "int | str",
+        "runtime": "str"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=False, 实际=False, 匹配=True
+
+执行测试用例 5: [5,3,4,5,5,1,1,5,10,5,5]
+
+================================================================================
+测试用例 5 的动态分析结果
+   方法: run_with_input(['[5,3,4,5,5,1,1,5,10,5,5]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "5",
+    "error": null,
+    "execution_steps": 13,
+    "execution_time": 0.0001404285430908203
+  },
+  "trace": {
+    "summary": {
+      "step_count": 4,
+      "total_steps": 13
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 10,
+        "step": 6,
+        "vars": {
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "i": 5
+        }
+      },
+      {
+        "lineno": 11,
+        "step": 10,
+        "vars": {
+          "y": 5
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 6,
+      "block_count": 7
+    },
+    "edges": {
+      "total": [
+        [
+          "if_merge_13",
+          "for_header_3"
+        ],
+        [
+          "if_condition_6",
+          "if_false_8"
+        ],
+        [
+          "if_condition_6",
+          "if_true_7"
+        ],
+        [
+          "for_body_start_4",
+          "if_condition_6"
+        ],
+        [
+          "for_header_3",
+          "for_body_start_4"
+        ],
+        [
+          "func_entry_1",
+          "for_header_3"
+        ]
+      ],
+      "detail": [
+        {
+          "from": "for_body_start_4",
+          "to": "if_condition_6"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_body_start_4"
+        },
+        {
+          "from": "func_entry_1",
+          "to": "for_header_3"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_false_8"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_true_7"
+        },
+        {
+          "from": "if_merge_13",
+          "to": "for_header_3"
+        }
+      ]
+    },
+    "blocks": {
+      "total": [
+        "for_header_3",
+        "func_entry_1",
+        "for_body_start_4",
+        "if_false_8",
+        "if_merge_13",
+        "if_true_7",
+        "if_condition_6"
+      ],
+      "detail": [
+        {
+          "node_id": "for_body_start_4",
+          "lineno": null
+        },
+        {
+          "node_id": "for_header_3",
+          "lineno": 2
+        },
+        {
+          "node_id": "func_entry_1",
+          "lineno": null
+        },
+        {
+          "node_id": "if_condition_6",
+          "lineno": 3
+        },
+        {
+          "node_id": "if_false_8",
+          "lineno": null
+        },
+        {
+          "node_id": "if_merge_13",
+          "lineno": null
+        },
+        {
+          "node_id": "if_true_7",
+          "lineno": null
+        }
+      ]
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 3,
+      "total_value_records": 3
+    },
+    "details": {
+      "nums": [
+        {
+          "step": 6,
+          "lineno": 10,
+          "value": "list[11]"
+        }
+      ],
+      "i": [
+        {
+          "step": 8,
+          "lineno": 3,
+          "value": 5
+        }
+      ],
+      "y": [
+        {
+          "step": 10,
+          "lineno": 11,
+          "value": 5
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 1
+    },
+    "details": {
+      "3": [
+        {
+          "step": 8,
+          "condition": "nums.count(i)>len(nums)/2",
+          "distance": 0.0,
+          "evaluated": true
+        }
+      ]
+    }
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "i": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "str"
+      },
+      "y": {
+        "static": "int | str",
+        "runtime": "int"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=5, 实际=5, 匹配=True
+
+================================================================================
+第五步：聚合分析
+================================================================================
+
+================================================================================
+聚合覆盖率分析
+   方法: aggregate_coverage(results)
+   返回: dict - 包含total_edges、total_blocks、edge_count、block_count
+--------------------------------------------------------------------------------
+{
+  "total_edges": [
+    [
+      "if_merge_13",
+      "for_header_3"
+    ],
+    [
+      "if_condition_6",
+      "if_false_8"
+    ],
+    [
+      "if_condition_6",
+      "if_true_7"
+    ],
+    [
+      "func_entry_1",
+      "for_header_3"
+    ],
+    [
+      "for_body_start_4",
+      "if_condition_6"
+    ],
+    [
+      "if_condition_10",
+      "if_false_12"
+    ],
+    [
+      "for_header_3",
+      "for_body_start_4"
+    ],
+    [
+      "if_merge_9",
+      "if_condition_10"
+    ],
+    [
+      "if_condition_10",
+      "if_true_11"
+    ]
+  ],
+  "total_blocks": [
+    "for_header_3",
+    "func_entry_1",
+    "for_body_start_4",
+    "if_false_8",
+    "if_merge_13",
+    "if_condition_10",
+    "if_true_7",
+    "if_true_11",
+    "if_false_12",
+    "if_merge_9",
+    "if_condition_6"
+  ],
+  "edge_count": 9,
+  "block_count": 11,
+  "actual_nodes_count": 3
+}
+
+================================================================================
+第六步：总结
+================================================================================
+
+================================================================================
+最终总结
+   方法: summary
+   返回: dict - 包含静态分析、测试执行、动态分析的统计信息
+--------------------------------------------------------------------------------
+{
+  "静态分析": {
+    "CFG节点数": 14,
+    "CFG边数": 17,
+    "谓词数量": 2,
+    "推断变量类型数": 4
+  },
+  "测试执行": {
+    "总测试用例": 5,
+    "成功执行数": 5,
+    "输出正确数": 5,
+    "成功率": "100.0%",
+    "正确率": "100.0%"
+  },
+  "动态分析": {
+    "总执行步数": 67,
+    "平均执行步数": 13.4,
+    "总覆盖边数": 9,
+    "总覆盖块数": 11
+  }
+}
+
+================================================================================
+测试完成！
+结果已保存到: test_result/test_s-3226-001_20260314_094034.txt
+================================================================================

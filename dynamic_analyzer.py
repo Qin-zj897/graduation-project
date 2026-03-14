@@ -20,14 +20,13 @@ from typing import Dict, List, Any, Optional, Set, Tuple
 class DynamicAnalyzer:
     """
     动态分析器
-    接收静态分析结果作为输入，不需要重新分析源代码
     """
     
     def __init__(self, 
-                 source_code: str,
-                 static_analysis_result: Dict[str, Any],
-                 timeout: float = 5.0,
-                 max_execution_steps: int = 10000):
+                source_code: str,
+                static_analysis_result: Dict[str, Any],
+                timeout: float = 5.0,
+                max_execution_steps: int = 10000):
         """
         初始化动态分析器
         
@@ -60,7 +59,6 @@ class DynamicAnalyzer:
         self.cfg_edges = set()
         self.cfg_line_to_nodes = defaultdict(list)  # 行号到节点的映射
         self.cfg_node_to_line = {}  # 节点到行号的映射
-        self.cfg_real_nodes = set()  # 有实际代码行的节点
         
         if cfg:
             # 提取节点
@@ -72,7 +70,6 @@ class DynamicAnalyzer:
                     if lineno:
                         self.cfg_line_to_nodes[lineno].append(node_id)
                         self.cfg_node_to_line[node_id] = lineno
-                        self.cfg_real_nodes.add(node_id)  # 标记为实际节点
             
             # 提取边，并为边的起止节点建立行号映射
             for edge in cfg.get('edges', []):
@@ -136,7 +133,6 @@ class DynamicAnalyzer:
         self._output_buffer = []
         self._execution_steps = 0
         self._last_line = None
-        self._last_vars_snapshot = {}  # 上一次的变量快照
     
     def run_with_input(self, input_data: Any = None) -> Dict[str, Any]:
         """
@@ -251,23 +247,15 @@ class DynamicAnalyzer:
             elif var in frame.f_globals:
                 vars_snapshot[var] = self._safe_value(frame.f_globals[var])
         
-        # 检测变量是否有变化
-        vars_changed = {}
+        # 记录轨迹
+        self._trace_records.append({
+            'lineno': lineno,
+            'step': self._execution_steps,
+            'vars': vars_snapshot
+        })
+        
+        # 记录变量值序列
         for var, val in vars_snapshot.items():
-            # 如果是新变量或值发生变化，记录
-            if var not in self._last_vars_snapshot or self._last_vars_snapshot[var] != val:
-                vars_changed[var] = val
-        
-        # 只在有变量变化或是第一步时记录轨迹
-        if vars_changed or self._execution_steps == 1:
-            self._trace_records.append({
-                'lineno': lineno,
-                'step': self._execution_steps,
-                'vars': vars_changed if vars_changed else vars_snapshot
-            })
-        
-        # 只记录变化的变量值序列
-        for var, val in vars_changed.items():
             self._variable_value_sequences[var].append({
                 'step': self._execution_steps,
                 'lineno': lineno,
@@ -276,9 +264,6 @@ class DynamicAnalyzer:
             # 记录运行时类型
             if val is not None:
                 self._runtime_types[var].add(type(val).__name__)
-        
-        # 更新上一次的快照
-        self._last_vars_snapshot = vars_snapshot.copy()
         
         # 更新CFG覆盖
         self._update_cfg_coverage(lineno)
@@ -289,7 +274,7 @@ class DynamicAnalyzer:
         self._last_line = lineno
     
     def _update_cfg_coverage(self, current_line):
-        """更新CFG边覆盖 - 改进版"""
+        """更新CFG边覆盖"""
         # 记录当前行覆盖的节点
         if current_line in self.cfg_line_to_nodes:
             for node in self.cfg_line_to_nodes[current_line]:
@@ -620,14 +605,6 @@ class DynamicAnalyzer:
         """使用多个输入执行程序"""
         return [self.run_with_input(input_data) for input_data in inputs_list]
     
-    def get_actual_nodes_count(self) -> int:
-        """获取实际节点数（只计算有行号的节点）"""
-        actual_nodes = set()
-        for node_id, lineno in self.cfg_node_to_line.items():
-            if lineno is not None:
-                actual_nodes.add(node_id)
-        return len(actual_nodes)
-    
     def aggregate_coverage(self, results_list: List[Dict[str, Any]]) -> Dict[str, Any]:
         """聚合多次执行的覆盖信息"""
         all_edges, all_blocks = set(), set()
@@ -636,13 +613,9 @@ class DynamicAnalyzer:
             all_edges.update(coverage.get('covered_edges', []))
             all_blocks.update(coverage.get('covered_blocks', []))
         
-        # 只计算有行号的实际节点
-        actual_nodes = self.get_actual_nodes_count()
-        
         return {
             'total_edges': list(all_edges),
             'total_blocks': list(all_blocks),
             'edge_count': len(all_edges),
-            'block_count': len(all_blocks),
-            'actual_nodes_count': actual_nodes
+            'block_count': len(all_blocks)
         }

@@ -1,0 +1,8043 @@
+================================================================================
+动态分析器简化测试 - s-3226-003
+================================================================================
+
+测试代码文件: 3226/success/s-3226-003.py
+测试用例文件: 3226.xml
+
+测试代码:
+def search(nums):
+    for x in nums:
+        s=0
+        if nums.count(x) > len(nums) // 2:
+            d=x
+            s += 1
+        else:
+            pass
+    if s == 0:
+        d="False"
+    return d
+
+
+
+
+
+
+nums = eval(input())
+y = search(nums)
+print(y)
+
+
+
+================================================================================
+
+================================================================================
+第一步：静态分析
+================================================================================
+[OK] 静态分析器创建成功
+
+================================================================================
+第二步：创建动态分析器
+================================================================================
+[OK] 动态分析器创建成功
+
+================================================================================
+第三步：从XML解析测试用例
+================================================================================
+解析的测试用例 (5 个):
+  用例1: 输入=[1,1,2,2], 期望输出=False
+  用例2: 输入=[2,2,1,1,1,2,2], 期望输出=2
+  用例3: 输入=[3,3,3,3,3,3,3], 期望输出=3
+  用例4: 输入=[5,3,4,5,5,1,1,5,10,5,5,6], 期望输出=False
+  用例5: 输入=[5,3,4,5,5,1,1,5,10,5,5], 期望输出=5
+
+================================================================================
+第四步：执行测试
+================================================================================
+
+执行测试用例 1: [1,1,2,2]
+
+================================================================================
+测试用例 1 的动态分析结果
+   方法: run_with_input(['[1,1,2,2]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "False",
+    "error": null,
+    "execution_steps": 30,
+    "execution_time": 0.0010006427764892578
+  },
+  "trace": {
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 18,
+        "step": 2,
+        "vars": {}
+      },
+      {
+        "lineno": 19,
+        "step": 6,
+        "vars": {
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 7,
+        "vars": {
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "x": 1,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 9,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 10,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 11,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 12,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 13,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 14,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 15,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 16,
+        "vars": {
+          "s": 0,
+          "x": 2,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 17,
+        "vars": {
+          "s": 0,
+          "x": 2,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 18,
+        "vars": {
+          "s": 0,
+          "x": 2,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 19,
+        "vars": {
+          "s": 0,
+          "x": 2,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 20,
+        "vars": {
+          "s": 0,
+          "x": 2,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 21,
+        "vars": {
+          "s": 0,
+          "x": 2,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 22,
+        "vars": {
+          "s": 0,
+          "x": 2,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 23,
+        "vars": {
+          "s": 0,
+          "x": 2,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 9,
+        "step": 24,
+        "vars": {
+          "s": 0,
+          "x": 2,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 10,
+        "step": 25,
+        "vars": {
+          "s": 0,
+          "x": 2,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 11,
+        "step": 26,
+        "vars": {
+          "d": "False",
+          "s": 0,
+          "x": 2,
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 20,
+        "step": 27,
+        "vars": {
+          "y": "False",
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      }
+    ],
+    "step_count": 24
+  },
+  "coverage": {
+    "covered_edges": [
+      [
+        "for_header_3",
+        "for_exit_5"
+      ],
+      [
+        "func_entry_1",
+        "for_header_3"
+      ],
+      [
+        "if_merge_9",
+        "for_header_3"
+      ],
+      [
+        "if_condition_10",
+        "if_false_12"
+      ],
+      [
+        "for_exit_5",
+        "if_condition_10"
+      ],
+      [
+        "if_condition_6",
+        "if_false_8"
+      ],
+      [
+        "for_header_3",
+        "for_body_start_4"
+      ],
+      [
+        "if_condition_6",
+        "if_true_7"
+      ],
+      [
+        "if_condition_10",
+        "if_true_11"
+      ],
+      [
+        "for_body_start_4",
+        "if_condition_6"
+      ]
+    ],
+    "covered_blocks": [
+      "for_header_3",
+      "if_true_7",
+      "if_merge_9",
+      "if_false_12",
+      "if_condition_10",
+      "if_true_11",
+      "func_entry_1",
+      "for_exit_5",
+      "if_condition_6",
+      "for_body_start_4",
+      "if_false_8"
+    ],
+    "edge_count": 10,
+    "block_count": 11
+  },
+  "variable_values": {
+    "nums": [
+      {
+        "step": 6,
+        "lineno": 19,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 7,
+        "lineno": 2,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 8,
+        "lineno": 3,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 10,
+        "lineno": 8,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 11,
+        "lineno": 2,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 12,
+        "lineno": 3,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 13,
+        "lineno": 4,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 14,
+        "lineno": 8,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 15,
+        "lineno": 2,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 16,
+        "lineno": 3,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 17,
+        "lineno": 4,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 18,
+        "lineno": 8,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 19,
+        "lineno": 2,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 20,
+        "lineno": 3,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 21,
+        "lineno": 4,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 22,
+        "lineno": 8,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 23,
+        "lineno": 2,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 24,
+        "lineno": 9,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 25,
+        "lineno": 10,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 26,
+        "lineno": 11,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 27,
+        "lineno": 20,
+        "value": [
+          1,
+          1,
+          2,
+          2
+        ]
+      }
+    ],
+    "x": [
+      {
+        "step": 8,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": 1
+      },
+      {
+        "step": 10,
+        "lineno": 8,
+        "value": 1
+      },
+      {
+        "step": 11,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 12,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 13,
+        "lineno": 4,
+        "value": 1
+      },
+      {
+        "step": 14,
+        "lineno": 8,
+        "value": 1
+      },
+      {
+        "step": 15,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 16,
+        "lineno": 3,
+        "value": 2
+      },
+      {
+        "step": 17,
+        "lineno": 4,
+        "value": 2
+      },
+      {
+        "step": 18,
+        "lineno": 8,
+        "value": 2
+      },
+      {
+        "step": 19,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 20,
+        "lineno": 3,
+        "value": 2
+      },
+      {
+        "step": 21,
+        "lineno": 4,
+        "value": 2
+      },
+      {
+        "step": 22,
+        "lineno": 8,
+        "value": 2
+      },
+      {
+        "step": 23,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 24,
+        "lineno": 9,
+        "value": 2
+      },
+      {
+        "step": 25,
+        "lineno": 10,
+        "value": 2
+      },
+      {
+        "step": 26,
+        "lineno": 11,
+        "value": 2
+      }
+    ],
+    "s": [
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 10,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 11,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 12,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 13,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 14,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 15,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 16,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 17,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 18,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 19,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 20,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 21,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 22,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 23,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 24,
+        "lineno": 9,
+        "value": 0
+      },
+      {
+        "step": 25,
+        "lineno": 10,
+        "value": 0
+      },
+      {
+        "step": 26,
+        "lineno": 11,
+        "value": 0
+      }
+    ],
+    "d": [
+      {
+        "step": 26,
+        "lineno": 11,
+        "value": "False"
+      }
+    ],
+    "y": [
+      {
+        "step": 27,
+        "lineno": 20,
+        "value": "False"
+      }
+    ]
+  },
+  "branch_distances": {
+    "4": [
+      {
+        "step": 9,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 13,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 17,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 21,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      }
+    ],
+    "9": [
+      {
+        "step": 24,
+        "condition": "s == 0",
+        "distance": 0.0,
+        "evaluated": true
+      }
+    ]
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "x": "int",
+      "s": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "list"
+      },
+      "d": {
+        "static": "int",
+        "runtime": "str"
+      },
+      "y": {
+        "static": "int",
+        "runtime": "str"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=False, 实际=False, 匹配=True
+
+执行测试用例 2: [2,2,1,1,1,2,2]
+
+================================================================================
+测试用例 2 的动态分析结果
+   方法: run_with_input(['[2,2,1,1,1,2,2]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "2",
+    "error": null,
+    "execution_steps": 45,
+    "execution_time": 0.0005137920379638672
+  },
+  "trace": {
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 18,
+        "step": 2,
+        "vars": {}
+      },
+      {
+        "lineno": 19,
+        "step": 6,
+        "vars": {
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 7,
+        "vars": {
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 9,
+        "vars": {
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 10,
+        "vars": {
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 11,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 12,
+        "vars": {
+          "d": 2,
+          "s": 1,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 13,
+        "vars": {
+          "d": 2,
+          "s": 1,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 14,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 15,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 16,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 17,
+        "vars": {
+          "d": 2,
+          "s": 1,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 18,
+        "vars": {
+          "d": 2,
+          "s": 1,
+          "x": 1,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 19,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 1,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 20,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 1,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 21,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 1,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 22,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 1,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 23,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 1,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 24,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 1,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 25,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 1,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 26,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 1,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 27,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 1,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 28,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 1,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 29,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 1,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 30,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 31,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 32,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 33,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 34,
+        "vars": {
+          "d": 2,
+          "s": 1,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 35,
+        "vars": {
+          "d": 2,
+          "s": 1,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 36,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 37,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 38,
+        "vars": {
+          "d": 2,
+          "s": 0,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 39,
+        "vars": {
+          "d": 2,
+          "s": 1,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 9,
+        "step": 40,
+        "vars": {
+          "d": 2,
+          "s": 1,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 11,
+        "step": 41,
+        "vars": {
+          "d": 2,
+          "s": 1,
+          "x": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 20,
+        "step": 42,
+        "vars": {
+          "y": 2,
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      }
+    ],
+    "step_count": 39
+  },
+  "coverage": {
+    "covered_edges": [
+      [
+        "for_header_3",
+        "for_exit_5"
+      ],
+      [
+        "func_entry_1",
+        "for_header_3"
+      ],
+      [
+        "if_merge_9",
+        "for_header_3"
+      ],
+      [
+        "if_condition_10",
+        "if_false_12"
+      ],
+      [
+        "for_exit_5",
+        "if_condition_10"
+      ],
+      [
+        "if_condition_6",
+        "if_false_8"
+      ],
+      [
+        "for_header_3",
+        "for_body_start_4"
+      ],
+      [
+        "if_condition_6",
+        "if_true_7"
+      ],
+      [
+        "if_condition_10",
+        "if_true_11"
+      ],
+      [
+        "for_body_start_4",
+        "if_condition_6"
+      ]
+    ],
+    "covered_blocks": [
+      "for_header_3",
+      "if_true_7",
+      "if_merge_9",
+      "if_false_12",
+      "if_condition_10",
+      "if_true_11",
+      "func_entry_1",
+      "for_exit_5",
+      "if_condition_6",
+      "for_body_start_4",
+      "if_false_8"
+    ],
+    "edge_count": 10,
+    "block_count": 11
+  },
+  "variable_values": {
+    "nums": [
+      {
+        "step": 6,
+        "lineno": 19,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 7,
+        "lineno": 2,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 8,
+        "lineno": 3,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 10,
+        "lineno": 5,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 11,
+        "lineno": 6,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 12,
+        "lineno": 2,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 13,
+        "lineno": 3,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 14,
+        "lineno": 4,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 15,
+        "lineno": 5,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 16,
+        "lineno": 6,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 17,
+        "lineno": 2,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 18,
+        "lineno": 3,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 19,
+        "lineno": 4,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 20,
+        "lineno": 8,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 21,
+        "lineno": 2,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 22,
+        "lineno": 3,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 23,
+        "lineno": 4,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 24,
+        "lineno": 8,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 25,
+        "lineno": 2,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 26,
+        "lineno": 3,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 27,
+        "lineno": 4,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 28,
+        "lineno": 8,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 29,
+        "lineno": 2,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 30,
+        "lineno": 3,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 31,
+        "lineno": 4,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 32,
+        "lineno": 5,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 33,
+        "lineno": 6,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 34,
+        "lineno": 2,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 35,
+        "lineno": 3,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 36,
+        "lineno": 4,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 37,
+        "lineno": 5,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 38,
+        "lineno": 6,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 39,
+        "lineno": 2,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 40,
+        "lineno": 9,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 41,
+        "lineno": 11,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "step": 42,
+        "lineno": 20,
+        "value": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
+        ]
+      }
+    ],
+    "x": [
+      {
+        "step": 8,
+        "lineno": 3,
+        "value": 2
+      },
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": 2
+      },
+      {
+        "step": 10,
+        "lineno": 5,
+        "value": 2
+      },
+      {
+        "step": 11,
+        "lineno": 6,
+        "value": 2
+      },
+      {
+        "step": 12,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 13,
+        "lineno": 3,
+        "value": 2
+      },
+      {
+        "step": 14,
+        "lineno": 4,
+        "value": 2
+      },
+      {
+        "step": 15,
+        "lineno": 5,
+        "value": 2
+      },
+      {
+        "step": 16,
+        "lineno": 6,
+        "value": 2
+      },
+      {
+        "step": 17,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 18,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 19,
+        "lineno": 4,
+        "value": 1
+      },
+      {
+        "step": 20,
+        "lineno": 8,
+        "value": 1
+      },
+      {
+        "step": 21,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 22,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 23,
+        "lineno": 4,
+        "value": 1
+      },
+      {
+        "step": 24,
+        "lineno": 8,
+        "value": 1
+      },
+      {
+        "step": 25,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 26,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 27,
+        "lineno": 4,
+        "value": 1
+      },
+      {
+        "step": 28,
+        "lineno": 8,
+        "value": 1
+      },
+      {
+        "step": 29,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 30,
+        "lineno": 3,
+        "value": 2
+      },
+      {
+        "step": 31,
+        "lineno": 4,
+        "value": 2
+      },
+      {
+        "step": 32,
+        "lineno": 5,
+        "value": 2
+      },
+      {
+        "step": 33,
+        "lineno": 6,
+        "value": 2
+      },
+      {
+        "step": 34,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 35,
+        "lineno": 3,
+        "value": 2
+      },
+      {
+        "step": 36,
+        "lineno": 4,
+        "value": 2
+      },
+      {
+        "step": 37,
+        "lineno": 5,
+        "value": 2
+      },
+      {
+        "step": 38,
+        "lineno": 6,
+        "value": 2
+      },
+      {
+        "step": 39,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 40,
+        "lineno": 9,
+        "value": 2
+      },
+      {
+        "step": 41,
+        "lineno": 11,
+        "value": 2
+      }
+    ],
+    "s": [
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 10,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 11,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 12,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 13,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 14,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 15,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 16,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 17,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 18,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 19,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 20,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 21,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 22,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 23,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 24,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 25,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 26,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 27,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 28,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 29,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 30,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 31,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 32,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 33,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 34,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 35,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 36,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 37,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 38,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 39,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 40,
+        "lineno": 9,
+        "value": 1
+      },
+      {
+        "step": 41,
+        "lineno": 11,
+        "value": 1
+      }
+    ],
+    "d": [
+      {
+        "step": 11,
+        "lineno": 6,
+        "value": 2
+      },
+      {
+        "step": 12,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 13,
+        "lineno": 3,
+        "value": 2
+      },
+      {
+        "step": 14,
+        "lineno": 4,
+        "value": 2
+      },
+      {
+        "step": 15,
+        "lineno": 5,
+        "value": 2
+      },
+      {
+        "step": 16,
+        "lineno": 6,
+        "value": 2
+      },
+      {
+        "step": 17,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 18,
+        "lineno": 3,
+        "value": 2
+      },
+      {
+        "step": 19,
+        "lineno": 4,
+        "value": 2
+      },
+      {
+        "step": 20,
+        "lineno": 8,
+        "value": 2
+      },
+      {
+        "step": 21,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 22,
+        "lineno": 3,
+        "value": 2
+      },
+      {
+        "step": 23,
+        "lineno": 4,
+        "value": 2
+      },
+      {
+        "step": 24,
+        "lineno": 8,
+        "value": 2
+      },
+      {
+        "step": 25,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 26,
+        "lineno": 3,
+        "value": 2
+      },
+      {
+        "step": 27,
+        "lineno": 4,
+        "value": 2
+      },
+      {
+        "step": 28,
+        "lineno": 8,
+        "value": 2
+      },
+      {
+        "step": 29,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 30,
+        "lineno": 3,
+        "value": 2
+      },
+      {
+        "step": 31,
+        "lineno": 4,
+        "value": 2
+      },
+      {
+        "step": 32,
+        "lineno": 5,
+        "value": 2
+      },
+      {
+        "step": 33,
+        "lineno": 6,
+        "value": 2
+      },
+      {
+        "step": 34,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 35,
+        "lineno": 3,
+        "value": 2
+      },
+      {
+        "step": 36,
+        "lineno": 4,
+        "value": 2
+      },
+      {
+        "step": 37,
+        "lineno": 5,
+        "value": 2
+      },
+      {
+        "step": 38,
+        "lineno": 6,
+        "value": 2
+      },
+      {
+        "step": 39,
+        "lineno": 2,
+        "value": 2
+      },
+      {
+        "step": 40,
+        "lineno": 9,
+        "value": 2
+      },
+      {
+        "step": 41,
+        "lineno": 11,
+        "value": 2
+      }
+    ],
+    "y": [
+      {
+        "step": 42,
+        "lineno": 20,
+        "value": 2
+      }
+    ]
+  },
+  "branch_distances": {
+    "4": [
+      {
+        "step": 9,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 14,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 19,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 23,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 27,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 31,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 36,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      }
+    ],
+    "9": [
+      {
+        "step": 40,
+        "condition": "s == 0",
+        "distance": 1.0,
+        "evaluated": false
+      }
+    ]
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "x": "int",
+      "s": "int",
+      "d": "int",
+      "y": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "list"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=2, 实际=2, 匹配=True
+
+执行测试用例 3: [3,3,3,3,3,3,3]
+
+================================================================================
+测试用例 3 的动态分析结果
+   方法: run_with_input(['[3,3,3,3,3,3,3]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "3",
+    "error": null,
+    "execution_steps": 48,
+    "execution_time": 0.0004706382751464844
+  },
+  "trace": {
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 18,
+        "step": 2,
+        "vars": {}
+      },
+      {
+        "lineno": 19,
+        "step": 6,
+        "vars": {
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 7,
+        "vars": {
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 9,
+        "vars": {
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 10,
+        "vars": {
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 11,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 12,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 13,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 14,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 15,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 16,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 17,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 18,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 19,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 20,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 21,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 22,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 23,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 24,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 25,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 26,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 27,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 28,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 29,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 30,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 31,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 32,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 33,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 34,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 35,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 36,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 37,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 38,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 39,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 40,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 41,
+        "vars": {
+          "d": 3,
+          "s": 0,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 42,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 9,
+        "step": 43,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 11,
+        "step": 44,
+        "vars": {
+          "d": 3,
+          "s": 1,
+          "x": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 20,
+        "step": 45,
+        "vars": {
+          "y": 3,
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      }
+    ],
+    "step_count": 42
+  },
+  "coverage": {
+    "covered_edges": [
+      [
+        "for_header_3",
+        "for_exit_5"
+      ],
+      [
+        "func_entry_1",
+        "for_header_3"
+      ],
+      [
+        "if_merge_9",
+        "for_header_3"
+      ],
+      [
+        "if_condition_10",
+        "if_false_12"
+      ],
+      [
+        "for_exit_5",
+        "if_condition_10"
+      ],
+      [
+        "if_condition_6",
+        "if_false_8"
+      ],
+      [
+        "for_header_3",
+        "for_body_start_4"
+      ],
+      [
+        "if_condition_6",
+        "if_true_7"
+      ],
+      [
+        "if_condition_10",
+        "if_true_11"
+      ],
+      [
+        "for_body_start_4",
+        "if_condition_6"
+      ]
+    ],
+    "covered_blocks": [
+      "for_header_3",
+      "if_true_7",
+      "if_merge_9",
+      "if_false_12",
+      "if_condition_10",
+      "if_true_11",
+      "func_entry_1",
+      "for_exit_5",
+      "if_condition_6",
+      "for_body_start_4",
+      "if_false_8"
+    ],
+    "edge_count": 10,
+    "block_count": 11
+  },
+  "variable_values": {
+    "nums": [
+      {
+        "step": 6,
+        "lineno": 19,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 7,
+        "lineno": 2,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 8,
+        "lineno": 3,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 10,
+        "lineno": 5,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 11,
+        "lineno": 6,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 12,
+        "lineno": 2,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 13,
+        "lineno": 3,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 14,
+        "lineno": 4,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 15,
+        "lineno": 5,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 16,
+        "lineno": 6,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 17,
+        "lineno": 2,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 18,
+        "lineno": 3,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 19,
+        "lineno": 4,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 20,
+        "lineno": 5,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 21,
+        "lineno": 6,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 22,
+        "lineno": 2,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 23,
+        "lineno": 3,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 24,
+        "lineno": 4,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 25,
+        "lineno": 5,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 26,
+        "lineno": 6,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 27,
+        "lineno": 2,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 28,
+        "lineno": 3,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 29,
+        "lineno": 4,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 30,
+        "lineno": 5,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 31,
+        "lineno": 6,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 32,
+        "lineno": 2,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 33,
+        "lineno": 3,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 34,
+        "lineno": 4,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 35,
+        "lineno": 5,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 36,
+        "lineno": 6,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 37,
+        "lineno": 2,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 38,
+        "lineno": 3,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 39,
+        "lineno": 4,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 40,
+        "lineno": 5,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 41,
+        "lineno": 6,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 42,
+        "lineno": 2,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 43,
+        "lineno": 9,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 44,
+        "lineno": 11,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "step": 45,
+        "lineno": 20,
+        "value": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      }
+    ],
+    "x": [
+      {
+        "step": 8,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 10,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 11,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 12,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 13,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 14,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 15,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 16,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 17,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 18,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 19,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 20,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 21,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 22,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 23,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 24,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 25,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 26,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 27,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 28,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 29,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 30,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 31,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 32,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 33,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 34,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 35,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 36,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 37,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 38,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 39,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 40,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 41,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 42,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 43,
+        "lineno": 9,
+        "value": 3
+      },
+      {
+        "step": 44,
+        "lineno": 11,
+        "value": 3
+      }
+    ],
+    "s": [
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 10,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 11,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 12,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 13,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 14,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 15,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 16,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 17,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 18,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 19,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 20,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 21,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 22,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 23,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 24,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 25,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 26,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 27,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 28,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 29,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 30,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 31,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 32,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 33,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 34,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 35,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 36,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 37,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 38,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 39,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 40,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 41,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 42,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 43,
+        "lineno": 9,
+        "value": 1
+      },
+      {
+        "step": 44,
+        "lineno": 11,
+        "value": 1
+      }
+    ],
+    "d": [
+      {
+        "step": 11,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 12,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 13,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 14,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 15,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 16,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 17,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 18,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 19,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 20,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 21,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 22,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 23,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 24,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 25,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 26,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 27,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 28,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 29,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 30,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 31,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 32,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 33,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 34,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 35,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 36,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 37,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 38,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 39,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 40,
+        "lineno": 5,
+        "value": 3
+      },
+      {
+        "step": 41,
+        "lineno": 6,
+        "value": 3
+      },
+      {
+        "step": 42,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 43,
+        "lineno": 9,
+        "value": 3
+      },
+      {
+        "step": 44,
+        "lineno": 11,
+        "value": 3
+      }
+    ],
+    "y": [
+      {
+        "step": 45,
+        "lineno": 20,
+        "value": 3
+      }
+    ]
+  },
+  "branch_distances": {
+    "4": [
+      {
+        "step": 9,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 14,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 19,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 24,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 29,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 34,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 39,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      }
+    ],
+    "9": [
+      {
+        "step": 43,
+        "condition": "s == 0",
+        "distance": 1.0,
+        "evaluated": false
+      }
+    ]
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "x": "int",
+      "s": "int",
+      "d": "int",
+      "y": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "list"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=3, 实际=3, 匹配=True
+
+执行测试用例 4: [5,3,4,5,5,1,1,5,10,5,5,6]
+
+================================================================================
+测试用例 4 的动态分析结果
+   方法: run_with_input(['[5,3,4,5,5,1,1,5,10,5,5,6]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "False",
+    "error": null,
+    "execution_steps": 62,
+    "execution_time": 0.0007116794586181641
+  },
+  "trace": {
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 18,
+        "step": 2,
+        "vars": {}
+      },
+      {
+        "lineno": 19,
+        "step": 6,
+        "vars": {
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 7,
+        "vars": {
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 9,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 10,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 11,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 12,
+        "vars": {
+          "s": 0,
+          "x": 3,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 13,
+        "vars": {
+          "s": 0,
+          "x": 3,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 14,
+        "vars": {
+          "s": 0,
+          "x": 3,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 15,
+        "vars": {
+          "s": 0,
+          "x": 3,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 16,
+        "vars": {
+          "s": 0,
+          "x": 4,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 17,
+        "vars": {
+          "s": 0,
+          "x": 4,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 18,
+        "vars": {
+          "s": 0,
+          "x": 4,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 19,
+        "vars": {
+          "s": 0,
+          "x": 4,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 20,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 21,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 22,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 23,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 24,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 25,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 26,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 27,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 28,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 29,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 30,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 31,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 32,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 33,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 34,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 35,
+        "vars": {
+          "s": 0,
+          "x": 1,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 36,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 37,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 38,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 39,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 40,
+        "vars": {
+          "s": 0,
+          "x": 10,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 41,
+        "vars": {
+          "s": 0,
+          "x": 10,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 42,
+        "vars": {
+          "s": 0,
+          "x": 10,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 43,
+        "vars": {
+          "s": 0,
+          "x": 10,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 44,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 45,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 46,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 47,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 48,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 49,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 50,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 51,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 52,
+        "vars": {
+          "s": 0,
+          "x": 6,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 53,
+        "vars": {
+          "s": 0,
+          "x": 6,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 54,
+        "vars": {
+          "s": 0,
+          "x": 6,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 55,
+        "vars": {
+          "s": 0,
+          "x": 6,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 9,
+        "step": 56,
+        "vars": {
+          "s": 0,
+          "x": 6,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 10,
+        "step": 57,
+        "vars": {
+          "s": 0,
+          "x": 6,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 11,
+        "step": 58,
+        "vars": {
+          "d": "False",
+          "s": 0,
+          "x": 6,
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 20,
+        "step": 59,
+        "vars": {
+          "y": "False",
+          "nums": "list[12]"
+        }
+      }
+    ],
+    "step_count": 56
+  },
+  "coverage": {
+    "covered_edges": [
+      [
+        "for_header_3",
+        "for_exit_5"
+      ],
+      [
+        "func_entry_1",
+        "for_header_3"
+      ],
+      [
+        "if_merge_9",
+        "for_header_3"
+      ],
+      [
+        "if_condition_10",
+        "if_false_12"
+      ],
+      [
+        "for_exit_5",
+        "if_condition_10"
+      ],
+      [
+        "if_condition_6",
+        "if_false_8"
+      ],
+      [
+        "for_header_3",
+        "for_body_start_4"
+      ],
+      [
+        "if_condition_6",
+        "if_true_7"
+      ],
+      [
+        "if_condition_10",
+        "if_true_11"
+      ],
+      [
+        "for_body_start_4",
+        "if_condition_6"
+      ]
+    ],
+    "covered_blocks": [
+      "for_header_3",
+      "if_true_7",
+      "if_merge_9",
+      "if_false_12",
+      "if_condition_10",
+      "if_true_11",
+      "func_entry_1",
+      "for_exit_5",
+      "if_condition_6",
+      "for_body_start_4",
+      "if_false_8"
+    ],
+    "edge_count": 10,
+    "block_count": 11
+  },
+  "variable_values": {
+    "nums": [
+      {
+        "step": 6,
+        "lineno": 19,
+        "value": "list[12]"
+      },
+      {
+        "step": 7,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 8,
+        "lineno": 3,
+        "value": "list[12]"
+      },
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": "list[12]"
+      },
+      {
+        "step": 10,
+        "lineno": 8,
+        "value": "list[12]"
+      },
+      {
+        "step": 11,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 12,
+        "lineno": 3,
+        "value": "list[12]"
+      },
+      {
+        "step": 13,
+        "lineno": 4,
+        "value": "list[12]"
+      },
+      {
+        "step": 14,
+        "lineno": 8,
+        "value": "list[12]"
+      },
+      {
+        "step": 15,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 16,
+        "lineno": 3,
+        "value": "list[12]"
+      },
+      {
+        "step": 17,
+        "lineno": 4,
+        "value": "list[12]"
+      },
+      {
+        "step": 18,
+        "lineno": 8,
+        "value": "list[12]"
+      },
+      {
+        "step": 19,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 20,
+        "lineno": 3,
+        "value": "list[12]"
+      },
+      {
+        "step": 21,
+        "lineno": 4,
+        "value": "list[12]"
+      },
+      {
+        "step": 22,
+        "lineno": 8,
+        "value": "list[12]"
+      },
+      {
+        "step": 23,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 24,
+        "lineno": 3,
+        "value": "list[12]"
+      },
+      {
+        "step": 25,
+        "lineno": 4,
+        "value": "list[12]"
+      },
+      {
+        "step": 26,
+        "lineno": 8,
+        "value": "list[12]"
+      },
+      {
+        "step": 27,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 28,
+        "lineno": 3,
+        "value": "list[12]"
+      },
+      {
+        "step": 29,
+        "lineno": 4,
+        "value": "list[12]"
+      },
+      {
+        "step": 30,
+        "lineno": 8,
+        "value": "list[12]"
+      },
+      {
+        "step": 31,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 32,
+        "lineno": 3,
+        "value": "list[12]"
+      },
+      {
+        "step": 33,
+        "lineno": 4,
+        "value": "list[12]"
+      },
+      {
+        "step": 34,
+        "lineno": 8,
+        "value": "list[12]"
+      },
+      {
+        "step": 35,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 36,
+        "lineno": 3,
+        "value": "list[12]"
+      },
+      {
+        "step": 37,
+        "lineno": 4,
+        "value": "list[12]"
+      },
+      {
+        "step": 38,
+        "lineno": 8,
+        "value": "list[12]"
+      },
+      {
+        "step": 39,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 40,
+        "lineno": 3,
+        "value": "list[12]"
+      },
+      {
+        "step": 41,
+        "lineno": 4,
+        "value": "list[12]"
+      },
+      {
+        "step": 42,
+        "lineno": 8,
+        "value": "list[12]"
+      },
+      {
+        "step": 43,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 44,
+        "lineno": 3,
+        "value": "list[12]"
+      },
+      {
+        "step": 45,
+        "lineno": 4,
+        "value": "list[12]"
+      },
+      {
+        "step": 46,
+        "lineno": 8,
+        "value": "list[12]"
+      },
+      {
+        "step": 47,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 48,
+        "lineno": 3,
+        "value": "list[12]"
+      },
+      {
+        "step": 49,
+        "lineno": 4,
+        "value": "list[12]"
+      },
+      {
+        "step": 50,
+        "lineno": 8,
+        "value": "list[12]"
+      },
+      {
+        "step": 51,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 52,
+        "lineno": 3,
+        "value": "list[12]"
+      },
+      {
+        "step": 53,
+        "lineno": 4,
+        "value": "list[12]"
+      },
+      {
+        "step": 54,
+        "lineno": 8,
+        "value": "list[12]"
+      },
+      {
+        "step": 55,
+        "lineno": 2,
+        "value": "list[12]"
+      },
+      {
+        "step": 56,
+        "lineno": 9,
+        "value": "list[12]"
+      },
+      {
+        "step": 57,
+        "lineno": 10,
+        "value": "list[12]"
+      },
+      {
+        "step": 58,
+        "lineno": 11,
+        "value": "list[12]"
+      },
+      {
+        "step": 59,
+        "lineno": 20,
+        "value": "list[12]"
+      }
+    ],
+    "x": [
+      {
+        "step": 8,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 10,
+        "lineno": 8,
+        "value": 5
+      },
+      {
+        "step": 11,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 12,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 13,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 14,
+        "lineno": 8,
+        "value": 3
+      },
+      {
+        "step": 15,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 16,
+        "lineno": 3,
+        "value": 4
+      },
+      {
+        "step": 17,
+        "lineno": 4,
+        "value": 4
+      },
+      {
+        "step": 18,
+        "lineno": 8,
+        "value": 4
+      },
+      {
+        "step": 19,
+        "lineno": 2,
+        "value": 4
+      },
+      {
+        "step": 20,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 21,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 22,
+        "lineno": 8,
+        "value": 5
+      },
+      {
+        "step": 23,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 24,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 25,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 26,
+        "lineno": 8,
+        "value": 5
+      },
+      {
+        "step": 27,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 28,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 29,
+        "lineno": 4,
+        "value": 1
+      },
+      {
+        "step": 30,
+        "lineno": 8,
+        "value": 1
+      },
+      {
+        "step": 31,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 32,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 33,
+        "lineno": 4,
+        "value": 1
+      },
+      {
+        "step": 34,
+        "lineno": 8,
+        "value": 1
+      },
+      {
+        "step": 35,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 36,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 37,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 38,
+        "lineno": 8,
+        "value": 5
+      },
+      {
+        "step": 39,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 40,
+        "lineno": 3,
+        "value": 10
+      },
+      {
+        "step": 41,
+        "lineno": 4,
+        "value": 10
+      },
+      {
+        "step": 42,
+        "lineno": 8,
+        "value": 10
+      },
+      {
+        "step": 43,
+        "lineno": 2,
+        "value": 10
+      },
+      {
+        "step": 44,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 45,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 46,
+        "lineno": 8,
+        "value": 5
+      },
+      {
+        "step": 47,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 48,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 49,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 50,
+        "lineno": 8,
+        "value": 5
+      },
+      {
+        "step": 51,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 52,
+        "lineno": 3,
+        "value": 6
+      },
+      {
+        "step": 53,
+        "lineno": 4,
+        "value": 6
+      },
+      {
+        "step": 54,
+        "lineno": 8,
+        "value": 6
+      },
+      {
+        "step": 55,
+        "lineno": 2,
+        "value": 6
+      },
+      {
+        "step": 56,
+        "lineno": 9,
+        "value": 6
+      },
+      {
+        "step": 57,
+        "lineno": 10,
+        "value": 6
+      },
+      {
+        "step": 58,
+        "lineno": 11,
+        "value": 6
+      }
+    ],
+    "s": [
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 10,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 11,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 12,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 13,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 14,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 15,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 16,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 17,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 18,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 19,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 20,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 21,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 22,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 23,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 24,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 25,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 26,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 27,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 28,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 29,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 30,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 31,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 32,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 33,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 34,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 35,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 36,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 37,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 38,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 39,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 40,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 41,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 42,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 43,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 44,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 45,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 46,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 47,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 48,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 49,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 50,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 51,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 52,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 53,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 54,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 55,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 56,
+        "lineno": 9,
+        "value": 0
+      },
+      {
+        "step": 57,
+        "lineno": 10,
+        "value": 0
+      },
+      {
+        "step": 58,
+        "lineno": 11,
+        "value": 0
+      }
+    ],
+    "d": [
+      {
+        "step": 58,
+        "lineno": 11,
+        "value": "False"
+      }
+    ],
+    "y": [
+      {
+        "step": 59,
+        "lineno": 20,
+        "value": "False"
+      }
+    ]
+  },
+  "branch_distances": {
+    "4": [
+      {
+        "step": 9,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 13,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 17,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 21,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 25,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 29,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 33,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 37,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 41,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 45,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 49,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 53,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      }
+    ],
+    "9": [
+      {
+        "step": 56,
+        "condition": "s == 0",
+        "distance": 0.0,
+        "evaluated": true
+      }
+    ]
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "x": "int",
+      "s": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "str"
+      },
+      "d": {
+        "static": "int",
+        "runtime": "str"
+      },
+      "y": {
+        "static": "int",
+        "runtime": "str"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=False, 实际=False, 匹配=True
+
+执行测试用例 5: [5,3,4,5,5,1,1,5,10,5,5]
+
+================================================================================
+测试用例 5 的动态分析结果
+   方法: run_with_input(['[5,3,4,5,5,1,1,5,10,5,5]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "5",
+    "error": null,
+    "execution_steps": 63,
+    "execution_time": 0.0006678104400634766
+  },
+  "trace": {
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 18,
+        "step": 2,
+        "vars": {}
+      },
+      {
+        "lineno": 19,
+        "step": 6,
+        "vars": {
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 7,
+        "vars": {
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 9,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 10,
+        "vars": {
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 11,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 12,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 13,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 3,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 14,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 3,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 15,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 3,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 16,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 3,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 17,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 4,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 18,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 4,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 19,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 4,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 20,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 4,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 21,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 22,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 23,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 24,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 25,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 26,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 27,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 28,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 29,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 30,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 31,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 1,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 32,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 1,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 33,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 1,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 34,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 1,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 35,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 1,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 36,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 1,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 37,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 1,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 38,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 1,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 39,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 40,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 41,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 42,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 43,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 44,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 10,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 45,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 10,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 8,
+        "step": 46,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 10,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 47,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 10,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 48,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 49,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 50,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 51,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 52,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 53,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 54,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 5,
+        "step": 55,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 6,
+        "step": 56,
+        "vars": {
+          "d": 5,
+          "s": 0,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 2,
+        "step": 57,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 9,
+        "step": 58,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 11,
+        "step": 59,
+        "vars": {
+          "d": 5,
+          "s": 1,
+          "x": 5,
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 20,
+        "step": 60,
+        "vars": {
+          "y": 5,
+          "nums": "list[11]"
+        }
+      }
+    ],
+    "step_count": 57
+  },
+  "coverage": {
+    "covered_edges": [
+      [
+        "for_header_3",
+        "for_exit_5"
+      ],
+      [
+        "func_entry_1",
+        "for_header_3"
+      ],
+      [
+        "if_merge_9",
+        "for_header_3"
+      ],
+      [
+        "if_condition_10",
+        "if_false_12"
+      ],
+      [
+        "for_exit_5",
+        "if_condition_10"
+      ],
+      [
+        "if_condition_6",
+        "if_false_8"
+      ],
+      [
+        "for_header_3",
+        "for_body_start_4"
+      ],
+      [
+        "if_condition_6",
+        "if_true_7"
+      ],
+      [
+        "if_condition_10",
+        "if_true_11"
+      ],
+      [
+        "for_body_start_4",
+        "if_condition_6"
+      ]
+    ],
+    "covered_blocks": [
+      "for_header_3",
+      "if_true_7",
+      "if_merge_9",
+      "if_false_12",
+      "if_condition_10",
+      "if_true_11",
+      "func_entry_1",
+      "for_exit_5",
+      "if_condition_6",
+      "for_body_start_4",
+      "if_false_8"
+    ],
+    "edge_count": 10,
+    "block_count": 11
+  },
+  "variable_values": {
+    "nums": [
+      {
+        "step": 6,
+        "lineno": 19,
+        "value": "list[11]"
+      },
+      {
+        "step": 7,
+        "lineno": 2,
+        "value": "list[11]"
+      },
+      {
+        "step": 8,
+        "lineno": 3,
+        "value": "list[11]"
+      },
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": "list[11]"
+      },
+      {
+        "step": 10,
+        "lineno": 5,
+        "value": "list[11]"
+      },
+      {
+        "step": 11,
+        "lineno": 6,
+        "value": "list[11]"
+      },
+      {
+        "step": 12,
+        "lineno": 2,
+        "value": "list[11]"
+      },
+      {
+        "step": 13,
+        "lineno": 3,
+        "value": "list[11]"
+      },
+      {
+        "step": 14,
+        "lineno": 4,
+        "value": "list[11]"
+      },
+      {
+        "step": 15,
+        "lineno": 8,
+        "value": "list[11]"
+      },
+      {
+        "step": 16,
+        "lineno": 2,
+        "value": "list[11]"
+      },
+      {
+        "step": 17,
+        "lineno": 3,
+        "value": "list[11]"
+      },
+      {
+        "step": 18,
+        "lineno": 4,
+        "value": "list[11]"
+      },
+      {
+        "step": 19,
+        "lineno": 8,
+        "value": "list[11]"
+      },
+      {
+        "step": 20,
+        "lineno": 2,
+        "value": "list[11]"
+      },
+      {
+        "step": 21,
+        "lineno": 3,
+        "value": "list[11]"
+      },
+      {
+        "step": 22,
+        "lineno": 4,
+        "value": "list[11]"
+      },
+      {
+        "step": 23,
+        "lineno": 5,
+        "value": "list[11]"
+      },
+      {
+        "step": 24,
+        "lineno": 6,
+        "value": "list[11]"
+      },
+      {
+        "step": 25,
+        "lineno": 2,
+        "value": "list[11]"
+      },
+      {
+        "step": 26,
+        "lineno": 3,
+        "value": "list[11]"
+      },
+      {
+        "step": 27,
+        "lineno": 4,
+        "value": "list[11]"
+      },
+      {
+        "step": 28,
+        "lineno": 5,
+        "value": "list[11]"
+      },
+      {
+        "step": 29,
+        "lineno": 6,
+        "value": "list[11]"
+      },
+      {
+        "step": 30,
+        "lineno": 2,
+        "value": "list[11]"
+      },
+      {
+        "step": 31,
+        "lineno": 3,
+        "value": "list[11]"
+      },
+      {
+        "step": 32,
+        "lineno": 4,
+        "value": "list[11]"
+      },
+      {
+        "step": 33,
+        "lineno": 8,
+        "value": "list[11]"
+      },
+      {
+        "step": 34,
+        "lineno": 2,
+        "value": "list[11]"
+      },
+      {
+        "step": 35,
+        "lineno": 3,
+        "value": "list[11]"
+      },
+      {
+        "step": 36,
+        "lineno": 4,
+        "value": "list[11]"
+      },
+      {
+        "step": 37,
+        "lineno": 8,
+        "value": "list[11]"
+      },
+      {
+        "step": 38,
+        "lineno": 2,
+        "value": "list[11]"
+      },
+      {
+        "step": 39,
+        "lineno": 3,
+        "value": "list[11]"
+      },
+      {
+        "step": 40,
+        "lineno": 4,
+        "value": "list[11]"
+      },
+      {
+        "step": 41,
+        "lineno": 5,
+        "value": "list[11]"
+      },
+      {
+        "step": 42,
+        "lineno": 6,
+        "value": "list[11]"
+      },
+      {
+        "step": 43,
+        "lineno": 2,
+        "value": "list[11]"
+      },
+      {
+        "step": 44,
+        "lineno": 3,
+        "value": "list[11]"
+      },
+      {
+        "step": 45,
+        "lineno": 4,
+        "value": "list[11]"
+      },
+      {
+        "step": 46,
+        "lineno": 8,
+        "value": "list[11]"
+      },
+      {
+        "step": 47,
+        "lineno": 2,
+        "value": "list[11]"
+      },
+      {
+        "step": 48,
+        "lineno": 3,
+        "value": "list[11]"
+      },
+      {
+        "step": 49,
+        "lineno": 4,
+        "value": "list[11]"
+      },
+      {
+        "step": 50,
+        "lineno": 5,
+        "value": "list[11]"
+      },
+      {
+        "step": 51,
+        "lineno": 6,
+        "value": "list[11]"
+      },
+      {
+        "step": 52,
+        "lineno": 2,
+        "value": "list[11]"
+      },
+      {
+        "step": 53,
+        "lineno": 3,
+        "value": "list[11]"
+      },
+      {
+        "step": 54,
+        "lineno": 4,
+        "value": "list[11]"
+      },
+      {
+        "step": 55,
+        "lineno": 5,
+        "value": "list[11]"
+      },
+      {
+        "step": 56,
+        "lineno": 6,
+        "value": "list[11]"
+      },
+      {
+        "step": 57,
+        "lineno": 2,
+        "value": "list[11]"
+      },
+      {
+        "step": 58,
+        "lineno": 9,
+        "value": "list[11]"
+      },
+      {
+        "step": 59,
+        "lineno": 11,
+        "value": "list[11]"
+      },
+      {
+        "step": 60,
+        "lineno": 20,
+        "value": "list[11]"
+      }
+    ],
+    "x": [
+      {
+        "step": 8,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 10,
+        "lineno": 5,
+        "value": 5
+      },
+      {
+        "step": 11,
+        "lineno": 6,
+        "value": 5
+      },
+      {
+        "step": 12,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 13,
+        "lineno": 3,
+        "value": 3
+      },
+      {
+        "step": 14,
+        "lineno": 4,
+        "value": 3
+      },
+      {
+        "step": 15,
+        "lineno": 8,
+        "value": 3
+      },
+      {
+        "step": 16,
+        "lineno": 2,
+        "value": 3
+      },
+      {
+        "step": 17,
+        "lineno": 3,
+        "value": 4
+      },
+      {
+        "step": 18,
+        "lineno": 4,
+        "value": 4
+      },
+      {
+        "step": 19,
+        "lineno": 8,
+        "value": 4
+      },
+      {
+        "step": 20,
+        "lineno": 2,
+        "value": 4
+      },
+      {
+        "step": 21,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 22,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 23,
+        "lineno": 5,
+        "value": 5
+      },
+      {
+        "step": 24,
+        "lineno": 6,
+        "value": 5
+      },
+      {
+        "step": 25,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 26,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 27,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 28,
+        "lineno": 5,
+        "value": 5
+      },
+      {
+        "step": 29,
+        "lineno": 6,
+        "value": 5
+      },
+      {
+        "step": 30,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 31,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 32,
+        "lineno": 4,
+        "value": 1
+      },
+      {
+        "step": 33,
+        "lineno": 8,
+        "value": 1
+      },
+      {
+        "step": 34,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 35,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 36,
+        "lineno": 4,
+        "value": 1
+      },
+      {
+        "step": 37,
+        "lineno": 8,
+        "value": 1
+      },
+      {
+        "step": 38,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 39,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 40,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 41,
+        "lineno": 5,
+        "value": 5
+      },
+      {
+        "step": 42,
+        "lineno": 6,
+        "value": 5
+      },
+      {
+        "step": 43,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 44,
+        "lineno": 3,
+        "value": 10
+      },
+      {
+        "step": 45,
+        "lineno": 4,
+        "value": 10
+      },
+      {
+        "step": 46,
+        "lineno": 8,
+        "value": 10
+      },
+      {
+        "step": 47,
+        "lineno": 2,
+        "value": 10
+      },
+      {
+        "step": 48,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 49,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 50,
+        "lineno": 5,
+        "value": 5
+      },
+      {
+        "step": 51,
+        "lineno": 6,
+        "value": 5
+      },
+      {
+        "step": 52,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 53,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 54,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 55,
+        "lineno": 5,
+        "value": 5
+      },
+      {
+        "step": 56,
+        "lineno": 6,
+        "value": 5
+      },
+      {
+        "step": 57,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 58,
+        "lineno": 9,
+        "value": 5
+      },
+      {
+        "step": 59,
+        "lineno": 11,
+        "value": 5
+      }
+    ],
+    "s": [
+      {
+        "step": 9,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 10,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 11,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 12,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 13,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 14,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 15,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 16,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 17,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 18,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 19,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 20,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 21,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 22,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 23,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 24,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 25,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 26,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 27,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 28,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 29,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 30,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 31,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 32,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 33,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 34,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 35,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 36,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 37,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 38,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 39,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 40,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 41,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 42,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 43,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 44,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 45,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 46,
+        "lineno": 8,
+        "value": 0
+      },
+      {
+        "step": 47,
+        "lineno": 2,
+        "value": 0
+      },
+      {
+        "step": 48,
+        "lineno": 3,
+        "value": 0
+      },
+      {
+        "step": 49,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 50,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 51,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 52,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 53,
+        "lineno": 3,
+        "value": 1
+      },
+      {
+        "step": 54,
+        "lineno": 4,
+        "value": 0
+      },
+      {
+        "step": 55,
+        "lineno": 5,
+        "value": 0
+      },
+      {
+        "step": 56,
+        "lineno": 6,
+        "value": 0
+      },
+      {
+        "step": 57,
+        "lineno": 2,
+        "value": 1
+      },
+      {
+        "step": 58,
+        "lineno": 9,
+        "value": 1
+      },
+      {
+        "step": 59,
+        "lineno": 11,
+        "value": 1
+      }
+    ],
+    "d": [
+      {
+        "step": 11,
+        "lineno": 6,
+        "value": 5
+      },
+      {
+        "step": 12,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 13,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 14,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 15,
+        "lineno": 8,
+        "value": 5
+      },
+      {
+        "step": 16,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 17,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 18,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 19,
+        "lineno": 8,
+        "value": 5
+      },
+      {
+        "step": 20,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 21,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 22,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 23,
+        "lineno": 5,
+        "value": 5
+      },
+      {
+        "step": 24,
+        "lineno": 6,
+        "value": 5
+      },
+      {
+        "step": 25,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 26,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 27,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 28,
+        "lineno": 5,
+        "value": 5
+      },
+      {
+        "step": 29,
+        "lineno": 6,
+        "value": 5
+      },
+      {
+        "step": 30,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 31,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 32,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 33,
+        "lineno": 8,
+        "value": 5
+      },
+      {
+        "step": 34,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 35,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 36,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 37,
+        "lineno": 8,
+        "value": 5
+      },
+      {
+        "step": 38,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 39,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 40,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 41,
+        "lineno": 5,
+        "value": 5
+      },
+      {
+        "step": 42,
+        "lineno": 6,
+        "value": 5
+      },
+      {
+        "step": 43,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 44,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 45,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 46,
+        "lineno": 8,
+        "value": 5
+      },
+      {
+        "step": 47,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 48,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 49,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 50,
+        "lineno": 5,
+        "value": 5
+      },
+      {
+        "step": 51,
+        "lineno": 6,
+        "value": 5
+      },
+      {
+        "step": 52,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 53,
+        "lineno": 3,
+        "value": 5
+      },
+      {
+        "step": 54,
+        "lineno": 4,
+        "value": 5
+      },
+      {
+        "step": 55,
+        "lineno": 5,
+        "value": 5
+      },
+      {
+        "step": 56,
+        "lineno": 6,
+        "value": 5
+      },
+      {
+        "step": 57,
+        "lineno": 2,
+        "value": 5
+      },
+      {
+        "step": 58,
+        "lineno": 9,
+        "value": 5
+      },
+      {
+        "step": 59,
+        "lineno": 11,
+        "value": 5
+      }
+    ],
+    "y": [
+      {
+        "step": 60,
+        "lineno": 20,
+        "value": 5
+      }
+    ]
+  },
+  "branch_distances": {
+    "4": [
+      {
+        "step": 9,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 14,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 18,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 22,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 27,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 32,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 36,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 40,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 45,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 1.0,
+        "evaluated": false
+      },
+      {
+        "step": 49,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      },
+      {
+        "step": 54,
+        "condition": "nums.count(x) > len(nums) // 2",
+        "distance": 0.0,
+        "evaluated": true
+      }
+    ],
+    "9": [
+      {
+        "step": 58,
+        "condition": "s == 0",
+        "distance": 1.0,
+        "evaluated": false
+      }
+    ]
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "x": "int",
+      "s": "int",
+      "d": "int",
+      "y": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "str"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=5, 实际=5, 匹配=True
+
+================================================================================
+第五步：聚合分析
+================================================================================
+
+================================================================================
+聚合覆盖率分析
+   方法: aggregate_coverage(results)
+   返回: dict - 包含total_edges、total_blocks、edge_count、block_count
+--------------------------------------------------------------------------------
+{
+  "total_edges": [
+    [
+      "for_header_3",
+      "for_exit_5"
+    ],
+    [
+      "func_entry_1",
+      "for_header_3"
+    ],
+    [
+      "if_merge_9",
+      "for_header_3"
+    ],
+    [
+      "if_condition_10",
+      "if_false_12"
+    ],
+    [
+      "for_exit_5",
+      "if_condition_10"
+    ],
+    [
+      "if_condition_6",
+      "if_false_8"
+    ],
+    [
+      "for_header_3",
+      "for_body_start_4"
+    ],
+    [
+      "if_condition_6",
+      "if_true_7"
+    ],
+    [
+      "if_condition_10",
+      "if_true_11"
+    ],
+    [
+      "for_body_start_4",
+      "if_condition_6"
+    ]
+  ],
+  "total_blocks": [
+    "for_header_3",
+    "if_true_7",
+    "if_merge_9",
+    "if_false_12",
+    "if_condition_10",
+    "if_true_11",
+    "func_entry_1",
+    "for_exit_5",
+    "if_condition_6",
+    "for_body_start_4",
+    "if_false_8"
+  ],
+  "edge_count": 10,
+  "block_count": 11
+}
+
+================================================================================
+第六步：总结
+================================================================================
+
+================================================================================
+最终总结
+   方法: summary
+   返回: dict - 包含静态分析、测试执行、动态分析的统计信息
+--------------------------------------------------------------------------------
+{
+  "静态分析": {
+    "CFG节点数": 14,
+    "CFG边数": 17,
+    "谓词数量": 2,
+    "推断变量类型数": 6
+  },
+  "测试执行": {
+    "总测试用例": 5,
+    "成功执行数": 5,
+    "输出正确数": 5,
+    "成功率": "100.0%",
+    "正确率": "100.0%"
+  },
+  "动态分析": {
+    "总执行步数": 248,
+    "平均执行步数": 49.6,
+    "总覆盖边数": 10,
+    "总CFG边数": 17,
+    "边覆盖率": "58.82%",
+    "总覆盖块数": 11,
+    "总CFG块数": 14,
+    "块覆盖率": "78.57%"
+  }
+}
+
+================================================================================
+测试完成！
+结果已保存到: test_result/test_s-3226-003_20260314_095855.txt
+================================================================================

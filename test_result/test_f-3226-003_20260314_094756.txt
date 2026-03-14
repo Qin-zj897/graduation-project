@@ -1,0 +1,1869 @@
+================================================================================
+动态分析器简化测试 - f-3226-003
+================================================================================
+
+测试代码文件: 3226/failure/f-3226-003.py
+测试用例文件: 3226.xml
+
+测试代码:
+def search(nums):
+    dic={}
+    for i in nums:
+        if i not in dic:
+            dic[i]=1
+        else:
+            dic[i]+=1
+    return max(dic.values())
+
+
+
+
+
+nums = eval(input())
+y = search(nums)
+print(y)
+
+
+
+================================================================================
+
+================================================================================
+第一步：静态分析
+================================================================================
+[OK] 静态分析器创建成功
+
+================================================================================
+第二步：创建动态分析器
+================================================================================
+[OK] 动态分析器创建成功
+
+================================================================================
+第三步：从XML解析测试用例
+================================================================================
+解析的测试用例 (5 个):
+  用例1: 输入=[1,1,2,2], 期望输出=False
+  用例2: 输入=[2,2,1,1,1,2,2], 期望输出=2
+  用例3: 输入=[3,3,3,3,3,3,3], 期望输出=3
+  用例4: 输入=[5,3,4,5,5,1,1,5,10,5,5,6], 期望输出=False
+  用例5: 输入=[5,3,4,5,5,1,1,5,10,5,5], 期望输出=5
+
+================================================================================
+第四步：执行测试
+================================================================================
+
+执行测试用例 1: [1,1,2,2]
+
+================================================================================
+测试用例 1 的动态分析结果
+   方法: run_with_input(['[1,1,2,2]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "2",
+    "error": null,
+    "execution_steps": 25,
+    "execution_time": 0.0008263587951660156
+  },
+  "trace": {
+    "summary": {
+      "step_count": 6,
+      "total_steps": 25
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 15,
+        "step": 6,
+        "vars": {
+          "nums": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "dic": {
+            "1": 2,
+            "2": 2
+          }
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 9,
+        "vars": {
+          "i": 1
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 15,
+        "vars": {
+          "i": 2
+        }
+      },
+      {
+        "lineno": 16,
+        "step": 22,
+        "vars": {
+          "y": 2
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 7,
+      "block_count": 8
+    },
+    "edges": {
+      "total": [
+        [
+          "if_merge_9",
+          "for_header_3"
+        ],
+        [
+          "if_condition_6",
+          "if_false_8"
+        ],
+        [
+          "for_header_3",
+          "for_exit_5"
+        ],
+        [
+          "for_body_start_4",
+          "if_condition_6"
+        ],
+        [
+          "func_entry_1",
+          "for_header_3"
+        ],
+        [
+          "for_header_3",
+          "for_body_start_4"
+        ],
+        [
+          "if_condition_6",
+          "if_true_7"
+        ]
+      ],
+      "detail": [
+        {
+          "from": "for_body_start_4",
+          "to": "if_condition_6"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_body_start_4"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_exit_5"
+        },
+        {
+          "from": "func_entry_1",
+          "to": "for_header_3"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_false_8"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_true_7"
+        },
+        {
+          "from": "if_merge_9",
+          "to": "for_header_3"
+        }
+      ]
+    },
+    "blocks": {
+      "total": [
+        "if_merge_9",
+        "for_exit_5",
+        "if_true_7",
+        "for_body_start_4",
+        "if_false_8",
+        "for_header_3",
+        "func_entry_1",
+        "if_condition_6"
+      ],
+      "detail": [
+        {
+          "node_id": "for_body_start_4",
+          "lineno": null
+        },
+        {
+          "node_id": "for_exit_5",
+          "lineno": null
+        },
+        {
+          "node_id": "for_header_3",
+          "lineno": 3
+        },
+        {
+          "node_id": "func_entry_1",
+          "lineno": null
+        },
+        {
+          "node_id": "if_condition_6",
+          "lineno": 4
+        },
+        {
+          "node_id": "if_false_8",
+          "lineno": null
+        },
+        {
+          "node_id": "if_merge_9",
+          "lineno": null
+        },
+        {
+          "node_id": "if_true_7",
+          "lineno": null
+        }
+      ]
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 4,
+      "total_value_records": 5
+    },
+    "details": {
+      "nums": [
+        {
+          "step": 6,
+          "lineno": 15,
+          "value": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      ],
+      "dic": [
+        {
+          "step": 8,
+          "lineno": 3,
+          "value": {
+            "1": 2,
+            "2": 2
+          }
+        }
+      ],
+      "i": [
+        {
+          "step": 9,
+          "lineno": 4,
+          "value": 1
+        },
+        {
+          "step": 15,
+          "lineno": 4,
+          "value": 2
+        }
+      ],
+      "y": [
+        {
+          "step": 22,
+          "lineno": 16,
+          "value": 2
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 1
+    },
+    "details": {
+      "4": [
+        {
+          "step": 9,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 12,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 15,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 18,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        }
+      ]
+    }
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "dic": "dict",
+      "i": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "list"
+      },
+      "y": {
+        "static": "numeric",
+        "runtime": "int"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=False, 实际=2, 匹配=False
+
+执行测试用例 2: [2,2,1,1,1,2,2]
+
+================================================================================
+测试用例 2 的动态分析结果
+   方法: run_with_input(['[2,2,1,1,1,2,2]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "4",
+    "error": null,
+    "execution_steps": 34,
+    "execution_time": 0.00032830238342285156
+  },
+  "trace": {
+    "summary": {
+      "step_count": 7,
+      "total_steps": 34
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 15,
+        "step": 6,
+        "vars": {
+          "nums": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "dic": {
+            "2": 4,
+            "1": 3
+          }
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 9,
+        "vars": {
+          "i": 2
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 15,
+        "vars": {
+          "i": 1
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 24,
+        "vars": {
+          "i": 2
+        }
+      },
+      {
+        "lineno": 16,
+        "step": 31,
+        "vars": {
+          "y": 4
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 7,
+      "block_count": 8
+    },
+    "edges": {
+      "total": [
+        [
+          "if_merge_9",
+          "for_header_3"
+        ],
+        [
+          "if_condition_6",
+          "if_false_8"
+        ],
+        [
+          "for_header_3",
+          "for_exit_5"
+        ],
+        [
+          "for_body_start_4",
+          "if_condition_6"
+        ],
+        [
+          "func_entry_1",
+          "for_header_3"
+        ],
+        [
+          "for_header_3",
+          "for_body_start_4"
+        ],
+        [
+          "if_condition_6",
+          "if_true_7"
+        ]
+      ],
+      "detail": [
+        {
+          "from": "for_body_start_4",
+          "to": "if_condition_6"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_body_start_4"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_exit_5"
+        },
+        {
+          "from": "func_entry_1",
+          "to": "for_header_3"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_false_8"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_true_7"
+        },
+        {
+          "from": "if_merge_9",
+          "to": "for_header_3"
+        }
+      ]
+    },
+    "blocks": {
+      "total": [
+        "if_merge_9",
+        "for_exit_5",
+        "if_true_7",
+        "for_body_start_4",
+        "if_false_8",
+        "for_header_3",
+        "func_entry_1",
+        "if_condition_6"
+      ],
+      "detail": [
+        {
+          "node_id": "for_body_start_4",
+          "lineno": null
+        },
+        {
+          "node_id": "for_exit_5",
+          "lineno": null
+        },
+        {
+          "node_id": "for_header_3",
+          "lineno": 3
+        },
+        {
+          "node_id": "func_entry_1",
+          "lineno": null
+        },
+        {
+          "node_id": "if_condition_6",
+          "lineno": 4
+        },
+        {
+          "node_id": "if_false_8",
+          "lineno": null
+        },
+        {
+          "node_id": "if_merge_9",
+          "lineno": null
+        },
+        {
+          "node_id": "if_true_7",
+          "lineno": null
+        }
+      ]
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 4,
+      "total_value_records": 6
+    },
+    "details": {
+      "nums": [
+        {
+          "step": 6,
+          "lineno": 15,
+          "value": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      ],
+      "dic": [
+        {
+          "step": 8,
+          "lineno": 3,
+          "value": {
+            "2": 4,
+            "1": 3
+          }
+        }
+      ],
+      "i": [
+        {
+          "step": 9,
+          "lineno": 4,
+          "value": 2
+        },
+        {
+          "step": 15,
+          "lineno": 4,
+          "value": 1
+        },
+        {
+          "step": 24,
+          "lineno": 4,
+          "value": 2
+        }
+      ],
+      "y": [
+        {
+          "step": 31,
+          "lineno": 16,
+          "value": 4
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 1
+    },
+    "details": {
+      "4": [
+        {
+          "step": 9,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 12,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 15,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 18,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 21,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 24,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 27,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        }
+      ]
+    }
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "dic": "dict",
+      "i": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "list"
+      },
+      "y": {
+        "static": "numeric",
+        "runtime": "int"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=2, 实际=4, 匹配=False
+
+执行测试用例 3: [3,3,3,3,3,3,3]
+
+================================================================================
+测试用例 3 的动态分析结果
+   方法: run_with_input(['[3,3,3,3,3,3,3]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "7",
+    "error": null,
+    "execution_steps": 34,
+    "execution_time": 0.0002999305725097656
+  },
+  "trace": {
+    "summary": {
+      "step_count": 5,
+      "total_steps": 34
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 15,
+        "step": 6,
+        "vars": {
+          "nums": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "dic": {
+            "3": 7
+          }
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 9,
+        "vars": {
+          "i": 3
+        }
+      },
+      {
+        "lineno": 16,
+        "step": 31,
+        "vars": {
+          "y": 7
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 7,
+      "block_count": 8
+    },
+    "edges": {
+      "total": [
+        [
+          "if_merge_9",
+          "for_header_3"
+        ],
+        [
+          "if_condition_6",
+          "if_false_8"
+        ],
+        [
+          "for_header_3",
+          "for_exit_5"
+        ],
+        [
+          "for_body_start_4",
+          "if_condition_6"
+        ],
+        [
+          "func_entry_1",
+          "for_header_3"
+        ],
+        [
+          "for_header_3",
+          "for_body_start_4"
+        ],
+        [
+          "if_condition_6",
+          "if_true_7"
+        ]
+      ],
+      "detail": [
+        {
+          "from": "for_body_start_4",
+          "to": "if_condition_6"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_body_start_4"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_exit_5"
+        },
+        {
+          "from": "func_entry_1",
+          "to": "for_header_3"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_false_8"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_true_7"
+        },
+        {
+          "from": "if_merge_9",
+          "to": "for_header_3"
+        }
+      ]
+    },
+    "blocks": {
+      "total": [
+        "if_merge_9",
+        "for_exit_5",
+        "if_true_7",
+        "for_body_start_4",
+        "if_false_8",
+        "for_header_3",
+        "func_entry_1",
+        "if_condition_6"
+      ],
+      "detail": [
+        {
+          "node_id": "for_body_start_4",
+          "lineno": null
+        },
+        {
+          "node_id": "for_exit_5",
+          "lineno": null
+        },
+        {
+          "node_id": "for_header_3",
+          "lineno": 3
+        },
+        {
+          "node_id": "func_entry_1",
+          "lineno": null
+        },
+        {
+          "node_id": "if_condition_6",
+          "lineno": 4
+        },
+        {
+          "node_id": "if_false_8",
+          "lineno": null
+        },
+        {
+          "node_id": "if_merge_9",
+          "lineno": null
+        },
+        {
+          "node_id": "if_true_7",
+          "lineno": null
+        }
+      ]
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 4,
+      "total_value_records": 4
+    },
+    "details": {
+      "nums": [
+        {
+          "step": 6,
+          "lineno": 15,
+          "value": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      ],
+      "dic": [
+        {
+          "step": 8,
+          "lineno": 3,
+          "value": {
+            "3": 7
+          }
+        }
+      ],
+      "i": [
+        {
+          "step": 9,
+          "lineno": 4,
+          "value": 3
+        }
+      ],
+      "y": [
+        {
+          "step": 31,
+          "lineno": 16,
+          "value": 7
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 1
+    },
+    "details": {
+      "4": [
+        {
+          "step": 9,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 12,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 15,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 18,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 21,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 24,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 27,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        }
+      ]
+    }
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "dic": "dict",
+      "i": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "list"
+      },
+      "y": {
+        "static": "numeric",
+        "runtime": "int"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=3, 实际=7, 匹配=False
+
+执行测试用例 4: [5,3,4,5,5,1,1,5,10,5,5,6]
+
+================================================================================
+测试用例 4 的动态分析结果
+   方法: run_with_input(['[5,3,4,5,5,1,1,5,10,5,5,6]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "6",
+    "error": null,
+    "execution_steps": 49,
+    "execution_time": 0.0004429817199707031
+  },
+  "trace": {
+    "summary": {
+      "step_count": 13,
+      "total_steps": 49
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 15,
+        "step": 6,
+        "vars": {
+          "nums": "list[12]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "dic": {
+            "5": 6,
+            "3": 1,
+            "4": 1,
+            "1": 2,
+            "10": 1,
+            "6": 1
+          }
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 9,
+        "vars": {
+          "i": 5
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 12,
+        "vars": {
+          "i": 3
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 15,
+        "vars": {
+          "i": 4
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 18,
+        "vars": {
+          "i": 5
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 24,
+        "vars": {
+          "i": 1
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 30,
+        "vars": {
+          "i": 5
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 33,
+        "vars": {
+          "i": 10
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 36,
+        "vars": {
+          "i": 5
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 42,
+        "vars": {
+          "i": 6
+        }
+      },
+      {
+        "lineno": 16,
+        "step": 46,
+        "vars": {
+          "y": 6
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 7,
+      "block_count": 8
+    },
+    "edges": {
+      "total": [
+        [
+          "if_merge_9",
+          "for_header_3"
+        ],
+        [
+          "if_condition_6",
+          "if_false_8"
+        ],
+        [
+          "for_header_3",
+          "for_exit_5"
+        ],
+        [
+          "for_body_start_4",
+          "if_condition_6"
+        ],
+        [
+          "func_entry_1",
+          "for_header_3"
+        ],
+        [
+          "for_header_3",
+          "for_body_start_4"
+        ],
+        [
+          "if_condition_6",
+          "if_true_7"
+        ]
+      ],
+      "detail": [
+        {
+          "from": "for_body_start_4",
+          "to": "if_condition_6"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_body_start_4"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_exit_5"
+        },
+        {
+          "from": "func_entry_1",
+          "to": "for_header_3"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_false_8"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_true_7"
+        },
+        {
+          "from": "if_merge_9",
+          "to": "for_header_3"
+        }
+      ]
+    },
+    "blocks": {
+      "total": [
+        "if_merge_9",
+        "for_exit_5",
+        "if_true_7",
+        "for_body_start_4",
+        "if_false_8",
+        "for_header_3",
+        "func_entry_1",
+        "if_condition_6"
+      ],
+      "detail": [
+        {
+          "node_id": "for_body_start_4",
+          "lineno": null
+        },
+        {
+          "node_id": "for_exit_5",
+          "lineno": null
+        },
+        {
+          "node_id": "for_header_3",
+          "lineno": 3
+        },
+        {
+          "node_id": "func_entry_1",
+          "lineno": null
+        },
+        {
+          "node_id": "if_condition_6",
+          "lineno": 4
+        },
+        {
+          "node_id": "if_false_8",
+          "lineno": null
+        },
+        {
+          "node_id": "if_merge_9",
+          "lineno": null
+        },
+        {
+          "node_id": "if_true_7",
+          "lineno": null
+        }
+      ]
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 4,
+      "total_value_records": 12
+    },
+    "details": {
+      "nums": [
+        {
+          "step": 6,
+          "lineno": 15,
+          "value": "list[12]"
+        }
+      ],
+      "dic": [
+        {
+          "step": 8,
+          "lineno": 3,
+          "value": {
+            "5": 6,
+            "3": 1,
+            "4": 1,
+            "1": 2,
+            "10": 1,
+            "6": 1
+          }
+        }
+      ],
+      "i": [
+        {
+          "step": 9,
+          "lineno": 4,
+          "value": 5
+        },
+        {
+          "step": 12,
+          "lineno": 4,
+          "value": 3
+        },
+        {
+          "step": 15,
+          "lineno": 4,
+          "value": 4
+        },
+        {
+          "step": 18,
+          "lineno": 4,
+          "value": 5
+        },
+        {
+          "step": 24,
+          "lineno": 4,
+          "value": 1
+        },
+        {
+          "step": 30,
+          "lineno": 4,
+          "value": 5
+        },
+        {
+          "step": 33,
+          "lineno": 4,
+          "value": 10
+        },
+        {
+          "step": 36,
+          "lineno": 4,
+          "value": 5
+        },
+        {
+          "step": 42,
+          "lineno": 4,
+          "value": 6
+        }
+      ],
+      "y": [
+        {
+          "step": 46,
+          "lineno": 16,
+          "value": 6
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 1
+    },
+    "details": {
+      "4": [
+        {
+          "step": 9,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 12,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 15,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 18,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 21,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 24,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 27,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 30,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 33,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 36,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 39,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 42,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        }
+      ]
+    }
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "dic": "dict",
+      "i": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "str"
+      },
+      "y": {
+        "static": "numeric",
+        "runtime": "int"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=False, 实际=6, 匹配=False
+
+执行测试用例 5: [5,3,4,5,5,1,1,5,10,5,5]
+
+================================================================================
+测试用例 5 的动态分析结果
+   方法: run_with_input(['[5,3,4,5,5,1,1,5,10,5,5]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": true,
+    "output": "6",
+    "error": null,
+    "execution_steps": 46,
+    "execution_time": 0.00041604042053222656
+  },
+  "trace": {
+    "summary": {
+      "step_count": 12,
+      "total_steps": 46
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 15,
+        "step": 6,
+        "vars": {
+          "nums": "list[11]"
+        }
+      },
+      {
+        "lineno": 3,
+        "step": 8,
+        "vars": {
+          "dic": {
+            "5": 6,
+            "3": 1,
+            "4": 1,
+            "1": 2,
+            "10": 1
+          }
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 9,
+        "vars": {
+          "i": 5
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 12,
+        "vars": {
+          "i": 3
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 15,
+        "vars": {
+          "i": 4
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 18,
+        "vars": {
+          "i": 5
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 24,
+        "vars": {
+          "i": 1
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 30,
+        "vars": {
+          "i": 5
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 33,
+        "vars": {
+          "i": 10
+        }
+      },
+      {
+        "lineno": 4,
+        "step": 36,
+        "vars": {
+          "i": 5
+        }
+      },
+      {
+        "lineno": 16,
+        "step": 43,
+        "vars": {
+          "y": 6
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 7,
+      "block_count": 8
+    },
+    "edges": {
+      "total": [
+        [
+          "if_merge_9",
+          "for_header_3"
+        ],
+        [
+          "if_condition_6",
+          "if_false_8"
+        ],
+        [
+          "for_header_3",
+          "for_exit_5"
+        ],
+        [
+          "for_body_start_4",
+          "if_condition_6"
+        ],
+        [
+          "func_entry_1",
+          "for_header_3"
+        ],
+        [
+          "for_header_3",
+          "for_body_start_4"
+        ],
+        [
+          "if_condition_6",
+          "if_true_7"
+        ]
+      ],
+      "detail": [
+        {
+          "from": "for_body_start_4",
+          "to": "if_condition_6"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_body_start_4"
+        },
+        {
+          "from": "for_header_3",
+          "to": "for_exit_5"
+        },
+        {
+          "from": "func_entry_1",
+          "to": "for_header_3"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_false_8"
+        },
+        {
+          "from": "if_condition_6",
+          "to": "if_true_7"
+        },
+        {
+          "from": "if_merge_9",
+          "to": "for_header_3"
+        }
+      ]
+    },
+    "blocks": {
+      "total": [
+        "if_merge_9",
+        "for_exit_5",
+        "if_true_7",
+        "for_body_start_4",
+        "if_false_8",
+        "for_header_3",
+        "func_entry_1",
+        "if_condition_6"
+      ],
+      "detail": [
+        {
+          "node_id": "for_body_start_4",
+          "lineno": null
+        },
+        {
+          "node_id": "for_exit_5",
+          "lineno": null
+        },
+        {
+          "node_id": "for_header_3",
+          "lineno": 3
+        },
+        {
+          "node_id": "func_entry_1",
+          "lineno": null
+        },
+        {
+          "node_id": "if_condition_6",
+          "lineno": 4
+        },
+        {
+          "node_id": "if_false_8",
+          "lineno": null
+        },
+        {
+          "node_id": "if_merge_9",
+          "lineno": null
+        },
+        {
+          "node_id": "if_true_7",
+          "lineno": null
+        }
+      ]
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 4,
+      "total_value_records": 11
+    },
+    "details": {
+      "nums": [
+        {
+          "step": 6,
+          "lineno": 15,
+          "value": "list[11]"
+        }
+      ],
+      "dic": [
+        {
+          "step": 8,
+          "lineno": 3,
+          "value": {
+            "5": 6,
+            "3": 1,
+            "4": 1,
+            "1": 2,
+            "10": 1
+          }
+        }
+      ],
+      "i": [
+        {
+          "step": 9,
+          "lineno": 4,
+          "value": 5
+        },
+        {
+          "step": 12,
+          "lineno": 4,
+          "value": 3
+        },
+        {
+          "step": 15,
+          "lineno": 4,
+          "value": 4
+        },
+        {
+          "step": 18,
+          "lineno": 4,
+          "value": 5
+        },
+        {
+          "step": 24,
+          "lineno": 4,
+          "value": 1
+        },
+        {
+          "step": 30,
+          "lineno": 4,
+          "value": 5
+        },
+        {
+          "step": 33,
+          "lineno": 4,
+          "value": 10
+        },
+        {
+          "step": 36,
+          "lineno": 4,
+          "value": 5
+        }
+      ],
+      "y": [
+        {
+          "step": 43,
+          "lineno": 16,
+          "value": 6
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 1
+    },
+    "details": {
+      "4": [
+        {
+          "step": 9,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 12,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 15,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 18,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 21,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 24,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 27,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 30,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 33,
+          "condition": "i not in dic",
+          "distance": 0.0,
+          "evaluated": true
+        },
+        {
+          "step": 36,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        },
+        {
+          "step": 39,
+          "condition": "i not in dic",
+          "distance": 1.0,
+          "evaluated": false
+        }
+      ]
+    }
+  },
+  "type_validation": {
+    "confirmed_types": {
+      "dic": "dict",
+      "i": "int"
+    },
+    "corrected_types": {
+      "nums": {
+        "static": "list[int]",
+        "runtime": "str"
+      },
+      "y": {
+        "static": "numeric",
+        "runtime": "int"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=5, 实际=6, 匹配=False
+
+================================================================================
+第五步：聚合分析
+================================================================================
+
+================================================================================
+聚合覆盖率分析
+   方法: aggregate_coverage(results)
+   返回: dict - 包含total_edges、total_blocks、edge_count、block_count
+--------------------------------------------------------------------------------
+{
+  "total_edges": [
+    [
+      "if_merge_9",
+      "for_header_3"
+    ],
+    [
+      "if_condition_6",
+      "if_false_8"
+    ],
+    [
+      "for_header_3",
+      "for_exit_5"
+    ],
+    [
+      "for_body_start_4",
+      "if_condition_6"
+    ],
+    [
+      "func_entry_1",
+      "for_header_3"
+    ],
+    [
+      "for_header_3",
+      "for_body_start_4"
+    ],
+    [
+      "if_condition_6",
+      "if_true_7"
+    ]
+  ],
+  "total_blocks": [
+    "if_merge_9",
+    "if_condition_6",
+    "for_exit_5",
+    "if_true_7",
+    "func_entry_1",
+    "for_header_3",
+    "if_false_8",
+    "for_body_start_4"
+  ],
+  "edge_count": 7,
+  "block_count": 8,
+  "actual_nodes_count": 2
+}
+
+================================================================================
+第六步：总结
+================================================================================
+
+================================================================================
+最终总结
+   方法: summary
+   返回: dict - 包含静态分析、测试执行、动态分析的统计信息
+--------------------------------------------------------------------------------
+{
+  "静态分析": {
+    "CFG节点数": 10,
+    "CFG边数": 12,
+    "谓词数量": 1,
+    "推断变量类型数": 5
+  },
+  "测试执行": {
+    "总测试用例": 5,
+    "成功执行数": 5,
+    "输出正确数": 0,
+    "成功率": "100.0%",
+    "正确率": "0.0%"
+  },
+  "动态分析": {
+    "总执行步数": 188,
+    "平均执行步数": 37.6,
+    "总覆盖边数": 7,
+    "总覆盖块数": 8
+  }
+}
+
+================================================================================
+测试完成！
+结果已保存到: test_result/test_f-3226-003_20260314_094756.txt
+================================================================================

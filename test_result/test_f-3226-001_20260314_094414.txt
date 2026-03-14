@@ -1,0 +1,568 @@
+================================================================================
+动态分析器简化测试 - f-3226-001
+================================================================================
+
+测试代码文件: 3226/failure/f-3226-001.py
+测试用例文件: 3226.xml
+
+测试代码:
+ls = eval(input())
+n = eval(input())
+ls2 = ls*n
+ls3 = [x*x for x in ls2]
+ls4=[]
+for x in ls3:
+    if x not in ls4:
+        ls4.append(x)
+print(ls4)
+
+
+
+
+
+nums = eval(input())
+y = search(nums)
+print(y)
+
+
+
+================================================================================
+
+================================================================================
+第一步：静态分析
+================================================================================
+[OK] 静态分析器创建成功
+
+================================================================================
+第二步：创建动态分析器
+================================================================================
+[OK] 动态分析器创建成功
+
+================================================================================
+第三步：从XML解析测试用例
+================================================================================
+解析的测试用例 (5 个):
+  用例1: 输入=[1,1,2,2], 期望输出=False
+  用例2: 输入=[2,2,1,1,1,2,2], 期望输出=2
+  用例3: 输入=[3,3,3,3,3,3,3], 期望输出=3
+  用例4: 输入=[5,3,4,5,5,1,1,5,10,5,5,6], 期望输出=False
+  用例5: 输入=[5,3,4,5,5,1,1,5,10,5,5], 期望输出=5
+
+================================================================================
+第四步：执行测试
+================================================================================
+
+执行测试用例 1: [1,1,2,2]
+
+================================================================================
+测试用例 1 的动态分析结果
+   方法: run_with_input(['[1,1,2,2]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": false,
+    "output": "",
+    "error": "Traceback (most recent call last):\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 640, in mock_input\n    return str(next(input_iter))\n               ~~~~^^^^^^^^^^^^\nStopIteration\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 189, in run_with_input\n    exec(compiled_code, global_ns, local_ns)\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<dynamic>\", line 2, in <module>\n    n = eval(input())\n             ~~~~~^^\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 642, in mock_input\n    raise RuntimeError(\"输入数据不足\")\nRuntimeError: 输入数据不足\n",
+    "execution_steps": 3058,
+    "execution_time": 0.07542181015014648
+  },
+  "trace": {
+    "summary": {
+      "step_count": 2,
+      "total_steps": 3058
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 2,
+        "step": 5,
+        "vars": {
+          "ls": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 0,
+      "block_count": 0
+    },
+    "edges": {
+      "total": [],
+      "detail": []
+    },
+    "blocks": {
+      "total": [],
+      "detail": []
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 1,
+      "total_value_records": 1
+    },
+    "details": {
+      "ls": [
+        {
+          "step": 5,
+          "lineno": 2,
+          "value": [
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 0
+    },
+    "details": {}
+  },
+  "type_validation": {
+    "confirmed_types": {},
+    "corrected_types": {
+      "ls": {
+        "static": "numeric",
+        "runtime": "list"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=False, 实际=, 匹配=False
+
+执行测试用例 2: [2,2,1,1,1,2,2]
+
+================================================================================
+测试用例 2 的动态分析结果
+   方法: run_with_input(['[2,2,1,1,1,2,2]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": false,
+    "output": "",
+    "error": "Traceback (most recent call last):\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 640, in mock_input\n    return str(next(input_iter))\n               ~~~~^^^^^^^^^^^^\nStopIteration\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 189, in run_with_input\n    exec(compiled_code, global_ns, local_ns)\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<dynamic>\", line 2, in <module>\n    n = eval(input())\n             ~~~~~^^\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 642, in mock_input\n    raise RuntimeError(\"输入数据不足\")\nRuntimeError: 输入数据不足\n",
+    "execution_steps": 2568,
+    "execution_time": 0.0016334056854248047
+  },
+  "trace": {
+    "summary": {
+      "step_count": 2,
+      "total_steps": 2568
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 2,
+        "step": 5,
+        "vars": {
+          "ls": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 0,
+      "block_count": 0
+    },
+    "edges": {
+      "total": [],
+      "detail": []
+    },
+    "blocks": {
+      "total": [],
+      "detail": []
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 1,
+      "total_value_records": 1
+    },
+    "details": {
+      "ls": [
+        {
+          "step": 5,
+          "lineno": 2,
+          "value": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 0
+    },
+    "details": {}
+  },
+  "type_validation": {
+    "confirmed_types": {},
+    "corrected_types": {
+      "ls": {
+        "static": "numeric",
+        "runtime": "list"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=2, 实际=, 匹配=False
+
+执行测试用例 3: [3,3,3,3,3,3,3]
+
+================================================================================
+测试用例 3 的动态分析结果
+   方法: run_with_input(['[3,3,3,3,3,3,3]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": false,
+    "output": "",
+    "error": "Traceback (most recent call last):\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 640, in mock_input\n    return str(next(input_iter))\n               ~~~~^^^^^^^^^^^^\nStopIteration\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 189, in run_with_input\n    exec(compiled_code, global_ns, local_ns)\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<dynamic>\", line 2, in <module>\n    n = eval(input())\n             ~~~~~^^\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 642, in mock_input\n    raise RuntimeError(\"输入数据不足\")\nRuntimeError: 输入数据不足\n",
+    "execution_steps": 2568,
+    "execution_time": 0.0014197826385498047
+  },
+  "trace": {
+    "summary": {
+      "step_count": 2,
+      "total_steps": 2568
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 2,
+        "step": 5,
+        "vars": {
+          "ls": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 0,
+      "block_count": 0
+    },
+    "edges": {
+      "total": [],
+      "detail": []
+    },
+    "blocks": {
+      "total": [],
+      "detail": []
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 1,
+      "total_value_records": 1
+    },
+    "details": {
+      "ls": [
+        {
+          "step": 5,
+          "lineno": 2,
+          "value": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 0
+    },
+    "details": {}
+  },
+  "type_validation": {
+    "confirmed_types": {},
+    "corrected_types": {
+      "ls": {
+        "static": "numeric",
+        "runtime": "list"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=3, 实际=, 匹配=False
+
+执行测试用例 4: [5,3,4,5,5,1,1,5,10,5,5,6]
+
+================================================================================
+测试用例 4 的动态分析结果
+   方法: run_with_input(['[5,3,4,5,5,1,1,5,10,5,5,6]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": false,
+    "output": "",
+    "error": "Traceback (most recent call last):\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 640, in mock_input\n    return str(next(input_iter))\n               ~~~~^^^^^^^^^^^^\nStopIteration\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 189, in run_with_input\n    exec(compiled_code, global_ns, local_ns)\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<dynamic>\", line 2, in <module>\n    n = eval(input())\n             ~~~~~^^\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 642, in mock_input\n    raise RuntimeError(\"输入数据不足\")\nRuntimeError: 输入数据不足\n",
+    "execution_steps": 2568,
+    "execution_time": 0.0014033317565917969
+  },
+  "trace": {
+    "summary": {
+      "step_count": 2,
+      "total_steps": 2568
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 2,
+        "step": 5,
+        "vars": {
+          "ls": "list[12]"
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 0,
+      "block_count": 0
+    },
+    "edges": {
+      "total": [],
+      "detail": []
+    },
+    "blocks": {
+      "total": [],
+      "detail": []
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 1,
+      "total_value_records": 1
+    },
+    "details": {
+      "ls": [
+        {
+          "step": 5,
+          "lineno": 2,
+          "value": "list[12]"
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 0
+    },
+    "details": {}
+  },
+  "type_validation": {
+    "confirmed_types": {},
+    "corrected_types": {
+      "ls": {
+        "static": "numeric",
+        "runtime": "str"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=False, 实际=, 匹配=False
+
+执行测试用例 5: [5,3,4,5,5,1,1,5,10,5,5]
+
+================================================================================
+测试用例 5 的动态分析结果
+   方法: run_with_input(['[5,3,4,5,5,1,1,5,10,5,5]'])
+   返回: dict - 包含execution_info、trace、coverage、variable_values、branch_distances、type_validation
+--------------------------------------------------------------------------------
+{
+  "execution_info": {
+    "success": false,
+    "output": "",
+    "error": "Traceback (most recent call last):\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 640, in mock_input\n    return str(next(input_iter))\n               ~~~~^^^^^^^^^^^^\nStopIteration\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 189, in run_with_input\n    exec(compiled_code, global_ns, local_ns)\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<dynamic>\", line 2, in <module>\n    n = eval(input())\n             ~~~~~^^\n  File \"c:\\Users\\22954\\Desktop\\毕业设计\\datasets\\dynamic_analyzer.py\", line 642, in mock_input\n    raise RuntimeError(\"输入数据不足\")\nRuntimeError: 输入数据不足\n",
+    "execution_steps": 2568,
+    "execution_time": 0.0013887882232666016
+  },
+  "trace": {
+    "summary": {
+      "step_count": 2,
+      "total_steps": 2568
+    },
+    "records": [
+      {
+        "lineno": 1,
+        "step": 1,
+        "vars": {}
+      },
+      {
+        "lineno": 2,
+        "step": 5,
+        "vars": {
+          "ls": "list[11]"
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "summary": {
+      "edge_count": 0,
+      "block_count": 0
+    },
+    "edges": {
+      "total": [],
+      "detail": []
+    },
+    "blocks": {
+      "total": [],
+      "detail": []
+    }
+  },
+  "variable_values": {
+    "summary": {
+      "variable_count": 1,
+      "total_value_records": 1
+    },
+    "details": {
+      "ls": [
+        {
+          "step": 5,
+          "lineno": 2,
+          "value": "list[11]"
+        }
+      ]
+    }
+  },
+  "branch_distances": {
+    "summary": {
+      "branch_count": 0
+    },
+    "details": {}
+  },
+  "type_validation": {
+    "confirmed_types": {},
+    "corrected_types": {
+      "ls": {
+        "static": "numeric",
+        "runtime": "str"
+      }
+    },
+    "new_types": {}
+  }
+}
+
+验证: 期望=5, 实际=, 匹配=False
+
+================================================================================
+第五步：聚合分析
+================================================================================
+
+================================================================================
+聚合覆盖率分析
+   方法: aggregate_coverage(results)
+   返回: dict - 包含total_edges、total_blocks、edge_count、block_count
+--------------------------------------------------------------------------------
+{
+  "total_edges": [],
+  "total_blocks": [],
+  "edge_count": 0,
+  "block_count": 0,
+  "actual_nodes_count": 2
+}
+
+================================================================================
+第六步：总结
+================================================================================
+
+================================================================================
+最终总结
+   方法: summary
+   返回: dict - 包含静态分析、测试执行、动态分析的统计信息
+--------------------------------------------------------------------------------
+{
+  "静态分析": {
+    "CFG节点数": 8,
+    "CFG边数": 9,
+    "谓词数量": 1,
+    "推断变量类型数": 8
+  },
+  "测试执行": {
+    "总测试用例": 5,
+    "成功执行数": 0,
+    "输出正确数": 0,
+    "成功率": "0.0%",
+    "正确率": "0.0%"
+  },
+  "动态分析": {
+    "总执行步数": 13330,
+    "平均执行步数": 2666.0,
+    "总覆盖边数": 0,
+    "总覆盖块数": 0
+  }
+}
+
+================================================================================
+测试完成！
+结果已保存到: test_result/test_f-3226-001_20260314_094414.txt
+================================================================================
