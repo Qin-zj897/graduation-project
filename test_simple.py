@@ -110,6 +110,7 @@ print_result(
     result
 )
 
+'''
 # 6. 后向切片
 result = analyzer.backward_slice('sum1', 18)
 print_result(
@@ -118,7 +119,35 @@ print_result(
     "dict - 包含boundary_variables和data_flow_paths",
     result
 )
+'''
+
+# 7. 输入结构识别
+result = analyzer.identify_input_structure()
+print_result(
+    "7. 输入结构识别",
+    "identify_input_structure()",
+    "dict - 输入变量列表及类型/格式信息",
+    result
+)
+
+# 8. 分支约束绑定
+result = analyzer.get_branch_constraint_map()
+print_result(
+    "8. 分支约束绑定",
+    "get_branch_constraint_map()",
+    "dict - branch_id -> {pred_id, cfg_node_id, true_constraint, false_constraint}",
+    result
+)
+
+# 9. 变异候选值聚合
+result = analyzer.aggregate_mutation_candidates()
+print_result(
+    "9. 变异候选值聚合",
+    "aggregate_mutation_candidates()",
+    "dict - 输入变量 -> {branches: [{branch_id, candidates}]}",
+    result
+)
 
 print("\n" + "=" * 80)
-print("测试完成！")
+print("全部测试完成！")
 print("=" * 80)

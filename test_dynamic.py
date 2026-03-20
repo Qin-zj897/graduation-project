@@ -14,8 +14,8 @@ import os
 import sys
 
 # 配置
-CODE_FILE = "2910/success/s-2910-002.py"  # 要测试的代码文件
-XML_FILE = "2910.xml"  # 测试用例文件
+CODE_FILE = "3039/success/s-3039-002.py"  # 要测试的代码文件
+XML_FILE = "3039.xml"  # 测试用例文件
 
 # 读取测试代码
 with open(CODE_FILE, 'r', encoding='utf-8') as f:
@@ -173,6 +173,7 @@ try:
         match = actual_output == expected_output
         print(f"\n验证: 期望={expected_output}, 实际={actual_output}, 匹配={match}")
 
+
     # 第五步：聚合分析
     print("\n" + "=" * 80)
     print("第五步：聚合分析")
@@ -186,64 +187,103 @@ try:
         aggregated
     )
 
+    # 增量覆盖专项测试（与总结中边/块覆盖率一致，标注静态分析 B1/B2 标识）
+    print("\n" + "=" * 80)
+    print("增量覆盖统计验证")
+    print("=" * 80)
+    print("\n--- 各轮次增量覆盖明细 ---")
+    for r in results:
+        tc  = r["test_case"]
+        cov = r["result"].get("coverage", {})
+        print("\n  [用例 {}] 输入: {}".format(tc["id"], tc.get("input_display", tc["input"])))
+        print("    总边数/块数    : {} / {}".format(
+            cov.get("total_edges", 0), cov.get("total_blocks", 0)))
+        print("    累计边覆盖率   : {}/{} ({:.2%})".format(
+            cov.get("covered_edge_count", 0), cov.get("total_edges", 0), cov.get("edge_coverage_rate", 0)))
+        print("    累计块覆盖率   : {}/{} ({:.2%})".format(
+            cov.get("covered_block_count", 0), cov.get("total_blocks", 0), cov.get("block_coverage_rate", 0)))
+        newly_e = cov.get("newly_covered_edges", [])
+        if newly_e:
+            print("    本轮新增覆盖边 ({} 条):".format(len(newly_e)))
+            for e in newly_e:
+                bid = "[{}]".format(e["branch_id"]) if e["branch_id"] else ""
+                print("      + {} -[{}]-> {}  line={}  {}".format(
+                    e["from"], e["label"], e["to"], e["lineno"], bid))
+        else:
+            print("    本轮新增覆盖边 : 无")
+        uncov_e = cov.get("uncovered_edges", [])
+        if uncov_e:
+            print("    仍未覆盖边    ({} 条):".format(len(uncov_e)))
+            for e in uncov_e:
+                bid = "[{}]".format(e["branch_id"]) if e["branch_id"] else ""
+                print("      - {} -[{}]-> {}  line={}  {}".format(
+                    e["from"], e["label"], e["to"], e["lineno"], bid))
+        else:
+            print("    仍未覆盖边    : 全部已覆盖")
+    print("\n--- 聚合后最终覆盖状态 ---")
+    print("  边覆盖率 : {}/{} ({:.2%})".format(
+        aggregated.get("covered_edge_count", 0), aggregated.get("total_edges", 0),
+        aggregated.get("edge_coverage_rate", 0)))
+    print("  块覆盖率 : {}/{} ({:.2%})".format(
+        aggregated.get("covered_block_count", 0), aggregated.get("total_blocks", 0),
+        aggregated.get("block_coverage_rate", 0)))
+    print("  已覆盖边 :")
+    for e in aggregated.get("covered_edges", []):
+        bid = "[{}]".format(e["branch_id"]) if e["branch_id"] else ""
+        print("    + {} -[{}]-> {}  line={}  {}".format(
+            e["from"], e["label"], e["to"], e["lineno"], bid))
+    print("  未覆盖边 :")
+    for e in aggregated.get("uncovered_edges", []):
+        bid = "[{}]".format(e["branch_id"]) if e["branch_id"] else ""
+        print("    - {} -[{}]-> {}  line={}  {}".format(
+            e["from"], e["label"], e["to"], e["lineno"], bid))
+    if not aggregated.get("uncovered_edges"):
+        print("    （无）")
+
     # 第六步：总结
     print("\n" + "=" * 80)
     print("第六步：总结")
     print("=" * 80)
-
-    successful_tests = sum(1 for r in results if r['result']['execution_info']['success'])
-    correct_outputs = sum(1 for r in results if r['result']['execution_info']['output'].strip() == r['test_case']['expected_output'])
-
-    # 计算覆盖率
-    total_cfg_edges = cfg.get('metrics', {}).get('num_edges', 0)
-    total_cfg_nodes = cfg.get('metrics', {}).get('num_nodes', 0)
-    edge_coverage_rate = (aggregated['edge_count'] / total_cfg_edges * 100) if total_cfg_edges > 0 else 0
-    block_coverage_rate = (aggregated['block_count'] / total_cfg_nodes * 100) if total_cfg_nodes > 0 else 0
-
+    successful_tests = sum(1 for r in results if r["result"]["execution_info"]["success"])
+    correct_outputs  = sum(1 for r in results if r["result"]["execution_info"]["output"].strip() == r["test_case"]["expected_output"])
+    total_cfg_edges  = cfg.get("metrics", {}).get("num_edges", 0)
+    total_cfg_nodes  = cfg.get("metrics", {}).get("num_nodes", 0)
+    edge_coverage_rate  = aggregated.get("edge_coverage_rate",  0) * 100
+    block_coverage_rate = aggregated.get("block_coverage_rate", 0) * 100
     summary = {
-        '静态分析': {
-            'CFG节点数': cfg.get('metrics', {}).get('num_nodes', 0),
-            'CFG边数': cfg.get('metrics', {}).get('num_edges', 0),
-            '谓词数量': len(predicates),
-            '推断变量类型数': len(var_types)
+        "静态分析": {
+            "CFG节点数": cfg.get("metrics", {}).get("num_nodes", 0),
+            "CFG边数": cfg.get("metrics", {}).get("num_edges", 0),
+            "谓词数量": len(predicates),
+            "推断变量类型数": len(var_types)
         },
-        '测试执行': {
-            '总测试用例': len(test_cases),
-            '成功执行数': successful_tests,
-            '输出正确数': correct_outputs,
-            '成功率': f"{successful_tests/len(test_cases)*100:.1f}%" if test_cases else "0%",
-            '正确率': f"{correct_outputs/len(test_cases)*100:.1f}%" if test_cases else "0%"
+        "测试执行": {
+            "总测试用例": len(test_cases),
+            "成功执行数": successful_tests,
+            "输出正确数": correct_outputs,
+            "成功率": "{:.1f}%".format(successful_tests/len(test_cases)*100) if test_cases else "0%",
+            "正确率": "{:.1f}%".format(correct_outputs/len(test_cases)*100) if test_cases else "0%"
         },
-        '动态分析': {
-            '总执行步数': sum(r['result']['execution_info']['execution_steps'] for r in results),
-            '平均执行步数': sum(r['result']['execution_info']['execution_steps'] for r in results) / len(results) if results else 0,
-            '总覆盖边数': aggregated['edge_count'],
-            '总CFG边数': total_cfg_edges,
-            '边覆盖率': f"{edge_coverage_rate:.2f}%",
-            '总覆盖块数': aggregated['block_count'],
-            '总CFG块数': total_cfg_nodes,
-            '块覆盖率': f"{block_coverage_rate:.2f}%"
+        "动态分析": {
+            "总执行步数": sum(r["result"]["execution_info"]["execution_steps"] for r in results),
+            "平均执行步数": sum(r["result"]["execution_info"]["execution_steps"] for r in results) / len(results) if results else 0,
+            "已覆盖边数": aggregated.get("covered_edge_count", 0),
+            "总CFG边数": aggregated.get("total_edges", 0),
+            "边覆盖率": "{:.2f}%".format(edge_coverage_rate),
+            "已覆盖块数": aggregated.get("covered_block_count", 0),
+            "总CFG块数": aggregated.get("total_blocks", 0),
+            "块覆盖率": "{:.2f}%".format(block_coverage_rate)
         }
     }
-
-    print_result(
-        "最终总结",
-        "summary",
-        "dict - 包含静态分析、测试执行、动态分析的统计信息",
-        summary
-    )
-
+    print_result("最终总结", "summary", "dict - 包含静态分析、测试执行、动态分析的统计信息", summary)
     print("\n" + "=" * 80)
     print("测试完成！")
-    print(f"结果已保存到: {output_file}")
+    print("结果已保存到: {}".format(output_file))
     print("=" * 80)
 
 finally:
-    # 恢复标准输出
     sys.stdout = original_stdout
     output_handle.close()
-    
-    # 在控制台打印完成信息
-    print(f"[OK] 测试完成！结果已保存到: {output_file}")
-    print(f"[INFO] 测试代码: {CODE_FILE}")
-    print(f"[INFO] 测试用例: {XML_FILE}")
+    print("[OK] 测试完成！结果已保存到: {}".format(output_file))
+    print("[INFO] 测试代码: {}".format(CODE_FILE))
+    print("[INFO] 测试用例: {}".format(XML_FILE))

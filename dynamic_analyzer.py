@@ -77,21 +77,20 @@ class DynamicAnalyzer:
                 to_node = edge.get('to')
                 if from_node and to_node:
                     self.cfg_edges.add((from_node, to_node))
-                    
-                    # 从节点ID中提取行号（如果节点没有在branches中）
+                    # 所有端点都加入 cfg_nodes
+                    self.cfg_nodes.add(from_node)
+                    self.cfg_nodes.add(to_node)
+                    # 尝试从节点ID中提取行号
                     if from_node not in self.cfg_node_to_line:
                         from_line = self._extract_line_from_node(from_node)
                         if from_line:
                             self.cfg_node_to_line[from_node] = from_line
                             self.cfg_line_to_nodes[from_line].append(from_node)
-                            self.cfg_nodes.add(from_node)
-                    
                     if to_node not in self.cfg_node_to_line:
                         to_line = self._extract_line_from_node(to_node)
                         if to_line:
                             self.cfg_node_to_line[to_node] = to_line
                             self.cfg_line_to_nodes[to_line].append(to_node)
-                            self.cfg_nodes.add(to_node)
         
         # 关键变量
         self.key_variables = set()
@@ -116,11 +115,171 @@ class DynamicAnalyzer:
         for pred in predicates:
             anchor = pred.get('anchor_stmt', '')
             if anchor:
-                # 提取行号
                 match = re.search(r'L(\d+)', anchor)
                 if match:
                     lineno = int(match.group(1))
                     self.predicates_by_line[lineno] = pred
+
+        # 行号对应的谓词ID
+        self.line_to_pred_id = {}
+        for pred in predicates:
+            pid = pred.get('pred_id', '')
+            if not pid:
+                continue
+            # 优先用 lineno 字段
+            ln = pred.get('lineno')
+            if isinstance(ln, int):
+                self.line_to_pred_id[ln] = pid
+            # 兼容从 anchor_stmt 提取
+            anchor = pred.get('anchor_stmt', '')
+            if anchor:
+                m = re.search(r'L(\d+)', anchor)
+                if m:
+                    self.line_to_pred_id[int(m.group(1))] = pid
+
+        # 构建输入变量 -> 分支谓词 的传递链路
+        # 基于静态数据依赖做反向 BFS：从谓词条件变量出发，逆向追踪到输入变量
+        input_vars = set()
+        try:
+            from static_analyzer import StaticAnalyzer as _SA
+            _sa = _SA(source_code=self.source_code)
+            _inputs = _sa.identify_input_structure().get('inputs', [])
+            input_vars = {inp['variable'] for inp in _inputs if inp.get('variable')}
+        except Exception:
+            pass
+
+        # data_deps: {var -> [依赖的变量列表]}，即 var 的值来自哪些变量
+        # 构建正向依赖图 forward_deps: {src -> set(dst)}
+        forward_deps: Dict[str, set] = defaultdict(set)
+        for var, deps_list in data_deps.items():
+            for dep in deps_list:
+                forward_deps[dep].add(var)
+
+        for pred in predicates:
+            pid = pred.get('pred_id', '')
+            raw_var = pred.get('var', '')
+            expr    = pred.get('expression', '')
+            cond_tokens = set(re.findall(r'[a-zA-Z_][a-zA-Z0-9_]*', raw_var + ' ' + expr))
+            # 对 key_variables 中非输入变量，若它在当前谓词的表达式中依赖输入变量
+            # 则建立：输入变量 -> 该非输入变量 的正向依赖
+            for kv in list(self.key_variables):
+                if kv in cond_tokens and kv not in input_vars:
+                    for iv in input_vars:
+                        # 检查 kv 是否能从 iv 到达（已有依赖链）
+                        # 用BFS 检查
+                        from collections import deque as _dq
+                        visited_check = {iv}
+                        q_check = _dq([iv])
+                        reachable = False
+                        while q_check:
+                            cur = q_check.popleft()
+                            if cur == kv:
+                                reachable = True
+                                break
+                            for nxt in forward_deps.get(cur, set()):
+                                if nxt not in visited_check:
+                                    visited_check.add(nxt)
+                                    q_check.append(nxt)
+                        if reachable:
+                            # kv 已可达，跳过
+                            pass
+
+        # 对每个谓词，从其条件变量反向追踪到输入变量，记录链路
+        self.pred_input_chains: Dict[str, List[Dict]] = {}
+        self.input_vars = input_vars  # 供运行时动态追踪使用
+        self._static_forward_deps = forward_deps  # 供运行时补充
+
+        for pred in predicates:
+            pid = pred.get('pred_id', '')
+            if not pid:
+                continue
+            cond_vars = set()
+            raw_var = pred.get('var', '')
+            for token in re.findall(r'[a-zA-Z_][a-zA-Z0-9_]*', raw_var):
+                cond_vars.add(token)
+            for token in re.findall(r'[a-zA-Z_][a-zA-Z0-9_]*',
+                                    pred.get('expression', '')):
+                cond_vars.add(token)
+
+            chains = []
+            for inp_var in input_vars:
+                from collections import deque
+                queue = deque([(inp_var, [inp_var])])
+                visited = {inp_var}
+                found_chains = []
+                while queue:
+                    cur, path = queue.popleft()
+                    if cur in cond_vars and cur != inp_var:
+                        found_chains.append(path[:])
+                        continue
+                    for nxt in forward_deps.get(cur, set()):
+                        if nxt not in visited:
+                            visited.add(nxt)
+                            queue.append((nxt, path + [nxt]))
+                if inp_var in cond_vars:
+                    found_chains.append([inp_var])
+                for chain in found_chains:
+                    chains.append({
+                        'input_var': inp_var,
+                        'chain'    : chain,
+                        'affects'  : chain[-1],
+                    })
+
+            self.pred_input_chains[pid] = chains
+
+        # 所有分支节点集合用于增量统计
+        self.all_branch_nodes = {}
+        for branch in cfg.get('branches', []):
+            node_id = branch.get('node_id')
+            if node_id:
+                self.all_branch_nodes[node_id] = {
+                    'pred_id': branch.get('pred_id', ''),
+                    'lineno' : branch.get('lineno'),
+                    'type'   : branch.get('type', ''),
+                    'branch_id': '',  # 由下方 branch_constraint_map 填充
+                }
+
+        # 从静态分析 branch_constraint_map 获取统一的 B1/B2/B3 标识
+        # 建立 cfg_node_id -> branch_id 映射
+        self.node_to_branch_id = {}  # node_id -> 'B1'/'B2'...
+        branch_map = self.static_result.get('branch_constraint_map', {})
+        if not branch_map:
+            # 若调用方未提前传入，尝试从静态结果中获取
+            try:
+                from static_analyzer import StaticAnalyzer
+                sa = StaticAnalyzer(source_code=self.source_code)
+                branch_map = sa.get_branch_constraint_map()
+            except Exception:
+                branch_map = {}
+        for bid, binfo in branch_map.items():
+            nid = binfo.get('cfg_node_id', '')
+            if nid:
+                self.node_to_branch_id[nid] = bid
+                if nid in self.all_branch_nodes:
+                    self.all_branch_nodes[nid]['branch_id'] = bid
+
+        # 全部 CFG 边
+        self.all_cfg_edges = {}
+        for edge in cfg.get('edges', []):
+            fn    = edge.get('from', '')
+            tn    = edge.get('to', '')
+            label = edge.get('label', '')
+            if fn and tn:
+                self.all_cfg_edges[(fn, tn)] = {
+                    'label'  : label,
+                    'from'   : fn,
+                    'to'     : tn,
+                }
+
+        # 全部 CFG 节点（用于增量块覆盖统计，与总结中块覆盖率一致）
+        self.all_cfg_nodes = set(self.cfg_nodes)  # cfg_nodes 已含所有节点
+
+        # 跨轮次增量覆盖状态
+        self._global_covered_edges  = set()   # set of (from, to)
+        self._global_covered_blocks = set()   # set of node_id
+        # 兼容旧字段
+        self._global_covered_branches     = set()
+        self._global_covered_branch_edges = set()
     
     def _reset_results(self):
         """重置动态分析结果"""
@@ -193,27 +352,129 @@ class DynamicAnalyzer:
         execution_time = time.time() - start_time
         type_validation = self._validate_types()
         
+        # 增量覆盖统计
+        # 边级：本轮覆盖的边和全局已覆盖边
+        this_covered_edges  = self._covered_edges  & set(self.all_cfg_edges.keys())
+        newly_covered_edges = this_covered_edges - self._global_covered_edges
+        self._global_covered_edges |= this_covered_edges
+
+        # 块级：本轮覆盖的块和全局已覆盖块
+        this_covered_blocks  = self._covered_blocks & self.all_cfg_nodes
+        newly_covered_blocks = this_covered_blocks - self._global_covered_blocks
+        self._global_covered_blocks |= this_covered_blocks
+
+        total_edge_count    = len(self.all_cfg_edges)
+        covered_edge_count  = len(self._global_covered_edges)
+        total_block_count   = len(self.all_cfg_nodes)
+        covered_block_count = len(self._global_covered_blocks)
+        edge_coverage_rate  = round(covered_edge_count  / total_edge_count,  4) if total_edge_count  else 1.0
+        block_coverage_rate = round(covered_block_count / total_block_count, 4) if total_block_count else 1.0
+
+        uncovered_edges  = set(self.all_cfg_edges.keys()) - self._global_covered_edges
+        uncovered_blocks = self.all_cfg_nodes - self._global_covered_blocks
+
+        def _edge_detail(edge_set):
+            detail = []
+            for (fn, tn) in sorted(edge_set):
+                info = self.all_cfg_edges.get((fn, tn), {})
+                is_branch = fn in self.all_branch_nodes
+                detail.append({
+                    'from'      : fn,
+                    'to'        : tn,
+                    'label'     : info.get('label', ''),
+                    'is_branch' : is_branch,
+                    'branch_id' : self.node_to_branch_id.get(fn, '') if is_branch else '',
+                    'lineno'    : self.cfg_node_to_line.get(fn) or 'virtual',
+                })
+            return detail
+
+        def _block_detail(node_set):
+            detail = []
+            for nid in sorted(node_set):
+                is_branch = nid in self.all_branch_nodes
+                detail.append({
+                    'node_id'   : nid,
+                    'is_branch' : is_branch,
+                    'branch_id' : self.node_to_branch_id.get(nid, '') if is_branch else '',
+                    'lineno'    : self.cfg_node_to_line.get(nid) or 'virtual',
+                })
+            return detail
+
+        # 运行时动态补充 pred_input_chains
+        # 利用执行轨迹中变量值序列，推断哪些输入变量在谓词求值前发生了变化
+        runtime_chains: Dict[str, List[Dict]] = {}
+        for pred in self.static_result.get('predicates', []):
+            pid = pred.get('pred_id', '')
+            if not pid:
+                continue
+            static_chains = self.pred_input_chains.get(pid, [])
+            cond_vars = set(re.findall(r'[a-zA-Z_][a-zA-Z0-9_]*',
+                            pred.get('var', '') + ' ' + pred.get('expression', '')))
+            pred_steps = [r['step'] for r in self._branch_distances.get(pid, [])]
+            extra_chains = []
+            for iv in self.input_vars:
+                already = any(c['input_var'] == iv for c in static_chains)
+                if already:
+                    continue
+                iv_steps = [r['step'] for r in self._variable_value_sequences.get(iv, [])]
+                if not iv_steps or not pred_steps:
+                    continue
+                if min(iv_steps) <= max(pred_steps):
+                    mid_chain = [iv]
+                    for cv in sorted(cond_vars):
+                        if cv == iv:
+                            continue
+                        cv_steps = [r['step'] for r in self._variable_value_sequences.get(cv, [])]
+                        if cv_steps and min(iv_steps) <= min(cv_steps) <= max(pred_steps):
+                            mid_chain.append(cv)
+                    extra_chains.append({
+                        'input_var': iv,
+                        'chain'    : mid_chain,
+                        'affects'  : mid_chain[-1],
+                        'source'   : 'runtime',
+                    })
+            runtime_chains[pid] = static_chains + extra_chains
+
+        #动态分析补充后变量的传递链路
+        merged_chains = {
+            pid: runtime_chains.get(pid, self.pred_input_chains.get(pid, []))
+            for pid in set(list(self.pred_input_chains.keys()) + list(runtime_chains.keys()))
+        }
+
         return {
             'execution_info': {
-                'success': success,
-                'output': '\n'.join(self._output_buffer),
-                'error': error,
+                'success'        : success,
+                'output'         : '\n'.join(self._output_buffer),
+                'error'          : error,
                 'execution_steps': self._execution_steps,
-                'execution_time': execution_time
+                'execution_time' : execution_time
             },
             'trace': {
-                'records': self._trace_records,
+                'records'   : self._trace_records,
                 'step_count': len(self._trace_records)
             },
             'coverage': {
-                'covered_edges': list(self._covered_edges),
-                'covered_blocks': list(self._covered_blocks),
-                'edge_count': len(self._covered_edges),
-                'block_count': len(self._covered_blocks)
+                # 本轮原始覆盖
+                'covered_edges'      : list(self._covered_edges),
+                'covered_blocks'     : list(self._covered_blocks),
+                'edge_count'         : len(self._covered_edges),
+                'block_count'        : len(self._covered_blocks),
+                # 增量统计
+                'total_edges'        : total_edge_count,
+                'total_blocks'       : total_block_count,
+                'covered_edge_count' : covered_edge_count,
+                'covered_block_count': covered_block_count,
+                'edge_coverage_rate' : edge_coverage_rate,
+                'block_coverage_rate': block_coverage_rate,
+                'newly_covered_edges'  : _edge_detail(newly_covered_edges),
+                'newly_covered_blocks' : _block_detail(newly_covered_blocks),
+                'uncovered_edges'      : _edge_detail(uncovered_edges),
+                'uncovered_blocks'     : _block_detail(uncovered_blocks),
             },
-            'variable_values': dict(self._variable_value_sequences),
-            'branch_distances': dict(self._branch_distances),
-            'type_validation': type_validation
+            'variable_values'    : dict(self._variable_value_sequences),
+            'branch_distances'  : dict(self._branch_distances),
+            'pred_input_chains' : merged_chains,    #变量传递的链路
+            'type_validation' : type_validation
         }
     
     def _error_result(self, error_msg):
@@ -247,24 +508,31 @@ class DynamicAnalyzer:
             elif var in frame.f_globals:
                 vars_snapshot[var] = self._safe_value(frame.f_globals[var])
         
-        # 记录轨迹
-        self._trace_records.append({
-            'lineno': lineno,
-            'step': self._execution_steps,
-            'vars': vars_snapshot
-        })
-        
-        # 记录变量值序列
-        for var, val in vars_snapshot.items():
-            self._variable_value_sequences[var].append({
-                'step': self._execution_steps,
+        # 记录轨迹（只记录有变量变化的步骤）
+        changed_vars = {
+            var: val for var, val in vars_snapshot.items()
+            if not self._variable_value_sequences[var]
+            or self._variable_value_sequences[var][-1]['value'] != val
+        }
+        if changed_vars:
+            self._trace_records.append({
                 'lineno': lineno,
-                'value': val
+                'step'  : self._execution_steps,
+                'vars'  : changed_vars
             })
-            # 记录运行时类型
+
+        # 记录变量值序列（只在值发生变化时追加）
+        for var, val in vars_snapshot.items():
+            seq = self._variable_value_sequences[var]
+            if not seq or seq[-1]['value'] != val:
+                seq.append({
+                    'step'  : self._execution_steps,
+                    'lineno': lineno,
+                    'value' : val
+                })
             if val is not None:
                 self._runtime_types[var].add(type(val).__name__)
-        
+
         # 更新CFG覆盖
         self._update_cfg_coverage(lineno)
         
@@ -341,31 +609,67 @@ class DynamicAnalyzer:
     def _check_branch_condition(self, lineno, frame):
         """检查分支条件并计算分支距离"""
         try:
-            # 获取当前行的代码
             line = linecache.getline(frame.f_code.co_filename, lineno).strip()
-            
-            # 检查是否为分支语句
-            if not line.startswith(('if ', 'elif ', 'while ')):
+
+            is_while = line.startswith('while ')
+            is_for   = line.startswith('for ')
+            is_if    = line.startswith(('if ', 'elif '))
+
+            if not (is_while or is_for or is_if):
                 return
-            
-            # 提取条件表达式
+
             condition = self._extract_condition(line)
             if not condition:
                 return
-            
-            # 计算分支距离
-            distance = self._calculate_branch_distance(condition, frame)
-            
+
+            if is_for:
+                distance  = self._calculate_for_loop_distance(line, frame)
+                loop_type = 'for'
+                # for 循环条件显示为 iterable 表达式
+                import re as _re2
+                _m = _re2.match(r'for\s+.+\s+in\s+(.+?)\s*:', line)
+                condition = _m.group(1).strip() if _m else condition
+            else:
+                distance  = self._calculate_branch_distance(condition, frame)
+                loop_type = 'while' if is_while else 'if'
+
             if distance is not None:
-                self._branch_distances[lineno].append({
-                    'step': self._execution_steps,
+                key = self.line_to_pred_id.get(lineno, lineno)
+                self._branch_distances[key].append({
+                    'step'     : self._execution_steps,
+                    'pred_id'  : self.line_to_pred_id.get(lineno, ''),
+                    'lineno'   : lineno,
                     'condition': condition,
-                    'distance': distance,
-                    'evaluated': distance == 0.0
+                    'distance' : distance,
+                    'evaluated': distance == 0.0,
+                    'loop_type': loop_type,
                 })
-        except Exception as e:
-            # 静默失败，不影响执行
+        except Exception:
             pass
+
+    def _calculate_for_loop_distance(self, line, frame):
+        """
+        计算 for 循环的分支距离。
+        for var in iterable:
+            - iterable 非空（还有元素可迭代）：距离 = 0
+            - iterable 耗尽：距离 = 1
+        """
+        try:
+            import re as _re
+            m = _re.match(r'for\s+.+\s+in\s+(.+)\s*:', line)
+            if not m:
+                return None
+            iterable_expr = m.group(1).strip()
+            local_vars  = frame.f_locals
+            global_vars = frame.f_globals
+            iterable_val = eval(iterable_expr, global_vars, local_vars)
+            try:
+                remaining = len(iterable_val)
+            except TypeError:
+                remaining = sum(1 for _ in iterable_val)
+            return 0.0 if remaining > 0 else 1.0
+        except Exception:
+            return None
     
     def _extract_condition(self, line):
         """从代码行中提取条件表达式"""
@@ -484,7 +788,26 @@ class DynamicAnalyzer:
                 if isinstance(var_val, (int, float)):
                     actual_remainder = var_val % divisor
                     return abs(actual_remainder - remainder)
-        
+
+        # 处理复合条件 and / or（适用于 while 和 if）
+        # and：距离 = 各子条件距离之和（所有子条件都要为真）
+        # or ：距离 = 各子条件距离的最小值（任一为真即可）
+        cond_stripped = condition.strip()
+        if ' and ' in cond_stripped:
+            parts = cond_stripped.split(' and ')
+            dists = [self._compute_false_branch_distance(p.strip(), local_vars, global_vars)
+                    for p in parts]
+            valid = [d for d in dists if d is not None]
+            if valid:
+                return sum(valid)
+        if ' or ' in cond_stripped:
+            parts = cond_stripped.split(' or ')
+            dists = [self._compute_false_branch_distance(p.strip(), local_vars, global_vars)
+                    for p in parts]
+            valid = [d for d in dists if d is not None]
+            if valid:
+                return min(valid)
+
         # 默认距离
         return 1.0
     
@@ -607,15 +930,47 @@ class DynamicAnalyzer:
     
     def aggregate_coverage(self, results_list: List[Dict[str, Any]]) -> Dict[str, Any]:
         """聚合多次执行的覆盖信息"""
-        all_edges, all_blocks = set(), set()
-        for result in results_list:
-            coverage = result.get('coverage', {})
-            all_edges.update(coverage.get('covered_edges', []))
-            all_blocks.update(coverage.get('covered_blocks', []))
-        
+        total_edge_count    = len(self.all_cfg_edges)
+        total_block_count   = len(self.all_cfg_nodes)
+        covered_edges       = self._global_covered_edges
+        covered_blocks      = self._global_covered_blocks
+        uncovered_edges     = set(self.all_cfg_edges.keys()) - covered_edges
+        uncovered_blocks    = self.all_cfg_nodes - covered_blocks
+
+        def _edge_detail(edge_set):
+            return [
+                {
+                    'from'      : fn,
+                    'to'        : tn,
+                    'label'     : self.all_cfg_edges.get((fn, tn), {}).get('label', ''),
+                    'is_branch' : fn in self.all_branch_nodes,
+                    'branch_id' : self.node_to_branch_id.get(fn, '') if fn in self.all_branch_nodes else '',
+                    'lineno'    : self.cfg_node_to_line.get(fn) or 'virtual',
+                }
+                for fn, tn in sorted(edge_set)
+            ]
+
+        def _block_detail(node_set):
+            return [
+                {
+                    'node_id'   : nid,
+                    'is_branch' : nid in self.all_branch_nodes,
+                    'branch_id' : self.node_to_branch_id.get(nid, '') if nid in self.all_branch_nodes else '',
+                    'lineno'    : self.cfg_node_to_line.get(nid) or 'virtual',
+                }
+                for nid in sorted(node_set)
+            ]
+
+
         return {
-            'total_edges': list(all_edges),
-            'total_blocks': list(all_blocks),
-            'edge_count': len(all_edges),
-            'block_count': len(all_blocks)
+            'total_edges'        : total_edge_count,
+            'total_blocks'       : total_block_count,
+            'covered_edge_count' : len(covered_edges),
+            'covered_block_count': len(covered_blocks),
+            'edge_coverage_rate' : round(len(covered_edges)  / total_edge_count,  4) if total_edge_count  else 1.0,
+            'block_coverage_rate': round(len(covered_blocks) / total_block_count, 4) if total_block_count else 1.0,
+            'covered_edges'      : _edge_detail(covered_edges),
+            'uncovered_edges'    : _edge_detail(uncovered_edges),
+            'covered_blocks'     : _block_detail(covered_blocks),
+            'uncovered_blocks'   : _block_detail(uncovered_blocks),
         }

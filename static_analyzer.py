@@ -1,8 +1,10 @@
 import ast
+from fileinput import lineno
 import inspect
 import json
 from collections import defaultdict
 from typing import Dict, List, Set, Tuple, Any, Optional, Union
+from unittest import result
 import networkx as nx
 
 
@@ -49,22 +51,6 @@ class StaticAnalyzer:
     
     def _make_pred_id(self, lineno: int, col_offset: int = 0) -> str:
         """生成统一的谓词标识符: P{n}"""
-        key = (lineno, col_offset)
-        if key not in self._pred_id_map:
-            self._pred_counter += 1
-            self._pred_id_map[key] = f"P{self._pred_counter}"
-        return self._pred_id_map[key]
-        
-        # 统一标识符计数器
-        self._pred_counter = 0
-        self._pred_id_map = {}  # (lineno, col_offset) -> pred_id
-        
-    def _make_stmt_id(self, lineno: int, col_offset: int = 0) -> str:
-        """生成统一的语句标识符"""
-        return f"L{lineno}:C{col_offset}"
-    
-    def _make_pred_id(self, lineno: int, col_offset: int = 0) -> str:
-        """生成统一的谓词标识符"""
         key = (lineno, col_offset)
         if key not in self._pred_id_map:
             self._pred_counter += 1
@@ -606,7 +592,8 @@ class StaticAnalyzer:
                     # 记录条件信息
                     self.cfg.nodes[condition_block]['condition'] = {
                         'expression': ast.unparse(node.test) if hasattr(ast, 'unparse') else str(node.test),
-                        'lineno': node.lineno
+                        'lineno': node.lineno,
+                        'col_offset': node.col_offset
                     }
                     
                     # 连接当前块到条件块
@@ -663,6 +650,7 @@ class StaticAnalyzer:
                         'type': 'while',
                         'condition': ast.unparse(node.test) if hasattr(ast, 'unparse') else str(node.test),
                         'lineno': node.lineno,
+                        'col_offset': node.col_offset,
                         'has_else': bool(node.orelse)
                     }
                     self.cfg.nodes[loop_header]['loop'] = loop_info
@@ -1055,7 +1043,7 @@ class StaticAnalyzer:
                         'node_id': node_id,
                         'type': 'if_condition',
                         'condition': node_data.get('condition', {}),
-                        'pred_id': self._make_pred_id(node_data.get('condition', {}).get('lineno', 0), 0) if node_data.get('condition', {}).get('lineno') else None,
+                        'pred_id': self._make_pred_id(node_data.get('condition', {}).get('lineno', 0), node_data.get('condition', {}).get('col_offset', 0)) if node_data.get('condition', {}).get('lineno') else None,
                         'lineno': node_data.get('condition', {}).get('lineno')
                     })
                 elif node_data.get('type') == 'for_header':
@@ -1066,11 +1054,16 @@ class StaticAnalyzer:
                         'lineno': node_data.get('loop', {}).get('lineno')
                     })
                 elif node_data.get('type') == 'while_header':
+                    _wloop = node_data.get('loop', {})
+                    _wlineno = _wloop.get('lineno')
+                    _wcol = _wloop.get('col_offset', 0)
                     cfg_simplified['branches'].append({
                         'node_id': node_id,
                         'type': 'while_loop',
-                        'condition': node_data.get('condition', {}),
-                        'lineno': node_data.get('condition', {}).get('lineno')
+                        'condition': {'expression': _wloop.get('condition', ''), 'lineno': _wlineno, 'col_offset': _wcol},
+                        'loop': _wloop,
+                        'pred_id': self._make_pred_id(_wlineno, _wcol) if _wlineno else None,
+                        'lineno': _wlineno
                     })
             
             # 提取边信息（简化格式）
@@ -1200,6 +1193,11 @@ class StaticAnalyzer:
                             
                             # 同时提取详细的链式比较信息
                             self._extract_detailed_chained_comparison(compare_node, predicate_info)
+                            # 把链式比较中识别出的主变量写回 predicate_info
+                            if self.chained_comparisons:
+                                last = self.chained_comparisons[-1]
+                                if not predicate_info.get('var') and last.get('main_variable'):
+                                    predicate_info['var'] = last['main_variable']
                         else:
                             # 单个比较
                             predicate_info['is_chained'] = False
@@ -1411,6 +1409,12 @@ class StaticAnalyzer:
                             predicate_info['var_left'] = left_var
                             predicate_info['var_right'] = right_var
                             predicate_info['comparison_type'] = 'variable_op_variable'
+                        else:
+                            # 复杂表达式（函数调用等），用表达式字符串作为 var
+                            if not predicate_info.get('var'):
+                                left_str = ast.unparse(left_expr) if hasattr(ast, 'unparse') else str(left_expr)
+                                predicate_info['var'] = left_str
+                                predicate_info['comparison_type'] = 'complex_expression'
                         
                         # 特殊处理取模运算
                         if isinstance(left_expr, ast.BinOp) and isinstance(left_expr.op, ast.Mod):
@@ -1869,6 +1873,12 @@ class StaticAnalyzer:
                 if 'var' in pred:
                     simplified['var'] = pred['var']
                 
+                # 添加操作符（如果有）
+                if 'op' in pred:
+                    simplified['op'] = pred['op']
+                elif 'ops' in pred:
+                    simplified['ops'] = pred['ops']
+                
                 # 处理比较值
                 if pred.get('is_chained', False):
                     # 链式比较：从boundary_info中提取所有比较值作为list
@@ -1895,382 +1905,9 @@ class StaticAnalyzer:
             
         except Exception as e:
             return []
-
-    
-    def backward_slice(self, variable_name: str, line_number: int, 
-                    include_all_defs: bool = False) -> Dict[str, Any]:
-        """
-        后向切片
-        - 识别需要边界测试的变量
-        - 支持多种定义类型
-        - 返回需要边界测试的变量
-        
-        Args:
-            variable_name: 目标变量名
-            line_number: 目标行号
-            include_all_defs: 是否包含所有定义(包括不在数据流路径上的)
-            
-        Returns:
-            {
-                'boundary_variables': list, 需要边界测试的变量列表, 每个包含variable(变量名), boundary_values(边界值), suggested_test_values(建议测试值)
-                'data_flow_paths': list, 数据流路径列表, 记录变量的定义-使用关系
-            }
-            例如: {'boundary_variables': [{'variable': 'n', 'boundary_values': {...}, 'suggested_test_values': [9, 10, 11]}], 'data_flow_paths': [...]}
-            失败时返回空字典 {}
-        """
-        try:
-            # 构建def-use链
-            def_use_chains = self._build_def_use_chains()
-            
-            if variable_name not in def_use_chains:
-                return {}
-            
-            # 找到目标变量在指定行的使用
-            target_use = None
-            for use in def_use_chains[variable_name].get('uses', []):
-                if use['lineno'] == line_number:
-                    target_use = use
-                    break
-            
-            # 执行后向切片
-            affected_lines = set()
-            affected_vars = set([variable_name])
-            data_flow_paths = []
-            work_list = [(variable_name, line_number, [])]  # (变量, 行号, 路径)
-            visited = set()
-            
-            while work_list:
-                var, line, path = work_list.pop()
-                
-                if (var, line) in visited:
-                    continue
-                visited.add((var, line))
-                
-                # 添加当前行到影响行集合
-                affected_lines.add(line)
-                
-                # 记录当前路径
-                current_path = path + [(var, line)]
-                
-                # 查找定义该变量的语句
-                if var in def_use_chains:
-                    for def_info in def_use_chains[var].get('definitions', []):
-                        def_line = def_info['lineno']
-                        
-                        # 检查定义是否在数据流路径上
-                        if def_line < line:  # 只考虑之前的定义
-                            if include_all_defs or self._is_on_dataflow_path(def_info, var, line):
-                                
-                                # 添加定义行
-                                affected_lines.add(def_line)
-                                affected_vars.add(var)
-                                
-                                # 记录数据流路径
-                                data_flow_paths.append({
-                                    'from': (var, def_line),
-                                    'to': (var, line),
-                                    'path': current_path,
-                                    'def_type': def_info.get('type', 'unknown')
-                                })
-                                
-                                # 查找定义语句中使用的变量
-                                for used_var in def_info.get('uses', []):
-                                    work_list.append((used_var, def_line, current_path))
-            
-            # 识别需要边界测试的变量
-            boundary_variables = self._identify_boundary_variables(
-                affected_vars, def_use_chains, line_number
-            )
-            
-            # 统计信息
-            stats = {
-                'affected_lines_count': len(affected_lines),
-                'affected_variables_count': len(affected_vars),
-                'boundary_variables_count': len(boundary_variables),
-                'data_flow_paths_count': len(data_flow_paths),
-                'slice_depth': max((line - min(affected_lines)) for line in affected_lines) if affected_lines else 0
-            }
-            
-            # 简化边界变量信息，只保留必要字段
-            simplified_boundary_vars = []
-            for bv in boundary_variables:
-                simplified = {
-                    'variable': bv['variable'],
-                    'boundary_values': bv.get('boundary_values', {}),
-                    'suggested_test_values': bv.get('suggested_test_values', [])
-                }
-                simplified_boundary_vars.append(simplified)
-            
-            return {
-                'boundary_variables': simplified_boundary_vars,
-                'data_flow_paths': data_flow_paths
-            }
-            
-        except Exception as e:
-            return {}
-        
-    def _is_on_dataflow_path(self, def_info, var, use_line):
-        """检查定义是否在数据流路径上"""
-        def_line = def_info['lineno']
-        
-        # 基本检查:定义在使用之前
-        if def_line > use_line:
-            return False
-        
-        # 检查作用域是否匹配
-        def_scope = def_info.get('scope', [])
-        
-        return True
-
-    def _identify_boundary_variables(self, variables, def_use_chains, target_line):
-        """识别需要边界测试的变量"""
-        boundary_vars = []
-        
-        # 获取谓词信息
-        predicates_result = self.extract_predicates_and_constraints()
-        # predicates_result 现在直接是列表
-        predicates = predicates_result if predicates_result else []
-        
-        for var in variables:
-            var_info = def_use_chains.get(var, {})
-            uses = var_info.get('uses', [])
-            definitions = var_info.get('definitions', [])
-            
-            # 检查变量是否在边界条件中使用
-            in_boundary_condition = False
-            boundary_predicates = []
-            
-            for pred in predicates:
-                # 检查谓词中是否包含该变量
-                if self._variable_in_predicate(var, pred):
-                    in_boundary_condition = True
-                    boundary_predicates.append(pred)
-            
-            # 检查变量是否在循环中使用
-            in_loop = False
-            loop_contexts = []
-            for use in uses:
-                if use.get('context', {}).get('in_loop', False):
-                    in_loop = True
-                    loop_contexts.append({
-                        'line': use['lineno'],
-                        'function': use.get('function')
-                    })
-            
-            # 检查变量是否输入相关
-            is_input_related = self._is_input_related(var, definitions)
-            
-            # 确定是否需要边界测试
-            needs_boundary_test = (
-                in_boundary_condition or 
-                in_loop or 
-                is_input_related
-            )
-            
-            if needs_boundary_test:
-                # 获取变量的边界值信息
-                boundary_values = self._get_variable_boundary_values(var, predicates)
-
-                # 生成建议测试值
-                suggested_values = self._suggest_test_values(var, boundary_values, boundary_predicates)
-
-                # 收集变量定义信息
-                var_definitions = []
-                for d in definitions:
-                    if d['lineno'] <= target_line:
-                        def_info = {
-                            'line': d['lineno'],
-                            'type': d.get('type', 'unknown'),
-                            'source': d.get('value_expr', 'unknown')
-                        }
-                        var_definitions.append(def_info)
-                
-                boundary_vars.append({
-                    'variable': var,
-                    'needs_boundary_test': needs_boundary_test,
-                    'reasons': {
-                        'in_boundary_condition': in_boundary_condition,
-                        'in_loop': in_loop,
-                        'is_input_related': is_input_related
-                    },
-                    'boundary_predicates': boundary_predicates,
-                    'loop_contexts': loop_contexts,
-                    'boundary_values': boundary_values,
-                    'suggested_test_values': suggested_values,
-                    'definitions': var_definitions
-                })
-        
-        # 按重要性排序
-        boundary_vars.sort(key=lambda x: self._calculate_variable_importance(x))
-        
-        return boundary_vars
-
-    def _variable_in_predicate(self, var, predicate):
-        """检查变量是否在谓词中"""
-        if 'var' in predicate and predicate['var'] == var:
-            return True
-        
-        if 'var_left' in predicate and predicate['var_left'] == var:
-            return True
-        
-        if 'var_right' in predicate and predicate['var_right'] == var:
-            return True
-        
-        # 检查表达式
-        expr = predicate.get('expression', '')
-        if expr and var in expr:
-            # 使用正则表达式确保是完整的单词
-            import re
-            pattern = rf'\b{re.escape(var)}\b'
-            return bool(re.search(pattern, expr))
-
-    def _is_input_related(self, var, definitions):
-        """检查变量是否与输入相关"""
-        for def_info in definitions:
-            def_type = def_info.get('type', '')
-            value_expr = def_info.get('value_expr', '')
-            
-            # 检查是否是输入转换的结果
-            input_patterns = [
-                'input()',
-                'int(input())',
-                'float(input())',
-                'eval(input())'
-            ]
-            
-            if any(pattern in str(value_expr) for pattern in input_patterns):
-                return True
-            
-            # 检查是否是函数参数
-            if def_type == 'parameter':
-                return True
-            
-            # 检查是否来自输入相关的变量
-            uses = def_info.get('uses', [])
-            for used_var in uses:
-                # 递归检查使用的变量是否输入相关
-                if self._is_input_related(used_var, []):
-                    return True
-        
-        return False
-
-    def _get_variable_boundary_values(self, var, predicates):
-        """获取变量的边界值"""
-        boundary_values = {
-            'lower': None,
-            'upper': None,
-            'values': set(),
-            'comparisons': []
-        }
-        
-        for pred in predicates:
-            if self._variable_in_predicate(var, pred):
-                boundary_info = pred.get('boundary_info', {})
-                
-                # 收集比较值
-                if 'value' in boundary_info:
-                    boundary_values['values'].add(boundary_info['value'])
-                
-                if 'left_value' in boundary_info:
-                    boundary_values['values'].add(boundary_info['left_value'])
-                
-                if 'right_value' in boundary_info:
-                    boundary_values['values'].add(boundary_info['right_value'])
-                
-                # 收集建议值
-                if 'suggested_values' in boundary_info:
-                    for val in boundary_info['suggested_values']:
-                        boundary_values['values'].add(val)
-                
-                # 记录比较信息
-                boundary_values['comparisons'].append({
-                    'predicate': pred.get('expression', ''),
-                    'kind': pred.get('type', 'unknown'),
-                    'info': boundary_info
-                })
-
-                # 从边界信息中直接提取上下界
-                if 'lower' in boundary_info and boundary_info['lower'] is not None:
-                    boundary_values['lower'] = boundary_info['lower']
-                if 'upper' in boundary_info and boundary_info['upper'] is not None:
-                    boundary_values['upper'] = boundary_info['upper']
-
-        # 如果边界信息中没有明确的上下界,尝试从值集合中推断
-        numeric_values = [v for v in boundary_values['values'] if isinstance(v, (int, float))]
-        if numeric_values:
-            if boundary_values['lower'] is None:
-                boundary_values['lower'] = min(numeric_values)
-            if boundary_values['upper'] is None:
-                boundary_values['upper'] = max(numeric_values)
-        
-        # 转换为排序列表
-        boundary_values['values'] = sorted(list(boundary_values['values']))
-        
-        return boundary_values
-
-    def _suggest_test_values(self, var, boundary_values, boundary_predicates=None):
-        """为变量生成测试值建议"""
-        test_values = set()
-        
-        # 添加边界值
-        if boundary_values['values']:
-            for val in boundary_values['values']:
-                if isinstance(val, (int, float, str, bool)):
-                    test_values.add(val)
-
-        # 2. 从谓词中获取建议值
-        if boundary_predicates:
-            for pred in boundary_predicates:
-                if 'boundary_info' in pred and 'suggested_values' in pred['boundary_info']:
-                    for val in pred['boundary_info']['suggested_values']:
-                        if isinstance(val, (int, float)):
-                            test_values.add(val)
-        
-        # 添加边界附近的典型测试值
-        lower = boundary_values['lower']
-        upper = boundary_values['upper']
-        
-        if lower is not None and isinstance(lower, (int, float)):
-            test_values.update([lower - 1, lower, lower + 1])
-        
-        if upper is not None and isinstance(upper, (int, float)):
-            test_values.update([upper - 1, upper, upper + 1])
-        
-        # 如果只有单个值,添加一些典型变异
-        if len(boundary_values['values']) == 1:
-            single_value = next(iter(boundary_values['values']))
-            if isinstance(single_value, (int, float)):
-                test_values.update([single_value - 10, single_value + 10])
-            elif isinstance(single_value, str):
-                test_values.update(['', 'long_string', 'special_chars'])
-        
-        # 转换为排序列表
-        return sorted(list(test_values))
-
-    def _calculate_variable_importance(self, var_info):
-        """计算变量的重要性分数"""
-        score = 0
-        
-        # 在边界条件中使用的变量很重要
-        if var_info['reasons']['in_boundary_condition']:
-            score += 10
-        
-        # 在循环中使用的变量较重要
-        if var_info['reasons']['in_loop']:
-            score += 5
-        
-        # 输入相关的变量重要
-        if var_info['reasons']['is_input_related']:
-            score += 8
-        
-        # 有多个定义或使用的变量可能更重要
-        definitions = var_info.get('definitions', [])
-        score += min(len(definitions), 5)  # 最多加5分
-        
-        return -score  # 负分用于排序(分数越高越靠前)
     
     def _build_def_use_chains(self) -> Dict[str, Dict[str, List]]:
-        """构建完整的def-use链(内部方法)"""
+        """构建完整的def-use链"""
         if self._def_use_chains is not None:
             return self._def_use_chains
         
@@ -2665,7 +2302,455 @@ class StaticAnalyzer:
         visitor.visit(self.ast_tree)
         
         return self._def_use_chains
-    
+
+    def get_branch_constraint_map(self) -> Dict[str, Any]:
+        """
+        CFG 分支，谓词，约束唯一标识绑定
+        将 CFG 分支节点、谓词、true/false 两侧约束统一挂在同一个 branch_id 下。
+
+        Returns:
+            dict  {branch_id -> branch_info}，branch_info 包含:
+            {
+                'branch_id'       : str,   # 唯一分支标识，如 'B1'
+                'pred_id'         : str,   # 对应谓词 ID，如 'P1'（与 extract_predicates_and_constraints 一致）
+                'cfg_node_id'     : str,   # 对应 CFG 节点 ID
+                'true_constraint' : dict,  # 走 true 分支需要满足的约束
+                'false_constraint': dict,  # 走 false 分支需要满足的约束
+            }
+            失败时返回空字典 {}
+        """
+        try:
+            # 获取 CFG 分支列表
+            cfg = self.build_control_flow_graph()
+            cfg_branches = cfg.get('branches', [])
+
+            # 获取谓词列表，建立快速索引 ─────────────────────────────────
+            predicates = self.extract_predicates_and_constraints()
+            pred_by_id = {p['pred_id']: p for p in predicates if p.get('pred_id')}
+            pred_by_line = {}
+            for p in predicates:
+                ln = p.get('lineno')
+                if isinstance(ln, int):
+                    pred_by_line.setdefault(ln, []).append(p)
+
+            #逐个 CFG 分支构建 branch_info ─────────────────────────────
+            result = {}
+            branch_count = 0
+
+            for branch in cfg_branches:
+                branch_count += 1
+                branch_id = f'B{branch_count}'
+                btype = branch.get('type')
+                lineno = branch.get('lineno') or 0
+                cfg_node_id = branch.get('node_id', '')
+
+                # 找对应谓词
+                pred = None
+                pred_id = branch.get('pred_id')
+                if pred_id and pred_id in pred_by_id:
+                    pred = pred_by_id[pred_id]
+                else:
+                    candidates = pred_by_line.get(lineno, [])
+                    if candidates:
+                        pred = candidates[0]
+                        pred_id = pred.get('pred_id', '')
+
+                # 取谓词表达式（for 循环无谓词时从 loop 信息构造）
+                if pred:
+                    expression = pred.get('expression', '')
+                else:
+                    loop_info = branch.get('loop', {})
+                    expression = (
+                        loop_info.get('condition', '') or
+                        f"{loop_info.get('target', '')} in {loop_info.get('iterable', '')}"
+                    )
+
+                # 构建 true/false 约束
+                true_constraint, false_constraint = self._build_branch_constraints(
+                    btype, expression, pred, branch
+                )
+
+                result[branch_id] = {
+                    'branch_id'       : branch_id,
+                    'pred_id'         : pred_id or '',
+                    'cfg_node_id'     : cfg_node_id,
+                    'true_constraint' : true_constraint,
+                    'false_constraint': false_constraint,
+                }
+
+            return result
+
+        except Exception:
+            return {}
+
+    #构建 true/false 约束
+    def _build_branch_constraints(self, btype, expression, pred, branch):
+        """
+        根据分支类型和谓词，生成 true/false 两侧的约束描述。
+        返回 (true_constraint, false_constraint)，每个为 dict:
+            {
+                'condition': str,   # 需要满足的条件描述
+                'op'       : str,   # 运算符（如 '=='）
+                'var'      : str,   # 变量名
+                'value'    : any,   # 比较值
+            }
+        """
+        #默认的空约束
+        empty = {'condition': '', 'op': None, 'var': None, 'value': None}
+
+        if btype == 'if_condition' and pred:
+            op = pred.get('op')
+            # 链式比较没有单个 op，用 ops 列表的第一个和最后一个表示范围
+            if op is None and pred.get('ops'):
+                ops_list = pred['ops']
+                op = ops_list[0] if len(ops_list) == 1 else f"{ops_list[0]}..{ops_list[-1]}"
+            var  = pred.get('var') or pred.get('var_left')
+            val  = pred.get('value')
+            expr = pred.get('expression', expression)
+
+            #操作符取反映射
+            negation = {
+                    'Lt' : 'GtE', 'LtE': 'Gt',
+                    'Gt' : 'LtE', 'GtE': 'Lt',
+                    'Eq' : 'NotEq', 'NotEq': 'Eq',
+                    'In' : 'NotIn', 'NotIn': 'In',
+                    'Is' : 'IsNot', 'IsNot': 'Is',
+                }
+
+            #真约束
+            true_c = {
+                'condition': expr,
+                'op': op,
+                'var': var,
+                'value': val
+            }
+            #假约束
+            false_c = {
+                'condition': f'not({expr})',
+                'op': negation.get(op,op),
+                'var': var,
+                'value': val
+            }
+
+            #链式比较
+            if pred.get('is_chained') and isinstance(val, list):
+                true_c['value'] = val
+                false_c['value'] = val
+
+            # BoolOp 带原子条件
+            if pred.get('atomic_conditions'):
+                true_c['atomic_conditions']  = pred['atomic_conditions']
+                false_c['atomic_conditions'] = [
+                    {'expression': f'not ({ac["expression"]})',
+                    'var': ac.get('var'), 'normalized': ac.get('normalized')}
+                    for ac in pred['atomic_conditions']
+                ]
+
+            return true_c, false_c
+
+        elif btype == 'while_loop' and pred:
+            expr = pred.get('expression', expression)
+            op   = pred.get('op')
+            var  = pred.get('var') or pred.get('var_left')
+            val  = pred.get('value')
+            true_c  = {
+                'condition': expr,
+                'op': op,
+                'var': var, 
+                'value': val
+            }
+            false_c = {
+                'condition': f'not ({expr})', 
+                'op': None,
+                'var': var, 
+                'value': val
+            }
+
+            return true_c, false_c
+
+        elif btype == 'for_loop':
+            loop_info = branch.get('loop', {})
+            iterable  = loop_info.get('iterable', '')
+            target    = loop_info.get('target', '')
+            true_c  = {
+                'condition': f'{iterable} 非空，{target} 取下一个元素',
+                'op': 'iterate', 
+                'var': target, 
+                'value': None
+            }
+            false_c = {
+                'condition': f'{iterable} 已耗尽',
+                'op': 'exhausted', 
+                'var': target, 
+                'value': None
+            }
+            return true_c, false_c
+
+        return empty, {**empty, 'condition': f'not ({expression})'}
+
+    def aggregate_mutation_candidates(self) -> Dict[str, Any]:
+        """
+        变异候选值聚合
+        以「输入变量 -> 关联分支 -> 变异候选值」结构聚合
+
+        Returns:
+            dict  {input_var -> var_info}:
+            {
+                'variable'         : str,   # 输入变量名
+                'input_type'       : str,   # 输入类型
+                'input_format'     : str,   # 输入格式
+                'branches'         : [      # 关联分支
+                    {
+                        'branch_id' : str,  # 分支唯一标识
+                        'candidates': list, # 去重排序后的候选值
+                    }
+                ]
+            }
+            失败时返回空字典 {}
+        """
+        try:
+            # 获取输入变量列表
+            inputs = self.identify_input_structure().get('inputs', [])
+            if not inputs:
+                return {}
+
+            # 获取分支约束表
+            branch_map = self.get_branch_constraint_map()
+
+            # 获取 CFG 分支（用于 for 循环 iterable 关联）
+            cfg_branch_by_node = {
+                b['node_id']: b
+                for b in self.build_control_flow_graph().get('branches', [])
+            }
+
+            # 获取谓词列表（含 boundary_values）
+            pred_by_id = {
+                p['pred_id']: p
+                for p in self.extract_predicates_and_constraints()
+                if p.get('pred_id')
+            }
+
+            result = {}
+
+            for inp in inputs:
+                var   = inp.get('variable', '')
+                vtype = inp.get('type', 'unknown')
+                fmt   = inp.get('format', '')
+                if not var:
+                    continue
+
+                branch_entries = []
+
+                for branch_id, branch in branch_map.items():
+                    pred = pred_by_id.get(branch.get('pred_id', ''), {})
+
+                    # ── 关联判断 ─────────────────────────────────────────
+                    # 1. 谓词变量名匹配
+                    pred_var = pred.get('var', '')
+                    # 2. for 循环 iterable 匹配
+                    cfg_br   = cfg_branch_by_node.get(branch.get('cfg_node_id', ''), {})
+                    iterable = cfg_br.get('loop', {}).get('iterable', '')
+
+                    related = (
+                        var == pred_var or
+                        (iterable and var == iterable)
+                    )
+                    if not related:
+                        continue
+
+                    # ── 候选值：从谓词 boundary_values + 约束 value ±1 + 特殊值 ──
+                    candidate_set = set()
+
+                    # 谓词边界建议值
+                    for v in pred.get('boundary_values', []):
+                        if isinstance(v, (int, float)):
+                            candidate_set.add(v)
+
+                    # true/false 约束的比较值 ±1
+                    for constraint in (branch.get('true_constraint', {}),
+                                    branch.get('false_constraint', {})):
+                        cv = constraint.get('value')
+                        if isinstance(cv, (int, float)):
+                            candidate_set.update([cv - 1, cv, cv + 1])
+                        elif isinstance(cv, list):
+                            for item in cv:
+                                if isinstance(item, (int, float)):
+                                    candidate_set.update([item - 1, item, item + 1])
+
+                    # 按输入类型补充特殊值
+                    if vtype in ('int', 'float'):
+                        candidate_set.update([0, 1, -1, 2147483647])
+
+                    candidates = sorted(candidate_set)
+
+                    # 列表/字符串类型的特殊值（非数值，单独追加）
+                    if vtype in ('list', 'list[int]', 'list[float]', 'list[str]'):
+                        candidates = candidates + [[], [0], [1, 2, 3]]
+                    elif vtype == 'str':
+                        candidates = candidates + ['', ' ', 'a','\t','\n']
+
+                    branch_entries.append({'branch_id': branch_id, 'candidates': candidates})
+
+                result[var] = {
+                    'variable'    : var,
+                    'input_type'  : vtype,
+                    'input_format': fmt,
+                    'branches'    : branch_entries,
+                }
+
+            return result
+
+        except Exception:
+            return {}
+            
+
+    def identify_input_structure(self) -> Dict[str, Any]:
+        """
+        输入结构识别 - 明确输入入口、数量、类型/格式、输入对应哪个变量
+
+        Returns:
+            dict, 包含以下字段:
+            {
+                'input_count': int,      # 输入数量
+                'inputs': [              # 输入列表，按行号顺序
+                    {
+                        'index': int,        # 输入序号（从0开始）
+                        'variable': str,     # 对应的变量名
+                        'type': str,         # 变量类型
+                        'entry_point': str,  # 输入入口表达式
+                        'line': int,         # 所在行号
+                        'format': str,       # 输入格式
+                    }
+                ],
+                'type_summary': dict,   # 变量名->类型，快速查询
+            }
+            失败时返回空字典 {}
+        """
+        try:
+            result = {
+                'input_count': 0,
+                'inputs': [],
+                'type_summary': {},
+            }
+
+            # 1. 获取变量类型
+            var_types = self.get_variable_types()
+
+            # 2. 遍历 AST，识别所有输入表达式赋值
+            class InputFinder(ast.NodeVisitor):
+                def __init__(self):
+                    self.inputs = []
+
+                def visit_Assign(self, node):
+                    for target in node.targets:
+                        if isinstance(target, ast.Name):
+                            info = self._classify_input(node.value)
+                            if info is not None:
+                                self.inputs.append({
+                                    'variable': target.id,
+                                    'expression': info['expression'],
+                                    'line': node.lineno,
+                                    'format': info['format']
+                                })
+                    self.generic_visit(node)
+
+                def _classify_input(self, node):
+                    """判断 node 是否为输入表达式，返回 {'expression', 'format'} 或 None"""
+                    # 必须是函数调用节点
+                    if not isinstance(node, ast.Call):
+                        return None
+
+                    try:
+                        expr_str = ast.unparse(node)
+                    except Exception:
+                        expr_str = str(node)
+
+                    func = node.func
+
+                    # input()
+                    if isinstance(func, ast.Name) and func.id == 'input':
+                        return {'expression': expr_str, 'format': 'string'}
+
+                    # eval(input())
+                    if isinstance(func, ast.Name) and func.id == 'eval':
+                        if node.args and self._is_input_call(node.args[0]):
+                            return {'expression': expr_str, 'format': 'evaluated'}
+
+                    # int/float/str/bool(input())
+                    if isinstance(func, ast.Name) and func.id in ('int', 'float', 'str', 'bool'):
+                        if node.args and self._is_input_call(node.args[0]):
+                            return {'expression': expr_str, 'format': 'single_value'}
+
+                    # input().split()  或  input().split(sep)
+                    if isinstance(func, ast.Attribute) and func.attr == 'split':
+                        if self._is_input_call(func.value):
+                            return {'expression': expr_str, 'format': 'split_string'}
+
+                    # map(conv, input().split())
+                    if isinstance(func, ast.Name) and func.id == 'map':
+                        if len(node.args) >= 2 and self._contains_input_split(node.args[1]):
+                            return {'expression': expr_str, 'format': 'iterator'}
+
+                    # list(map(conv, input().split()))  /  list(input().split())
+                    if isinstance(func, ast.Name) and func.id == 'list':
+                        if node.args:
+                            inner = node.args[0]
+                            if isinstance(inner, ast.Call):
+                                inner_func = inner.func
+                                # list(map(...))
+                                if isinstance(inner_func, ast.Name) and inner_func.id == 'map':
+                                    if len(inner.args) >= 2 and self._contains_input_split(inner.args[1]):
+                                        return {'expression': expr_str, 'format': 'list'}
+                                # list(input().split())
+                                if self._contains_input_split(inner):
+                                    return {'expression': expr_str, 'format': 'list'}
+
+                    return None
+
+                def _is_input_call(self, node):
+                    """判断 node 是否为 input() 调用"""
+                    return (
+                        isinstance(node, ast.Call)
+                        and isinstance(node.func, ast.Name)
+                        and node.func.id == 'input'
+                    )
+
+                def _contains_input_split(self, node):
+                    """判断 node 是否为 input().split() 形式"""
+                    return (
+                        isinstance(node, ast.Call)
+                        and isinstance(node.func, ast.Attribute)
+                        and node.func.attr == 'split'
+                        and isinstance(node.func.value, ast.Call)
+                        and isinstance(node.func.value.func, ast.Name)
+                        and node.func.value.func.id == 'input'
+                    )
+
+            finder = InputFinder()
+            finder.visit(self.ast_tree)
+
+            # 3. 组装输入条目
+            for idx, info in enumerate(finder.inputs):
+                var_name = info['variable']
+                var_type = var_types.get(var_name, 'Any')
+                result['inputs'].append({
+                    'index': idx,
+                    'variable': var_name,
+                    'type': var_type,
+                    'entry_point': info['expression'],
+                    'line': info['line'],
+                    'format': info['format']
+                })
+                result['type_summary'][var_name] = var_type
+
+            result['input_count'] = len(result['inputs'])
+
+            return result
+
+        except Exception:
+            return {}
+
+
     def build_data_dependency_graph(self) -> Dict[str, Any]:
         """
         构建Def-Use/数据依赖图
