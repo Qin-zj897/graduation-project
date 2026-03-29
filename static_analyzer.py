@@ -2374,6 +2374,7 @@ class StaticAnalyzer:
                     'branch_id'       : branch_id,
                     'pred_id'         : pred_id or '',
                     'cfg_node_id'     : cfg_node_id,
+                    'lineno'          : lineno,
                     'true_constraint' : true_constraint,
                     'false_constraint': false_constraint,
                 }
