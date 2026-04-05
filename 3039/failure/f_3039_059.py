@@ -1,0 +1,27 @@
+def solve(ls1):
+    a = max(ls1)
+    b = min(ls1)
+    if a == b:
+        while true:
+            ls1.remove(a)
+            for i in ls1:
+                if a not in ls1:
+                    break
+    else:
+        while true:
+            ls1.remove(a)
+            for i in ls1:
+                if a not in ls1:
+                    break
+    while true:
+            ls1.remove(b)
+            for i in ls1:
+                if b not in ls1:
+                    break
+    return ls1
+
+
+if __name__ == '__main__':
+    ls1 = eval(input())
+    result = solve(ls1)
+    print(result)

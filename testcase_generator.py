@@ -19,6 +19,9 @@
 6. 返回测试用例集
 """
 
+import os
+import re
+import ast
 import random
 import copy
 import xml.etree.ElementTree as ET
@@ -27,6 +30,7 @@ from typing import Dict, List, Any, Optional
 
 from static_analyzer import StaticAnalyzer
 from dynamic_analyzer import DynamicAnalyzer
+from advanced_executor import AdvancedExecutor
 
 
 # utils
@@ -157,6 +161,13 @@ class TestcaseGenerator:
         self._stagnation_counter: Dict[str, int] = defaultdict(int)
         self._best_distance: Dict[str, float] = {}
 
+        self._base_dir = os.path.dirname(os.path.abspath(__file__))
+        self._problem_id = self._detect_problem_id(file_path, xml_file)
+        self._reference_code = self._load_reference_code(self._problem_id)
+        self._reference_executor = AdvancedExecutor(timeout=self.timeout) if self._reference_code else None
+
+        self._input_mutation_budget = max(6, population_size // 2)
+
     def generate(self) -> List[Dict]:
         """
         主入口：执行完整测试用例生成流程。
@@ -168,6 +179,7 @@ class TestcaseGenerator:
                 'input_display'   : str,
                 'covered_branches': List[str],
                 'output'          : str,
+                'expected_output' : str,
             }
         """
         # 步骤1：静态分析
@@ -197,6 +209,7 @@ class TestcaseGenerator:
                             'input_display'   : xtc.get('input_display', '\n'.join(inp_lines)),
                             'covered_branches': [],
                             'output'          : xtc.get('expected_output', ''),
+                            'expected_output' : self._compute_expected_output(inp_lines) or xtc.get('expected_output', ''),
                         })
                 except Exception:
                     pass
@@ -231,6 +244,7 @@ class TestcaseGenerator:
 
             #交叉 + 引导变异
             offspring = self._crossover_and_mutate(parents, results)
+            offspring.extend(self._generate_testcase_mutants(population, results))
 
             #合并
             population = self._merge_population(population, offspring, fitness_scores)
@@ -257,10 +271,246 @@ class TestcaseGenerator:
             if tc:
                 all_test_cases.append(tc)
 
-        # 步骤5：贪心精简测试集
-        return self._greedy_minimize(all_test_cases)
+        # 步骤5：按覆盖率 + 边界多样性精简测试集
+        minimized = self._greedy_minimize(all_test_cases)
+        return minimized
 
     # 步骤1：静态分析
+
+    def _detect_problem_id(self, file_path: Optional[str], xml_file: Optional[str]) -> Optional[str]:
+        """从文件路径中识别题目编号"""
+        candidates = [file_path, xml_file]
+        for path in candidates:
+            if not path:
+                continue
+            m = re.search(r'(2910|3039|3226)', str(path))
+            if m:
+                return m.group(1)
+        return None
+
+    def _load_reference_code(self, problem_id: Optional[str]) -> Optional[str]:
+        """加载题目参考实现代码。"""
+        if not problem_id:
+            return None
+        ref_path = os.path.join(self._base_dir, problem_id, 'reference.py')
+        if not os.path.isfile(ref_path):
+            return None
+        try:
+            with open(ref_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception:
+            return None
+
+    def _compute_expected_output(self, inp_lines: List[str]) -> str:
+        """运行参考代码得到期望输出。"""
+        if not self._reference_executor or not self._reference_code:
+            return ''
+        input_str = '\n'.join(inp_lines)
+        res = self._reference_executor.execute_with_timeout(self._reference_code, input_str, timeout=self.timeout)
+        if not res.get('success', False):
+            return ''
+        return str(res.get('output', '')).strip()
+
+    def _is_output_match(self, actual: str, expected: str) -> bool:
+        """输出比较：先比较字符串，再尝试浮点容差比较"""
+        a = (actual or '').strip()
+        e = (expected or '').strip()
+        if a == e:
+            return True
+        try:
+            return abs(float(a) - float(e)) < 0.01
+        except Exception:
+            return False
+
+    def _collect_boundary_values(self) -> List[float]:
+        """收集静态分析得到的数值边界，用于输入变异和测试集保留"""
+        vals: List[float] = []
+        for pred in self._predicates:
+            for v in pred.get('boundary_values', []):
+                if isinstance(v, (int, float)):
+                    vals.append(float(v))
+        for branch in self._branches:
+            for key in ('true_constraint', 'false_constraint'):
+                constraint = branch.get(key, {})
+                value = constraint.get('value')
+                if isinstance(value, (int, float)):
+                    vals.append(float(value))
+                elif isinstance(value, list):
+                    for x in value:
+                        if isinstance(x, (int, float)):
+                            vals.append(float(x))
+        seen = set()
+        ordered = []
+        for v in vals:
+            tag = round(float(v), 8)
+            if tag not in seen:
+                seen.add(tag)
+                ordered.append(v)
+        return ordered
+
+    def _safe_parse_value(self, text: str) -> Any:
+        """尽量把输入行解析为 Python 值"""
+        try:
+            return ast.literal_eval(text)
+        except Exception:
+            pass
+        try:
+            if '.' in text or 'e' in text.lower():
+                return float(text)
+            return int(text)
+        except Exception:
+            return text
+
+    def _flatten_numeric_atoms(self, value: Any) -> List[float]:
+        """递归提取输入中的所有数值原子。"""
+        out: List[float] = []
+        if isinstance(value, bool) or value is None:
+            return out
+        if isinstance(value, (int, float)):
+            out.append(float(value))
+            return out
+        if isinstance(value, dict):
+            for v in value.values():
+                out.extend(self._flatten_numeric_atoms(v))
+            return out
+        if isinstance(value, (list, tuple, set)):
+            for item in value:
+                out.extend(self._flatten_numeric_atoms(item))
+        return out
+
+    def _coerce_like(self, original: Any, new_val: Any) -> Any:
+        if isinstance(original, bool):
+            return bool(new_val)
+        if isinstance(original, int) and not isinstance(original, bool):
+            return int(round(float(new_val)))
+        if isinstance(original, float):
+            return float(new_val)
+        return new_val
+
+    def _replace_first_numeric(self, individual: Any, new_val: Any) -> Any:
+        """将个体中的第一个数值位置替换为 new_val。"""
+        if isinstance(individual, tuple):
+            items = list(individual)
+            for i, item in enumerate(items):
+                if isinstance(item, (int, float)) and not isinstance(item, bool):
+                    items[i] = self._coerce_like(item, new_val)
+                    return tuple(items)
+                if isinstance(item, list) and item and isinstance(item[0], (int, float)):
+                    copied = list(item)
+                    copied[0] = self._coerce_like(copied[0], new_val)
+                    items[i] = copied
+                    return tuple(items)
+            return tuple(items)
+        if isinstance(individual, list):
+            if individual and all(isinstance(x, str) for x in individual):
+                lines = list(individual)
+                for i, line in enumerate(lines):
+                    parsed = self._safe_parse_value(line)
+                    if isinstance(parsed, (int, float)) and not isinstance(parsed, bool):
+                        lines[i] = str(self._coerce_like(parsed, new_val))
+                        return lines
+                    if isinstance(parsed, list) and parsed and isinstance(parsed[0], (int, float)):
+                        parsed = list(parsed)
+                        parsed[0] = self._coerce_like(parsed[0], new_val)
+                        lines[i] = repr(parsed)
+                        return lines
+                return lines
+            copied = list(individual)
+            if copied and isinstance(copied[0], (int, float)) and not isinstance(copied[0], bool):
+                copied[0] = self._coerce_like(copied[0], new_val)
+            return copied
+        if isinstance(individual, (int, float)) and not isinstance(individual, bool):
+            return self._coerce_like(individual, new_val)
+        return copy.deepcopy(individual)
+
+    def _mutate_list_like(self, individual: Any) -> List[Any]:
+        """对列表形输入做结构性扰动。"""
+        variants: List[Any] = []
+
+        def mutate_list(lst: List[Any]) -> List[List[Any]]:
+            out: List[List[Any]] = []
+            if not lst:
+                return [[0], [1], [-1]]
+            out.append(lst + [lst[-1]])
+            out.append(lst[:-1] if len(lst) > 1 else [])
+            out.append(list(reversed(lst)))
+            if all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in lst):
+                out.append(lst + [0])
+                out.append(lst + [max(lst)])
+                out.append(lst + [min(lst)])
+            return out
+
+        if isinstance(individual, list) and individual and all(isinstance(x, (int, float)) for x in individual):
+            variants.extend(mutate_list(list(individual)))
+        elif isinstance(individual, list) and individual and all(isinstance(x, str) for x in individual):
+            lines = list(individual)
+            for i, line in enumerate(lines):
+                parsed = self._safe_parse_value(line)
+                if isinstance(parsed, list):
+                    for mutated in mutate_list(list(parsed)):
+                        new_lines = list(lines)
+                        new_lines[i] = repr(mutated)
+                        variants.append(new_lines)
+                    break
+        elif isinstance(individual, tuple):
+            for i, item in enumerate(individual):
+                if isinstance(item, list):
+                    for mutated in mutate_list(list(item)):
+                        parts = list(individual)
+                        parts[i] = mutated
+                        variants.append(tuple(parts))
+                    break
+        return variants
+
+    def _mutate_seed_individual(self, individual: Any, target_branch: Optional[Dict]) -> List[Any]:
+        """围绕已有测试输入生成若干变异输入。"""
+        candidates: List[Any] = [self._random_perturb(individual)]
+        if target_branch is not None:
+            candidates.append(self._guided_perturb(individual, target_branch))
+            constraint = target_branch.get('true_constraint', {})
+            var = constraint.get('var')
+            for cand in self._constraint_candidates(constraint.get('op'), constraint.get('value'))[:4]:
+                made = self._make_individual_with_var(var, cand)
+                if made is not None:
+                    candidates.append(made)
+                candidates.append(self._replace_first_numeric(individual, cand))
+        for boundary in self._collect_boundary_values()[:8]:
+            candidates.append(self._replace_first_numeric(individual, boundary))
+            candidates.append(self._replace_first_numeric(individual, boundary - 1))
+            candidates.append(self._replace_first_numeric(individual, boundary + 1))
+        candidates.extend(self._mutate_list_like(individual))
+
+        deduped: List[Any] = []
+        seen = set()
+        for cand in candidates:
+            key = repr(cand)
+            if key not in seen:
+                seen.add(key)
+                deduped.append(cand)
+        return deduped
+
+    def _generate_testcase_mutants(self, population: List[Any], results: List[Dict]) -> List[Any]:
+        """在正常生成流程中，对测试输入做变异。"""
+        if not population:
+            return []
+        ranked = list(zip(population, results))
+        ranked.sort(key=lambda pair: self._compute_fitness(pair[1]))
+        seed_count = max(2, min(len(ranked), self._input_mutation_budget // 2))
+        seeds = [ind for ind, _ in ranked[:seed_count]]
+        target_branch = self._find_closest_uncovered_branch(results)
+
+        mutants: List[Any] = []
+        seen = {repr(x) for x in population}
+        for seed in seeds:
+            for cand in self._mutate_seed_individual(seed, target_branch):
+                key = repr(cand)
+                if key in seen:
+                    continue
+                seen.add(key)
+                mutants.append(cand)
+                if len(mutants) >= self._input_mutation_budget:
+                    return mutants
+        return mutants
 
     def _run_static_analysis(self):
         """运行静态分析，获取分支列表、输入变量、边界条件。"""
@@ -884,19 +1134,180 @@ class TestcaseGenerator:
 
     # 步骤5：贪心精简测试集
 
+    def _derive_case_features(self, tc: Dict) -> Dict[str, set]:
+        """提取测试用例的覆盖、边界、多样性特征。"""
+        branches = {f"branch:{b}" for b in tc.get('covered_branches', [])}
+        boundary = set()
+        shape = set()
+        output = set()
+
+        parsed_values = [self._safe_parse_value(line) for line in tc.get('input', [])]
+        numeric_atoms: List[float] = []
+        for idx, value in enumerate(parsed_values):
+            numeric_atoms.extend(self._flatten_numeric_atoms(value))
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                if value < 0:
+                    shape.add(f"input{idx}:neg")
+                elif value > 0:
+                    shape.add(f"input{idx}:pos")
+                else:
+                    shape.add(f"input{idx}:zero")
+                shape.add(f"input{idx}:scalar")
+            elif isinstance(value, list):
+                n = len(value)
+                bucket = 'empty' if n == 0 else 'single' if n == 1 else 'short' if n <= 3 else 'medium' if n <= 6 else 'long'
+                shape.add(f"input{idx}:list:{bucket}")
+                if len(value) != len(set(repr(x) for x in value)):
+                    shape.add(f"input{idx}:list:dup")
+                nums = [x for x in value if isinstance(x, (int, float)) and not isinstance(x, bool)]
+                if nums:
+                    if any(x < 0 for x in nums):
+                        shape.add(f"input{idx}:list:neg")
+                    if any(x == 0 for x in nums):
+                        shape.add(f"input{idx}:list:zero")
+                    if any(x > 0 for x in nums):
+                        shape.add(f"input{idx}:list:pos")
+                    if nums == sorted(nums):
+                        shape.add(f"input{idx}:list:sorted")
+                    if nums == sorted(nums, reverse=True):
+                        shape.add(f"input{idx}:list:revsorted")
+
+        boundaries = self._collect_boundary_values()
+        for x in numeric_atoms:
+            if x < 0:
+                boundary.add('num:neg')
+            elif x > 0:
+                boundary.add('num:pos')
+            else:
+                boundary.add('num:zero')
+            if boundaries:
+                nearest = min(boundaries, key=lambda b: abs(x - b))
+                rounded = str(int(nearest)) if float(nearest).is_integer() else f"{nearest:.3f}"
+                dist = abs(x - nearest)
+                if dist < 1e-9:
+                    boundary.add(f"boundary:eq:{rounded}")
+                elif dist <= 1:
+                    side = 'below' if x < nearest else 'above'
+                    boundary.add(f"boundary:near:{side}:{rounded}")
+                elif dist <= 5:
+                    side = 'below' if x < nearest else 'above'
+                    boundary.add(f"boundary:adjacent:{side}:{rounded}")
+
+        expected = self._safe_parse_value((tc.get('expected_output') or tc.get('output') or '').strip())
+        if isinstance(expected, bool):
+            output.add(f"output:bool:{expected}")
+        elif isinstance(expected, (int, float)):
+            if expected < 0:
+                output.add('output:num:neg')
+            elif expected > 0:
+                output.add('output:num:pos')
+            else:
+                output.add('output:num:zero')
+        elif isinstance(expected, list):
+            bucket = 'empty' if len(expected) == 0 else 'single' if len(expected) == 1 else 'multi'
+            output.add(f"output:list:{bucket}")
+        elif str(expected) != '':
+            output.add(f"output:text:{str(expected)[:16]}")
+
+        return {
+            'branches': branches,
+            'boundary': boundary,
+            'shape': shape,
+            'output': output,
+        }
+
+    def _infer_case_style(self, test_cases: List[Dict]) -> str:
+        """根据输入形态分类"""
+        list_hits = 0
+        numeric_hits = 0
+        for tc in test_cases:
+            for line in tc.get('input', []):
+                value = self._safe_parse_value(line)
+                if isinstance(value, list):
+                    list_hits += 1
+                elif isinstance(value, (int, float)) and not isinstance(value, bool):
+                    numeric_hits += 1
+        if list_hits and not numeric_hits:
+            return 'list'
+        if numeric_hits and not list_hits:
+            return 'numeric'
+        if list_hits > numeric_hits:
+            return 'list'
+        return 'numeric' if numeric_hits else 'mixed'
+
+    def _select_essential_targets(self, target: Dict[str, set], style: str) -> Dict[str, set]:
+        """按题型选择需要保留的关键特征数量。"""
+        if style == 'list':
+            boundary_keep = 4
+            shape_keep = 8
+            output_keep = 5
+        elif style == 'numeric':
+            boundary_keep = 8
+            shape_keep = 4
+            output_keep = 4
+        else:
+            boundary_keep = 6
+            shape_keep = 6
+            output_keep = 4
+        return {
+            'branches': set(target['branches']),
+            'boundary': set(list(sorted(target['boundary']))[:boundary_keep]),
+            'shape': set(list(sorted(target['shape']))[:shape_keep]),
+            'output': set(list(sorted(target['output']))[:output_keep]),
+        }
+
+    def _pick_style_anchors(self, unique_cases: List[Dict], style: str) -> List[int]:
+        """按题型补充少量锚点样本，避免精简过头。"""
+        anchors: List[int] = []
+        parsed_per_case = [ [self._safe_parse_value(line) for line in tc.get('input', [])] for tc in unique_cases ]
+
+        if style == 'numeric':
+            numeric_scores = []
+            for idx, parsed in enumerate(parsed_per_case):
+                values = []
+                for value in parsed:
+                    values.extend(self._flatten_numeric_atoms(value))
+                if values:
+                    numeric_scores.append((min(values), max(values), idx))
+            if numeric_scores:
+                anchors.append(min(numeric_scores, key=lambda x: x[0])[2])
+                anchors.append(max(numeric_scores, key=lambda x: x[1])[2])
+        elif style == 'list':
+            list_scores = []
+            for idx, parsed in enumerate(parsed_per_case):
+                for value in parsed:
+                    if isinstance(value, list):
+                        nums = [x for x in value if isinstance(x, (int, float)) and not isinstance(x, bool)]
+                        has_dup = len(value) != len(set(repr(x) for x in value))
+                        list_scores.append((len(value), has_dup, any(x == 0 for x in nums), idx))
+                        break
+            if list_scores:
+                anchors.append(min(list_scores, key=lambda x: x[0])[3])
+                anchors.append(max(list_scores, key=lambda x: x[0])[3])
+                dup_cases = [x[3] for x in list_scores if x[1]]
+                if dup_cases:
+                    anchors.append(dup_cases[0])
+                zero_cases = [x[3] for x in list_scores if x[2]]
+                if zero_cases:
+                    anchors.append(zero_cases[0])
+
+        deduped = []
+        seen = set()
+        for idx in anchors:
+            if idx not in seen:
+                seen.add(idx)
+                deduped.append(idx)
+        return deduped
+
     def _greedy_minimize(self, test_cases: List[Dict]) -> List[Dict]:
         """
-        两阶段最小覆盖集选择：
-            阶段一（贪心扩展）：每轮从剩余用例中选覆盖「新分支」最多的用例，
-                            直到无新分支可覆盖，得到最大覆盖率下的初始集合。
-            阶段二（冗余裁剪）：逐一尝试去除已选用例，若去除后其他用例仍能
-                            维持相同覆盖率，则将其去除，保证数量最少。
-        目标：在覆盖率尽可能高的前提下，最小化测试用例数量。
+        按题型做精简：
+            - numeric 题更重视边界值与正负零/极值
+            - list 题更重视长度、重复、顺序、零值等结构形态
         """
         if not test_cases:
             return []
 
-        # 去重（按 input_display）
         seen_inputs: set = set()
         unique_cases: List[Dict] = []
         for tc in test_cases:
@@ -905,67 +1316,112 @@ class TestcaseGenerator:
                 seen_inputs.add(key)
                 unique_cases.append(tc)
 
-        # 若所有用例均无覆盖信息，直接返回去重后全集
-        if all(not tc.get('covered_branches') for tc in unique_cases):
-            return unique_cases
+        if not unique_cases:
+            return []
 
-        all_branches = {b['branch_id'] for b in self._branches}
+        style = self._infer_case_style(unique_cases)
+        features_by_idx = [self._derive_case_features(tc) for tc in unique_cases]
+        target = {
+            'branches': set().union(*(f['branches'] for f in features_by_idx)) if features_by_idx else set(),
+            'boundary': set().union(*(f['boundary'] for f in features_by_idx)) if features_by_idx else set(),
+            'shape': set().union(*(f['shape'] for f in features_by_idx)) if features_by_idx else set(),
+            'output': set().union(*(f['output'] for f in features_by_idx)) if features_by_idx else set(),
+        }
+        essential_targets = self._select_essential_targets(target, style)
 
-        #最大化覆盖率
-        covered_so_far: set = set()
-        selected: List[Dict] = []
-        remaining = list(unique_cases)
+        if style == 'list':
+            weights = {'branches': 100, 'boundary': 10, 'shape': 20, 'output': 10}
+        elif style == 'numeric':
+            weights = {'branches': 100, 'boundary': 20, 'shape': 8, 'output': 8}
+        else:
+            weights = {'branches': 100, 'boundary': 15, 'shape': 12, 'output': 8}
+
+        covered = {k: set() for k in essential_targets}
+        selected_idx: List[int] = []
+        remaining = set(range(len(unique_cases)))
 
         while remaining:
-            best_tc = None
-            best_new: set = set()
-            for tc in remaining:
-                new = set(tc.get('covered_branches', [])) - covered_so_far
-                # 主键：新覆盖分支数；次键：总覆盖分支数（tie-break）
-                if len(new) > len(best_new) or (
-                    len(new) == len(best_new) > 0
-                    and len(tc.get('covered_branches', [])) > len(best_tc.get('covered_branches', []))
-                ):
-                    best_new = new
-                    best_tc = tc
+            best_idx = None
+            best_score = -1
+            for idx in remaining:
+                feats = features_by_idx[idx]
+                score = 0
+                score += len(feats['branches'] - covered['branches']) * weights['branches']
+                score += len(feats['boundary'] & (essential_targets['boundary'] - covered['boundary'])) * weights['boundary']
+                score += len(feats['shape'] & (essential_targets['shape'] - covered['shape'])) * weights['shape']
+                score += len(feats['output'] & (essential_targets['output'] - covered['output'])) * weights['output']
+                if score > best_score:
+                    best_score = score
+                    best_idx = idx
+            if best_idx is None or best_score <= 0:
+                break
+            selected_idx.append(best_idx)
+            remaining.remove(best_idx)
+            covered['branches'] |= features_by_idx[best_idx]['branches']
+            covered['boundary'] |= features_by_idx[best_idx]['boundary'] & essential_targets['boundary']
+            covered['shape'] |= features_by_idx[best_idx]['shape'] & essential_targets['shape']
+            covered['output'] |= features_by_idx[best_idx]['output'] & essential_targets['output']
+            if all(covered[key] >= essential_targets[key] for key in essential_targets):
+                break
 
-            if not best_tc or not best_new:
-                break  # 无新分支可覆盖，已达到最大覆盖率
+        if not selected_idx:
+            selected_idx = [0]
 
-            selected.append(best_tc)
-            covered_so_far |= best_new
-            remaining.remove(best_tc)
+        for idx in self._pick_style_anchors(unique_cases, style):
+            if idx not in selected_idx:
+                selected_idx.append(idx)
 
-            if all_branches and covered_so_far >= all_branches:
-                break  # 已覆盖全部已知分支
-
-        # 若贪心结果为空（所有用例 covered_branches 均为空列表），退回全集
-        if not selected:
-            return unique_cases
-
-        # 在保持最大覆盖率的前提下最小化数量
-        # 从贡献分支数最少的用例开始尝试去除（最不重要的先试）
-        max_coverage = set(covered_so_far)  # 阶段一达到的最大覆盖集
-
-        # 按覆盖分支数升序排列（贡献少的优先尝试去除）
-        selected.sort(key=lambda tc: len(tc.get('covered_branches', [])))
-
-        minimized: List[Dict] = list(selected)
+        minimized = list(selected_idx)
         i = 0
         while i < len(minimized):
-            candidate = minimized[i]
-            rest = minimized[:i] + minimized[i + 1:]
-            rest_covered = set()
-            for tc in rest:
-                rest_covered |= set(tc.get('covered_branches', []))
-            if rest_covered >= max_coverage:
-                # 去除该用例后覆盖率不变，执行去除
-                minimized = rest
-                # i 不递增，继续检查同位置的下一个元素
+            trial = minimized[:i] + minimized[i + 1:]
+            trial_cov = {k: set() for k in essential_targets}
+            for idx in trial:
+                trial_cov['branches'] |= features_by_idx[idx]['branches']
+                trial_cov['boundary'] |= features_by_idx[idx]['boundary'] & essential_targets['boundary']
+                trial_cov['shape'] |= features_by_idx[idx]['shape'] & essential_targets['shape']
+                trial_cov['output'] |= features_by_idx[idx]['output'] & essential_targets['output']
+            if all(trial_cov[key] >= essential_targets[key] for key in essential_targets):
+                minimized = trial
             else:
                 i += 1
 
-        return minimized
+        minimized = sorted(set(minimized))
+
+        min_keep = min(5, len(unique_cases))
+        if len(minimized) < min_keep:
+            current_cov = {k: set() for k in essential_targets}
+            for idx in minimized:
+                current_cov['branches'] |= features_by_idx[idx]['branches']
+                current_cov['boundary'] |= features_by_idx[idx]['boundary'] & essential_targets['boundary']
+                current_cov['shape'] |= features_by_idx[idx]['shape'] & essential_targets['shape']
+                current_cov['output'] |= features_by_idx[idx]['output'] & essential_targets['output']
+
+            remaining_candidates = [idx for idx in range(len(unique_cases)) if idx not in set(minimized)]
+            while len(minimized) < min_keep and remaining_candidates:
+                best_idx = None
+                best_gain = -1
+                for idx in remaining_candidates:
+                    gain = 0
+                    gain += len(features_by_idx[idx]['branches'] - current_cov['branches']) * weights['branches']
+                    gain += len((features_by_idx[idx]['boundary'] & essential_targets['boundary']) - current_cov['boundary']) * weights['boundary']
+                    gain += len((features_by_idx[idx]['shape'] & essential_targets['shape']) - current_cov['shape']) * weights['shape']
+                    gain += len((features_by_idx[idx]['output'] & essential_targets['output']) - current_cov['output']) * weights['output']
+                    if gain > best_gain:
+                        best_gain = gain
+                        best_idx = idx
+
+                if best_idx is None:
+                    best_idx = remaining_candidates[0]
+                minimized.append(best_idx)
+                current_cov['branches'] |= features_by_idx[best_idx]['branches']
+                current_cov['boundary'] |= features_by_idx[best_idx]['boundary'] & essential_targets['boundary']
+                current_cov['shape'] |= features_by_idx[best_idx]['shape'] & essential_targets['shape']
+                current_cov['output'] |= features_by_idx[best_idx]['output'] & essential_targets['output']
+                remaining_candidates = [idx for idx in remaining_candidates if idx != best_idx]
+
+        minimized = sorted(set(minimized))
+        return [unique_cases[idx] for idx in minimized]
 
     # 辅助：构建测试用例记录
 
@@ -974,7 +1430,11 @@ class TestcaseGenerator:
         if not res.get('execution_info', {}).get('success', False):
             return None
 
-        inp_lines = _build_input_lines(individual, self._input_structure)
+        if isinstance(individual, list) and all(isinstance(x, str) for x in individual):
+            inp_lines = list(individual)
+        else:
+            inp_lines = _build_input_lines(individual, self._input_structure)
+        inp_lines = [str(x) for x in inp_lines]
         display   = '\n'.join(inp_lines)
 
         # 提取覆盖的分支 id，统一映射为 branch_id（B1/B2 等）
@@ -989,11 +1449,14 @@ class TestcaseGenerator:
                     covered.append(branch_id)
                     break
 
+        expected_output = self._compute_expected_output(inp_lines)
+
         return {
             'input'           : inp_lines,
             'input_display'   : display,
             'covered_branches': list(set(covered)),
             'output'          : res.get('execution_info', {}).get('output', ''),
+            'expected_output' : expected_output,
         }
 
     @staticmethod

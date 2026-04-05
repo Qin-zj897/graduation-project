@@ -1,0 +1,25 @@
+def solve(nums):
+    def search(nums):
+        new = []
+        w = len(nums) / 2
+        for x in nums:
+            a = nums.count(x)
+            if a > w:
+                new.append(x)
+        if new == []:
+            return False
+        else:
+            return new[0]
+
+
+
+
+
+    y = search(nums)
+    return y
+
+
+if __name__ == '__main__':
+    nums = eval(input())
+    result = solve(nums)
+    print(result)

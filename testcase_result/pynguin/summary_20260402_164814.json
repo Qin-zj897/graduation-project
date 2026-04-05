@@ -1,0 +1,24 @@
+[
+  {
+    "file": "C:\\Users\\22954\\Desktop\\毕业设计\\datasets\\3226\\success\\s_3226_001.py",
+    "project_path": "C:\\Users\\22954\\Desktop\\毕业设计\\datasets\\3226\\success",
+    "module_name": "s_3226_001",
+    "output_path": "C:\\Users\\22954\\Desktop\\毕业设计\\datasets\\testcase_result\\pynguin\\3226\\success\\s_3226_001",
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-m",
+      "pynguin",
+      "--project-path",
+      "C:\\Users\\22954\\Desktop\\毕业设计\\datasets\\3226\\success",
+      "--module-name",
+      "s_3226_001",
+      "--output-path",
+      "C:\\Users\\22954\\Desktop\\毕业设计\\datasets\\testcase_result\\pynguin\\3226\\success\\s_3226_001",
+      "--maximum-search-time",
+      "3"
+    ],
+    "started_at": "2026-04-02T16:48:07",
+    "exit_code": 0,
+    "ok": true
+  }
+]

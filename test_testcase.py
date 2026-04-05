@@ -9,19 +9,18 @@ TestcaseGenerator 测试脚本
 
 用法：
     python test_testcase.py                              # 使用默认配置
-    python test_testcase.py 3039/success/s-3039-002.py 3039.xml
-    python test_testcase.py 3039/success/s-3039-001.py none
+    python test_testcase.py 3039/success/s_3039_002.py 3039.xml
+    python test_testcase.py 3039/success/s_3039_001.py none
 """
 
 import os
 import sys
-import json
 from datetime import datetime
 from testcase_generator import TestcaseGenerator
 
 # 配置（可通过命令行参数覆盖）
-DEFAULT_CODE_FILE = "3226/success/s-3226-003.py"
-DEFAULT_XML_FILE  = "3226.xml"   # 设为 None 表示不使用 XML 种子
+DEFAULT_CODE_FILE = "2910/success/s_2910_004.py"
+DEFAULT_XML_FILE  = "2910.xml"  # 设为 None 表示不使用 XML 种子
 
 OUTPUT_DIR = "testcase_result"
 
@@ -38,33 +37,9 @@ GA_CONFIG = dict(
 )
 
 
-# ============================================================
-# 工具函数
-# ============================================================
-
-def make_serializable(obj):
-    """将对象递归转换为 JSON 可序列化格式"""
-    if isinstance(obj, dict):
-        return {k: make_serializable(v) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple)):
-        return [make_serializable(i) for i in obj]
-    if isinstance(obj, (str, int, float, bool, type(None))):
-        return obj
-    return str(obj)
-
-
 def sep(char="=", width=80):
     return char * width
 
-
-def print_section(title, fout=None):
-    s = "\n" + sep() + "\n" + title + "\n" + sep()
-    print(s, file=fout)
-
-
-# ============================================================
-# 主逻辑
-# ============================================================
 
 def run_test(code_file, xml_file):
     """运行 TestcaseGenerator 并将结果输出到文件"""
@@ -133,16 +108,18 @@ def _do_run(code_file, xml_file, code_filename, output_file, fh, term):
     # ── 测试用例集 ───────────────────────────────────────
     fprint(sep())
     fprint(f"测试用例集 - {code_filename}  （共 {len(test_cases)} 个）")
-    fprint(f"代码文件: {code_file}    XML种子: {xml_file or "（无）"}    耗时: {elapsed:.1f}s")
+    fprint(f"代码文件: {code_file}    XML种子: {xml_file or '（无）'}    耗时: {elapsed:.1f}s")
     fprint(sep())
 
     for i, tc in enumerate(test_cases, 1):
         inputs  = tc.get("input", [])
         covered = sorted(tc.get("covered_branches", []))
         out     = tc.get("output", "").strip()
-        fprint(f"\n[{i:02d}] 输入    : {" | ".join(inputs)}")
-        fprint(f"     输出    : {out if out else "（无）"}")
-        fprint(f"     覆盖分支: {covered if covered else "（无分支信息）"}")
+        exp     = tc.get("expected_output", "").strip()
+        fprint(f"\n[{i:02d}] 输入    : {' | '.join(inputs)}")
+        fprint(f"     期望输出: {exp if exp else '（无）'}")
+        fprint(f"     实际输出: {out if out else '（无）'}")
+        fprint(f"     覆盖分支: {covered if covered else '（无分支信息）'}")
 
     # ── 边/块覆盖率（通过 DynamicAnalyzer 聚合）────────────────
     da_results = []
@@ -174,8 +151,8 @@ def _do_run(code_file, xml_file, code_filename, output_file, fh, term):
         real_total   = sum(1 for e in all_cov + all_uncov if not is_structural_edge(e))
         real_covered = sum(1 for e in all_cov if not is_structural_edge(e))
         edge_rate    = real_covered / real_total * 100 if real_total else 0.0
-        # 真实块（排除结构节点）
-        real_uncov_blk  = [b for b in all_uncov_blk if not is_structural_block(b)]
+
+        real_uncov_blk   = [b for b in all_uncov_blk if not is_structural_block(b)]
         struct_uncov_blk = [b for b in all_uncov_blk if is_structural_block(b)]
         block_real_total   = sum(1 for b in all_cov_blk + all_uncov_blk if not is_structural_block(b))
         block_real_covered = sum(1 for b in all_cov_blk if not is_structural_block(b))
@@ -194,7 +171,7 @@ def _do_run(code_file, xml_file, code_filename, output_file, fh, term):
     fprint(f"  分支覆盖率 : {covered_cnt}/{total_cnt} = {branch_cov_rate:.2f}%")
     fprint(f"  边覆盖率   : {real_covered}/{real_total} = {edge_rate:.2f}%  (已排除 {len(struct_uncov)} 条结构边)")
     fprint(f"  块覆盖率   : {block_covered}/{block_total} = {block_rate:.2f}%")
-    fprint(f"  已覆盖分支 : {sorted(covered_ids) if covered_ids else "（无）"}")
+    fprint(f"  已覆盖分支 : {sorted(covered_ids) if covered_ids else '（无）'}")
 
     if uncovered:
         fprint("  未覆盖分支 :")
@@ -222,16 +199,15 @@ def _do_run(code_file, xml_file, code_filename, output_file, fh, term):
 
     struct_excl = struct_uncov + struct_uncov_blk
     if struct_excl:
-        struct_node_ids = {b.get("node_id","") for b in struct_uncov_blk}
         fprint(f"  结构节点/边（不计入覆盖率，共 {len(struct_excl)} 项）:")
         for e in struct_uncov:
             fprint(f"    □ 边: {e['from']} -[{e['label']}]->{e['to']}  [分支体内部连接边]")
         for b in struct_uncov_blk:
             fprint(f"    □ 块: {b['node_id']}  [纯合并/入口节点，无实际语句]")
+
     fprint("\n" + sep())
     fprint(f"结果已保存到: {output_file}")
     fprint(sep())
-
 
 
 if __name__ == "__main__":

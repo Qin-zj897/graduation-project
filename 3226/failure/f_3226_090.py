@@ -1,0 +1,30 @@
+def solve(nums):
+    def search(nums):
+       count = 0
+       candidate = None
+       for i in nums:
+          if count == 0:
+             candidate = num
+          if candidate == num:
+             count += 1
+          else:
+             count-=1
+      count = candidate.count()
+       if count>len(nums)//2
+         return   candidate
+       else:
+         return False
+
+
+
+
+
+
+    y = search(nums)
+    return y
+
+
+if __name__ == '__main__':
+    nums = eval(input())
+    result = solve(nums)
+    print(result)

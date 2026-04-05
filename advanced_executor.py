@@ -229,7 +229,8 @@ class AdvancedExecutor:
             
             safe_globals = {
                 '__builtins__': safe_builtins,
-                'SafeList': self.SafeList
+                'SafeList': self.SafeList,
+                '__name__': '__main__'
             }
             
             # 执行代码

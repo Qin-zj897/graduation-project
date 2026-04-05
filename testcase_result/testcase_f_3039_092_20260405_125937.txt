@@ -1,0 +1,108 @@
+================================================================================
+测试用例集 - f_3039_092  （共 5 个）
+代码文件: 3039\failure\f_3039_092.py    XML种子: 3039.xml    耗时: 1.2s
+================================================================================
+
+[01] 输入    : [-1,2,3,4,5]
+     期望输出: [2, 3, 4]
+     实际输出: [2, 3, 4]
+     覆盖分支: （无分支信息）
+
+[02] 输入    : [1,1,2,2]
+     期望输出: []
+     实际输出: []
+     覆盖分支: （无分支信息）
+
+[03] 输入    : [2,3,4,5,7,8,9,10,1,2,10]
+     期望输出: [2, 3, 4, 5, 7, 8, 9, 2]
+     实际输出: [2, 3, 4, 5, 7, 8, 9, 2]
+     覆盖分支: （无分支信息）
+
+[04] 输入    : [1,1,1]
+     期望输出: []
+     实际输出: []
+     覆盖分支: （无分支信息）
+
+[05] 输入    : [-2,3,4,5,6,7,8,90,-2,90,90]
+     期望输出: [3, 4, 5, 6, 7, 8]
+     实际输出: [3, 4, 5, 6, 7, 8]
+     覆盖分支: （无分支信息）
+
+================================================================================
+覆盖率报告
+================================================================================
+  分支覆盖率 : 0/7 = 0.00%
+  边覆盖率   : 2/14 = 14.29%  (已排除 20 条结构边)
+  块覆盖率   : 1/7 = 14.29%
+  已覆盖分支 : （无）
+  未覆盖分支 :
+    - B1  (for循环 第9行)  node=for_header_3
+    - B2  (pred_id=P1)  node=if_condition_6
+    - B3  (for循环 第12行)  node=for_header_10
+    - B4  (pred_id=P2)  node=if_condition_13
+    - B5  (for循环 第15行)  node=for_header_17
+    - B6  (pred_id=P3)  node=if_condition_20
+    - B7  (pred_id=P4)  node=if_condition_24
+  未覆盖真实CFG边 :
+    - for_header_10 -[iterate]->for_body_start_11  line=12  [B3]
+    - for_header_10 -[exhausted]->for_exit_12  line=12  [B3]
+    - for_header_17 -[iterate]->for_body_start_18  line=15  [B5]
+    - for_header_17 -[exhausted]->for_exit_19  line=15  [B5]
+    - for_header_3 -[iterate]->for_body_start_4  line=9  [B1]
+    - for_header_3 -[exhausted]->for_exit_5  line=9  [B1]
+    - if_condition_13 -[false]->if_false_15  line=13  [B4]
+    - if_condition_13 -[true]->if_true_14  line=13  [B4]
+    - if_condition_20 -[false]->if_false_22  line=16  [B6]
+    - if_condition_20 -[true]->if_true_21  line=16  [B6]
+    - if_condition_6 -[false]->if_false_8  line=10  [B2]
+    - if_condition_6 -[true]->if_true_7  line=10  [B2]
+  未覆盖真实块 :
+    - for_header_10  line=12  [B3]
+    - for_header_17  line=15  [B5]
+    - for_header_3  line=9  [B1]
+    - if_condition_13  line=13  [B4]
+    - if_condition_20  line=16  [B6]
+    - if_condition_6  line=10  [B2]
+  结构节点/边（不计入覆盖率，共 38 项）:
+    □ 边: for_body_start_11 -[]->if_condition_13  [分支体内部连接边]
+    □ 边: for_body_start_18 -[]->if_condition_20  [分支体内部连接边]
+    □ 边: for_body_start_4 -[]->if_condition_6  [分支体内部连接边]
+    □ 边: for_exit_12 -[]->for_header_17  [分支体内部连接边]
+    □ 边: for_exit_19 -[return]->func_exit_2  [分支体内部连接边]
+    □ 边: for_exit_5 -[]->for_header_10  [分支体内部连接边]
+    □ 边: func_entry_1 -[]->for_header_3  [分支体内部连接边]
+    □ 边: func_exit_2 -[return]->if_true_25  [分支体内部连接边]
+    □ 边: if_false_15 -[false_end]->if_merge_16  [分支体内部连接边]
+    □ 边: if_false_22 -[false_end]->if_merge_23  [分支体内部连接边]
+    □ 边: if_false_26 -[false_end]->if_merge_27  [分支体内部连接边]
+    □ 边: if_false_8 -[false_end]->if_merge_9  [分支体内部连接边]
+    □ 边: if_merge_16 -[continue]->for_header_10  [分支体内部连接边]
+    □ 边: if_merge_23 -[continue]->for_header_17  [分支体内部连接边]
+    □ 边: if_merge_9 -[continue]->for_header_3  [分支体内部连接边]
+    □ 边: if_true_14 -[true_end]->if_merge_16  [分支体内部连接边]
+    □ 边: if_true_21 -[true_end]->if_merge_23  [分支体内部连接边]
+    □ 边: if_true_25 -[call]->func_entry_1  [分支体内部连接边]
+    □ 边: if_true_25 -[true_end]->if_merge_27  [分支体内部连接边]
+    □ 边: if_true_7 -[true_end]->if_merge_9  [分支体内部连接边]
+    □ 块: for_body_start_11  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_18  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_4  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_12  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_19  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_5  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_1  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_2  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_15  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_22  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_8  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_16  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_23  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_27  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_9  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_14  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_21  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_7  [纯合并/入口节点，无实际语句]
+
+================================================================================
+结果已保存到: testcase_result\testcase_f_3039_092_20260405_125937.txt
+================================================================================
