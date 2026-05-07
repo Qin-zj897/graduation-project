@@ -1,0 +1,102 @@
+================================================================================
+测试用例集 - s_03025_040  （共 5 个）
+代码文件: c:\Users\22954\Desktop\毕业设计\datasets\03025\success\s_03025_040.py    XML种子: c:\Users\22954\Desktop\毕业设计\datasets\03025.xml    耗时: 3.8s
+================================================================================
+
+[01] 输入    : 1 25 25 50
+     期望输出: 2
+     实际输出: ERROR: name 'object' is not defined
+     结果判断: 错误
+     覆盖分支: ['B1', 'B2', 'B3', 'B5', 'B6']
+
+[02] 输入    : 1 1 99 0
+     期望输出: 1
+     实际输出: ERROR: name 'object' is not defined
+     结果判断: 错误
+     覆盖分支: ['B1', 'B2', 'B3', 'B5', 'B6']
+
+[03] 输入    : 2 1 99 0
+     期望输出: 568600006
+     实际输出: ERROR: name 'object' is not defined
+     结果判断: 错误
+     覆盖分支: ['B1', 'B2', 'B3', 'B5', 'B6']
+
+[04] 输入    : 3 1 99 0
+     期望输出: 281387425
+     实际输出: ERROR: name 'object' is not defined
+     结果判断: 错误
+     覆盖分支: ['B1', 'B2', 'B3', 'B5', 'B6']
+
+[05] 输入    : 10 1 99 0
+     期望输出: 358733447
+     实际输出: ERROR: name 'object' is not defined
+     结果判断: 错误
+     覆盖分支: ['B1', 'B2', 'B3', 'B5', 'B6']
+
+================================================================================
+覆盖率报告
+================================================================================
+  分支覆盖率 : 5/6 = 83.33%
+  边覆盖率   : 1/12 = 8.33%  (已排除 19 条结构边)
+  块覆盖率   : 6/6 = 100.00%
+  已覆盖分支 : ['B1', 'B2', 'B3', 'B5', 'B6']
+  代码类型判断 : 应为正确程序（success）
+  代码是否正确判断成功 : 否
+  未覆盖分支 :
+    - B4  (pred_id=P2)  node=if_condition_17
+  未覆盖真实CFG边 :
+    - for_header_21 -[iterate]->for_body_start_22  line=41  [B5]
+    - for_header_21 -[exhausted]->for_exit_23  line=41  [B5]
+    - for_header_24 -[iterate]->for_body_start_25  line=47  [B6]
+    - for_header_24 -[exhausted]->for_exit_26  line=47  [B6]
+    - for_header_5 -[iterate]->for_body_start_6  line=13  [B1]
+    - for_header_5 -[exhausted]->for_exit_7  line=13  [B1]
+    - for_header_8 -[iterate]->for_body_start_9  line=18  [B2]
+    - for_header_8 -[exhausted]->for_exit_10  line=18  [B2]
+    - if_condition_13 -[true]->if_true_14  line=24  [B3]
+    - if_condition_17 -[false]->if_false_19  line=26  [B4]
+    - if_condition_17 -[true]->if_true_18  line=26  [B4]
+  未覆盖真实块   : 无
+  结构节点/边（不计入覆盖率，共 38 项）:
+    □ 边: for_body_start_22 -[continue]->for_header_21  [分支体内部连接边]
+    □ 边: for_body_start_25 -[continue]->for_header_24  [分支体内部连接边]
+    □ 边: for_body_start_25 -[call]->func_entry_11  [分支体内部连接边]
+    □ 边: for_body_start_6 -[continue]->for_header_5  [分支体内部连接边]
+    □ 边: for_body_start_9 -[continue]->for_header_8  [分支体内部连接边]
+    □ 边: for_exit_10 -[implicit_return]->func_exit_4  [分支体内部连接边]
+    □ 边: for_exit_23 -[]->for_header_24  [分支体内部连接边]
+    □ 边: for_exit_26 -[return]->func_exit_2  [分支体内部连接边]
+    □ 边: for_exit_7 -[]->for_header_8  [分支体内部连接边]
+    □ 边: func_entry_1 -[]->for_header_21  [分支体内部连接边]
+    □ 边: func_entry_11 -[]->if_condition_13  [分支体内部连接边]
+    □ 边: func_entry_3 -[]->for_header_5  [分支体内部连接边]
+    □ 边: func_exit_12 -[return]->for_body_start_25  [分支体内部连接边]
+    □ 边: func_exit_2 -[return]->main_entry_0  [分支体内部连接边]
+    □ 边: if_false_19 -[false_end]->if_merge_20  [分支体内部连接边]
+    □ 边: if_merge_20 -[return]->func_exit_12  [分支体内部连接边]
+    □ 边: if_true_14 -[return]->func_exit_12  [分支体内部连接边]
+    □ 边: if_true_18 -[return]->func_exit_12  [分支体内部连接边]
+    □ 边: main_entry_0 -[call]->func_entry_1  [分支体内部连接边]
+    □ 块: for_body_start_22  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_25  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_6  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_9  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_10  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_23  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_26  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_7  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_1  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_11  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_3  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_12  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_2  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_4  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_19  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_20  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_14  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_18  [纯合并/入口节点，无实际语句]
+    □ 块: main_entry_0  [纯合并/入口节点，无实际语句]
+
+================================================================================
+结果已保存到: testcase_result\testcase_s_03025_040_20260424_171013.txt
+================================================================================

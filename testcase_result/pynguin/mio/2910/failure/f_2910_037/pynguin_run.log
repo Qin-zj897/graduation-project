@@ -1,0 +1,33 @@
+COMMAND:
+C:\Python314\python.exe -m pynguin --project_path C:\Users\22954\Desktop\毕业设计\datasets\2910\failure --module_name f_2910_037 --algorithm MIO --output-path C:\Users\22954\Desktop\毕业设计\datasets\testcase_result\pynguin\mio\2910\failure\f_2910_037 --maximum-search-time 15 --maximum-memory 700 --assertion_generation NONE --coverage-metrics BRANCH --statistics-backend NONE --use-master-worker False --subprocess-if-recommended False --no-rich
+
+STDOUT:
+
+
+STDERR:
+[20:00:25] [ERROR](pynguin.generator:_load_sut:224): Failed to load SUT: duplicate argument 'h' in function definition (f_2910_037.py, line 1)
+Traceback (most recent call last):
+  File "C:\Users\22954\Desktop\毕业设计\pynguin-main\src\pynguin\generator.py", line 220, in _load_sut
+    importlib.import_module(module_name)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "C:\Users\22954\Desktop\毕业设计\pynguin-main\src\pynguin\instrumentation\machinery.py", line 53, in exec_module
+    super().exec_module(module)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "C:\Users\22954\Desktop\毕业设计\pynguin-main\src\pynguin\instrumentation\machinery.py", line 67, in get_code
+    to_instrument = cast("CodeType", super().get_code(fullname))
+                                     ~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "C:\Users\22954\Desktop\毕业设计\datasets\2910\failure\f_2910_037.py", line 1
+    def solve(h, h):
+                 ^
+SyntaxError: duplicate argument 'h' in function definition

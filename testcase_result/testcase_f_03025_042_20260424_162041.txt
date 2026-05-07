@@ -1,0 +1,94 @@
+================================================================================
+测试用例集 - f_03025_042  （共 5 个）
+代码文件: c:\Users\22954\Desktop\毕业设计\datasets\03025\failure\f_03025_042.py    XML种子: c:\Users\22954\Desktop\毕业设计\datasets\03025.xml    耗时: 1.4s
+================================================================================
+
+[01] 输入    : 1 25 25 50
+     期望输出: 2
+     实际输出: ERROR: name 'raw_input' is not defined
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[02] 输入    : 1 1 99 0
+     期望输出: 1
+     实际输出: ERROR: name 'raw_input' is not defined
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[03] 输入    : 2 1 99 0
+     期望输出: 568600006
+     实际输出: ERROR: name 'raw_input' is not defined
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[04] 输入    : 3 1 99 0
+     期望输出: 281387425
+     实际输出: ERROR: name 'raw_input' is not defined
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[05] 输入    : 10 1 99 0
+     期望输出: 358733447
+     实际输出: ERROR: name 'raw_input' is not defined
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+================================================================================
+覆盖率报告
+================================================================================
+  分支覆盖率 : 0/4 = 0.00%
+  边覆盖率   : 0/8 = 0.00%  (已排除 13 条结构边)
+  块覆盖率   : 0/4 = 0.00%
+  已覆盖分支 : （无）
+  代码类型判断 : 应为错误程序（failure）
+  代码是否正确判断成功 : 是
+  未覆盖分支 :
+    - B1  (for循环 第6行)  node=for_header_1
+    - B2  (pred_id=P1)  node=if_condition_6
+    - B3  (for循环 第18行)  node=for_header_10
+    - B4  (pred_id=P2)  node=if_condition_13
+  未覆盖真实CFG边 :
+    - for_header_1 -[iterate]->for_body_start_2  line=6  [B1]
+    - for_header_1 -[exhausted]->for_exit_3  line=6  [B1]
+    - for_header_10 -[iterate]->for_body_start_11  line=18  [B3]
+    - for_header_10 -[exhausted]->for_exit_12  line=18  [B3]
+    - if_condition_13 -[false]->if_false_15  line=26  [B4]
+    - if_condition_13 -[true]->if_true_14  line=26  [B4]
+    - if_condition_6 -[false]->if_false_8  line=13  [B2]
+    - if_condition_6 -[true]->if_true_7  line=13  [B2]
+  未覆盖真实块 :
+    - for_header_1  line=6  [B1]
+    - for_header_10  line=18  [B3]
+    - if_condition_13  line=26  [B4]
+    - if_condition_6  line=13  [B2]
+  结构节点/边（不计入覆盖率，共 26 项）:
+    □ 边: for_body_start_11 -[continue]->for_header_10  [分支体内部连接边]
+    □ 边: for_body_start_11 -[call]->func_entry_4  [分支体内部连接边]
+    □ 边: for_body_start_2 -[continue]->for_header_1  [分支体内部连接边]
+    □ 边: for_exit_12 -[]->if_condition_13  [分支体内部连接边]
+    □ 边: for_exit_3 -[]->for_header_10  [分支体内部连接边]
+    □ 边: func_entry_4 -[]->if_condition_6  [分支体内部连接边]
+    □ 边: func_exit_5 -[return]->for_body_start_11  [分支体内部连接边]
+    □ 边: if_false_15 -[false_end]->if_merge_16  [分支体内部连接边]
+    □ 边: if_false_8 -[return]->func_exit_5  [分支体内部连接边]
+    □ 边: if_merge_9 -[implicit_return]->func_exit_5  [分支体内部连接边]
+    □ 边: if_true_14 -[true_end]->if_merge_16  [分支体内部连接边]
+    □ 边: if_true_7 -[return]->func_exit_5  [分支体内部连接边]
+    □ 边: main_entry_0 -[]->for_header_1  [分支体内部连接边]
+    □ 块: for_body_start_11  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_2  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_12  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_3  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_4  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_5  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_15  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_8  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_16  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_9  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_14  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_7  [纯合并/入口节点，无实际语句]
+    □ 块: main_entry_0  [纯合并/入口节点，无实际语句]
+
+================================================================================
+结果已保存到: testcase_result\testcase_f_03025_042_20260424_162041.txt
+================================================================================

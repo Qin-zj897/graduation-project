@@ -1,0 +1,11 @@
+COMMAND:
+C:\Python314\python.exe -m pynguin --project_path C:\Users\22954\Desktop\毕业设计\datasets\pynguin_wrapped\03039\success --module_name s_03039_120 --output-path C:\Users\22954\Desktop\毕业设计\datasets\testcase_result\pynguin\03039\success\s_03039_120 --maximum-search-time 20 --assertion_generation NONE --coverage-metrics BRANCH --statistics-backend NONE --no-rich
+
+STDOUT:
+
+
+STDERR:
+Experienced timeout from test-case execution
+Finished thread did not return a result.
+Bug in Pynguin!
+Failed to write statistics data

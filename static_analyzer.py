@@ -40,7 +40,8 @@ class StaticAnalyzer:
         self._variable_types = None
         self._def_use_chains = None
         self._input_structure = None
-        self._mutation_rules = None        
+        self._mutation_rules = None
+        self._input_recognition_context = None
         # 统一标识符计数器
         self._pred_counter = 0
         self._pred_id_map = {}  # (lineno, col_offset) -> pred_id
@@ -2612,18 +2613,9 @@ class StaticAnalyzer:
         Returns:
             dict, 包含以下字段:
             {
-                'input_count': int,      # 输入数量
-                'inputs': [              # 输入列表，按行号顺序
-                    {
-                        'index': int,        # 输入序号（从0开始）
-                        'variable': str,     # 对应的变量名
-                        'type': str,         # 变量类型
-                        'entry_point': str,  # 输入入口表达式
-                        'line': int,         # 所在行号
-                        'format': str,       # 输入格式
-                    }
-                ],
-                'type_summary': dict,   # 变量名->类型，快速查询
+                'input_count': int,
+                'inputs': [...],
+                'type_summary': dict,
             }
             失败时返回空字典 {}
         """
@@ -2634,30 +2626,53 @@ class StaticAnalyzer:
                 'type_summary': {},
             }
 
-            # 1. 获取变量类型
             var_types = self.get_variable_types()
+            context = self._build_input_recognition_context()
+            input_records = []
 
-            # 2. 遍历 AST，识别所有输入表达式赋值
             class InputFinder(ast.NodeVisitor):
-                def __init__(self):
+                def __init__(self, outer):
+                    self.outer = outer
+                    self.context = context
                     self.inputs = []
 
                 def visit_Assign(self, node):
                     for target in node.targets:
-                        if isinstance(target, ast.Name):
-                            info = self._classify_input(node.value)
-                            if info is not None:
-                                self.inputs.append({
-                                    'variable': target.id,
-                                    'expression': info['expression'],
-                                    'line': node.lineno,
-                                    'format': info['format']
-                                })
+                        self._register_assignment_targets(target, node.value, node.lineno)
                     self.generic_visit(node)
 
+                def visit_AnnAssign(self, node):
+                    if node.value is not None:
+                        self._register_assignment_targets(node.target, node.value, node.lineno)
+                    self.generic_visit(node)
+
+                def _register_assignment_targets(self, target, value, lineno):
+                    info = self._classify_input(value)
+                    if info is None:
+                        return False
+
+                    if isinstance(target, ast.Name):
+                        self.inputs.append({
+                            'variable': target.id,
+                            'expression': info['expression'],
+                            'line': lineno,
+                            'format': info['format']
+                        })
+                        return True
+
+                    if isinstance(target, (ast.Tuple, ast.List)):
+                        for elt in target.elts:
+                            if isinstance(elt, ast.Name):
+                                self.inputs.append({
+                                    'variable': elt.id,
+                                    'expression': info['expression'],
+                                    'line': lineno,
+                                    'format': info['format']
+                                })
+                        return True
+                    return False
+
                 def _classify_input(self, node):
-                    """判断 node 是否为输入表达式，返回 {'expression', 'format'} 或 None"""
-                    # 必须是函数调用节点
                     if not isinstance(node, ast.Call):
                         return None
 
@@ -2668,70 +2683,79 @@ class StaticAnalyzer:
 
                     func = node.func
 
-                    # input()
-                    if isinstance(func, ast.Name) and func.id == 'input':
+                    if self._is_direct_input_call(node):
                         return {'expression': expr_str, 'format': 'string'}
 
-                    # eval(input())
                     if isinstance(func, ast.Name) and func.id == 'eval':
-                        if node.args and self._is_input_call(node.args[0]):
+                        if node.args and self._is_direct_input_call(node.args[0]):
                             return {'expression': expr_str, 'format': 'evaluated'}
 
-                    # int/float/str/bool(input())
                     if isinstance(func, ast.Name) and func.id in ('int', 'float', 'str', 'bool'):
-                        if node.args and self._is_input_call(node.args[0]):
+                        if node.args and self._is_direct_input_call(node.args[0]):
                             return {'expression': expr_str, 'format': 'single_value'}
 
-                    # input().split()  或  input().split(sep)
                     if isinstance(func, ast.Attribute) and func.attr == 'split':
-                        if self._is_input_call(func.value):
+                        if self._is_direct_input_call(func.value):
                             return {'expression': expr_str, 'format': 'split_string'}
 
-                    # map(conv, input().split())
                     if isinstance(func, ast.Name) and func.id == 'map':
                         if len(node.args) >= 2 and self._contains_input_split(node.args[1]):
                             return {'expression': expr_str, 'format': 'iterator'}
 
-                    # list(map(conv, input().split()))  /  list(input().split())
-                    if isinstance(func, ast.Name) and func.id == 'list':
-                        if node.args:
-                            inner = node.args[0]
-                            if isinstance(inner, ast.Call):
-                                inner_func = inner.func
-                                # list(map(...))
-                                if isinstance(inner_func, ast.Name) and inner_func.id == 'map':
-                                    if len(inner.args) >= 2 and self._contains_input_split(inner.args[1]):
-                                        return {'expression': expr_str, 'format': 'list'}
-                                # list(input().split())
-                                if self._contains_input_split(inner):
+                    if isinstance(func, ast.Name) and func.id == 'list' and node.args:
+                        inner = node.args[0]
+                        if isinstance(inner, ast.Call):
+                            inner_func = inner.func
+                            if isinstance(inner_func, ast.Name) and inner_func.id == 'map':
+                                if len(inner.args) >= 2 and self._contains_input_split(inner.args[1]):
                                     return {'expression': expr_str, 'format': 'list'}
+                            if self._contains_input_split(inner):
+                                return {'expression': expr_str, 'format': 'list'}
+
+                    if isinstance(func, ast.Name):
+                        wrapper_info = self.context['wrapper_functions'].get(func.id)
+                        if wrapper_info is not None:
+                            return {
+                                'expression': expr_str,
+                                'format': wrapper_info.get('format', 'wrapped_input')
+                            }
 
                     return None
 
-                def _is_input_call(self, node):
-                    """判断 node 是否为 input() 调用"""
-                    return (
-                        isinstance(node, ast.Call)
-                        and isinstance(node.func, ast.Name)
-                        and node.func.id == 'input'
-                    )
+                def _is_direct_input_call(self, node):
+                    if not isinstance(node, ast.Call):
+                        return False
+                    func = node.func
+                    if isinstance(func, ast.Name):
+                        return (
+                            func.id == 'input'
+                            or func.id in self.context['readline_aliases']
+                            or func.id in self.context['input_aliases']
+                        )
+                    if isinstance(func, ast.Attribute):
+                        return self.outer._is_readline_attribute(func)
+                    return False
 
                 def _contains_input_split(self, node):
-                    """判断 node 是否为 input().split() 形式"""
                     return (
                         isinstance(node, ast.Call)
                         and isinstance(node.func, ast.Attribute)
                         and node.func.attr == 'split'
-                        and isinstance(node.func.value, ast.Call)
-                        and isinstance(node.func.value.func, ast.Name)
-                        and node.func.value.func.id == 'input'
+                        and self._is_direct_input_call(node.func.value)
                     )
 
-            finder = InputFinder()
+            finder = InputFinder(self)
             finder.visit(self.ast_tree)
 
-            # 3. 组装输入条目
-            for idx, info in enumerate(finder.inputs):
+            seen = set()
+            for info in finder.inputs:
+                key = (info['variable'], info['line'], info['expression'])
+                if key in seen:
+                    continue
+                seen.add(key)
+                input_records.append(info)
+
+            for idx, info in enumerate(input_records):
                 var_name = info['variable']
                 var_type = var_types.get(var_name, 'Any')
                 result['inputs'].append({
@@ -2745,12 +2769,146 @@ class StaticAnalyzer:
                 result['type_summary'][var_name] = var_type
 
             result['input_count'] = len(result['inputs'])
-
             return result
 
         except Exception:
             return {}
 
+
+    def _is_readline_attribute(self, node):
+        """判断是否为 sys.stdin.readline 属性访问"""
+        return (
+            isinstance(node, ast.Attribute)
+            and node.attr == 'readline'
+            and isinstance(node.value, ast.Attribute)
+            and node.value.attr == 'stdin'
+            and isinstance(node.value.value, ast.Name)
+            and node.value.value.id == 'sys'
+        )
+
+    def _build_input_recognition_context(self):
+        """构建输入识别上下文，包括别名与包装函数"""
+        if self._input_recognition_context is not None:
+            return self._input_recognition_context
+
+        context = {
+            'readline_aliases': set(),
+            'input_aliases': set(),
+            'wrapper_functions': {},
+        }
+
+        class InputContextBuilder(ast.NodeVisitor):
+            def __init__(self, outer, ctx):
+                self.outer = outer
+                self.ctx = ctx
+
+            def visit_Assign(self, node):
+                if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+                    target_name = node.targets[0].id
+                    value = node.value
+                    if self.outer._is_readline_attribute(value):
+                        self.ctx['readline_aliases'].add(target_name)
+                    elif isinstance(value, ast.Name):
+                        if value.id == 'input' or value.id in self.ctx['input_aliases']:
+                            self.ctx['input_aliases'].add(target_name)
+                        if value.id in self.ctx['readline_aliases']:
+                            self.ctx['readline_aliases'].add(target_name)
+                    elif isinstance(value, ast.Lambda):
+                        wrapper_format = self._classify_wrapper_return(value.body)
+                        if wrapper_format is not None:
+                            self.ctx['wrapper_functions'][target_name] = {'format': wrapper_format}
+                self.generic_visit(node)
+
+            def visit_FunctionDef(self, node):
+                wrapper = self._analyze_wrapper_function(node)
+                if wrapper is not None:
+                    self.ctx['wrapper_functions'][node.name] = wrapper
+                self.generic_visit(node)
+
+            def _analyze_wrapper_function(self, node):
+                return_nodes = [stmt for stmt in ast.walk(node) if isinstance(stmt, ast.Return) and stmt.value is not None]
+                if not return_nodes:
+                    return None
+
+                formats = []
+                for return_node in return_nodes:
+                    fmt = self._classify_wrapper_return(return_node.value)
+                    if fmt is None:
+                        return None
+                    formats.append(fmt)
+
+                if 'iterator' in formats:
+                    preferred = 'iterator'
+                elif 'list' in formats:
+                    preferred = 'list'
+                elif 'single_value' in formats:
+                    preferred = 'single_value'
+                elif 'split_string' in formats:
+                    preferred = 'split_string'
+                elif 'evaluated' in formats:
+                    preferred = 'evaluated'
+                else:
+                    preferred = 'string'
+
+                return {'format': preferred}
+
+            def _classify_wrapper_return(self, value):
+                if isinstance(value, ast.ListComp):
+                    generator = value.generators[0] if value.generators else None
+                    if generator is not None and self._contains_input_split(generator.iter):
+                        return 'list'
+                    return None
+
+                if not isinstance(value, ast.Call):
+                    return None
+
+                func = value.func
+                if isinstance(func, ast.Name):
+                    if func.id in self.ctx['wrapper_functions']:
+                        return self.ctx['wrapper_functions'][func.id].get('format')
+                    if func.id == 'input' or func.id in self.ctx['readline_aliases'] or func.id in self.ctx['input_aliases']:
+                        return 'string'
+                    if func.id == 'eval' and value.args and self._is_direct_input_call(value.args[0]):
+                        return 'evaluated'
+                    if func.id in ('int', 'float', 'str', 'bool') and value.args and self._is_direct_input_call(value.args[0]):
+                        return 'single_value'
+                    if func.id == 'map' and len(value.args) >= 2 and self._contains_input_split(value.args[1]):
+                        return 'iterator'
+                    if func.id == 'list' and value.args:
+                        inner = value.args[0]
+                        if isinstance(inner, ast.Call):
+                            inner_func = inner.func
+                            if isinstance(inner_func, ast.Name) and inner_func.id == 'map' and len(inner.args) >= 2 and self._contains_input_split(inner.args[1]):
+                                return 'list'
+                            if self._contains_input_split(inner):
+                                return 'list'
+                elif isinstance(func, ast.Attribute):
+                    if func.attr == 'split' and self._is_direct_input_call(func.value):
+                        return 'split_string'
+
+                return None
+
+            def _is_direct_input_call(self, node):
+                if not isinstance(node, ast.Call):
+                    return False
+                func = node.func
+                if isinstance(func, ast.Name):
+                    return func.id == 'input' or func.id in self.ctx['readline_aliases'] or func.id in self.ctx['input_aliases']
+                if isinstance(func, ast.Attribute):
+                    return self.outer._is_readline_attribute(func)
+                return False
+
+            def _contains_input_split(self, node):
+                return (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == 'split'
+                    and self._is_direct_input_call(node.func.value)
+                )
+
+        InputContextBuilder(self, context).visit(self.ast_tree)
+        self._input_recognition_context = context
+        return context
 
     def build_data_dependency_graph(self) -> Dict[str, Any]:
         """
@@ -4828,6 +4986,7 @@ class TypeInferencer(ast.NodeVisitor):
         self.def_use_chains = def_use_chains
         self.constants = constants
         self.ast_tree = ast_tree
+        self._input_recognition_context = None
         self._current_function = None
         self._current_class = None
         self._scope_stack = []  # 作用域栈
@@ -5279,96 +5438,116 @@ class TypeInferencer(ast.NodeVisitor):
         """分析复杂的输入表达式"""
         if not isinstance(node, ast.Call):
             return None
-        
-        # 1. eval(input())
+
+        context = self._build_input_recognition_context()
+
+        def is_direct_input_call(call_node):
+            if not isinstance(call_node, ast.Call):
+                return False
+            func = call_node.func
+            if isinstance(func, ast.Name):
+                return (
+                    func.id == 'input'
+                    or func.id in context['readline_aliases']
+                    or func.id in context['input_aliases']
+                )
+            if isinstance(func, ast.Attribute):
+                return self._is_readline_attribute(func)
+            return False
+
+        def contains_input_split(call_node):
+            return (
+                isinstance(call_node, ast.Call)
+                and isinstance(call_node.func, ast.Attribute)
+                and call_node.func.attr == 'split'
+                and is_direct_input_call(call_node.func.value)
+            )
+
         if isinstance(node.func, ast.Name) and node.func.id == 'eval':
-            # 检查eval的参数
-            if node.args and isinstance(node.args[0], ast.Call):
-                arg_call = node.args[0]
-                if isinstance(arg_call.func, ast.Name) and arg_call.func.id == 'input':
-                    # eval(input())
-                    return {
-                        'type': 'Any',  # 暂时保持Any
-                        'confidence': 'low',
-                        'source': 'eval_input',
-                        'inference_hints': {
-                            'can_be_numeric': True,
-                            'can_be_int': True,
-                            'can_be_float': True,
-                            'can_be_str': True,
-                            'can_be_list': True,
-                            'can_be_iterable': True
-                        },
-                        'needs_context_inference': True  # 标记需要上下文推断
-                    }
-        
-        # 2. int(input()), float(input())
-        if isinstance(node.func, ast.Name) and node.func.id in ['int', 'float']:
-            if node.args and isinstance(node.args[0], ast.Call):
-                arg_call = node.args[0]
-                if isinstance(arg_call.func, ast.Name) and arg_call.func.id == 'input':
-                    # int(input()) 或 float(input())
-                    return {
-                        'type': node.func.id, 
-                        'confidence': 'high', 
-                        'source': f'{node.func.id}_input'
-                    }
-        
-        # 3. input().split()
+            if node.args and is_direct_input_call(node.args[0]):
+                return {
+                    'type': 'Any',
+                    'confidence': 'low',
+                    'source': 'eval_input',
+                    'inference_hints': {
+                        'can_be_numeric': True,
+                        'can_be_int': True,
+                        'can_be_float': True,
+                        'can_be_str': True,
+                        'can_be_list': True,
+                        'can_be_iterable': True
+                    },
+                    'needs_context_inference': True
+                }
+
+        if isinstance(node.func, ast.Name) and node.func.id in ['int', 'float', 'str', 'bool']:
+            if node.args and is_direct_input_call(node.args[0]):
+                return {
+                    'type': node.func.id,
+                    'confidence': 'high',
+                    'source': f'{node.func.id}_input'
+                }
+
         if isinstance(node.func, ast.Attribute):
-            # 获取对象类型
+            if node.func.attr == 'split' and is_direct_input_call(node.func.value):
+                return {'type': 'list[str]', 'confidence': 'high', 'source': 'split_input'}
             obj_type = self._enhanced_infer_expression_type(node.func.value)
             if obj_type and obj_type['type'] == 'str':
                 method_name = node.func.attr
-                if method_name == 'split':
-                    return {'type': 'list[str]', 'confidence': 'high', 'source': 'split_input'}
-                elif method_name in self.str_method_returns:
+                if method_name in self.str_method_returns:
                     return {'type': self.str_method_returns[method_name], 'confidence': 'high', 'source': 'str_method'}
-        
-        # 4. map(int, input().split())
+
         if isinstance(node.func, ast.Name) and node.func.id == 'map':
             if len(node.args) >= 2:
-                # 第一个参数是转换函数
                 func_arg = node.args[0]
-                # 第二个参数通常是 input().split()
                 iter_arg = node.args[1]
-                
-                if isinstance(func_arg, ast.Name) and func_arg.id in ['int', 'float']:
-                    iter_type = self._enhanced_infer_expression_type(iter_arg)
-                    if iter_type and iter_type['type'] == 'list[str]':
-                        return {
-                            'type': f'list[{func_arg.id}]',
-                            'confidence': 'high',
-                            'source': 'mapped_input'
-                        }
-        
-        # 5. 普通的input()
-        if isinstance(node.func, ast.Name) and node.func.id == 'input':
+                if isinstance(func_arg, ast.Name) and func_arg.id in ['int', 'float'] and contains_input_split(iter_arg):
+                    return {
+                        'type': f'list[{func_arg.id}]',
+                        'confidence': 'high',
+                        'source': 'mapped_input'
+                    }
+
+        if is_direct_input_call(node):
             return {'type': 'str', 'confidence': 'high', 'source': 'input'}
-        
-        # 6. 其他函数调用
+
         if isinstance(node.func, ast.Name):
             func_name = node.func.id
+            wrapper_info = context['wrapper_functions'].get(func_name)
+            if wrapper_info is not None:
+                format_type_map = {
+                    'string': 'str',
+                    'split_string': 'list[str]',
+                    'single_value': 'int',
+                    'iterator': 'list[int]',
+                    'list': 'list[int]',
+                    'evaluated': 'Any',
+                    'wrapped_input': 'Any',
+                }
+                wrapper_format = wrapper_info.get('format', 'wrapped_input')
+                return {
+                    'type': format_type_map.get(wrapper_format, 'Any'),
+                    'confidence': 'medium',
+                    'source': f'wrapper_function_{func_name}'
+                }
+
             if func_name in self.builtin_return_types:
                 return {
                     'type': self.builtin_return_types[func_name],
                     'confidence': 'high',
                     'source': f'builtin_{func_name}'
                 }
-        
-        # 7. 方法调用
+
         if isinstance(node.func, ast.Attribute):
             obj_type = self._enhanced_infer_expression_type(node.func.value)
             if obj_type:
                 method_name = node.func.attr
-                # 字符串方法
                 if obj_type['type'] == 'str' and method_name in self.str_method_returns:
                     return {
                         'type': self.str_method_returns[method_name],
                         'confidence': 'high',
                         'source': 'str_method'
                     }
-                # 列表方法
                 elif obj_type['type'].startswith('list'):
                     if method_name in ['append', 'extend', 'insert', 'remove', 'sort', 'reverse']:
                         return {'type': 'None', 'confidence': 'medium', 'source': 'list_method'}
@@ -5377,44 +5556,34 @@ class TypeInferencer(ast.NodeVisitor):
                             return {'type': obj_type['type'][5:-1], 'confidence': 'medium', 'source': 'list_method'}
                         else:
                             return {'type': 'Any', 'confidence': 'low', 'source': 'list_method'}
-                        
-        # 8. max()/min() 函数
+
         if isinstance(node.func, ast.Name) and node.func.id in ['max', 'min']:
             if node.args:
-                # 分析参数的第一个元素
                 first_arg = node.args[0]
                 arg_type = self._enhanced_infer_expression_type(first_arg)
-                
                 if arg_type:
-                    # 如果参数是列表类型
                     if arg_type['type'].startswith('list['):
-                        # max(list[T]) 返回 T
                         return {
-                            'type': arg_type['type'][5:-1],  # 提取T
+                            'type': arg_type['type'][5:-1],
                             'confidence': arg_type.get('confidence', 'medium'),
                             'source': f'{node.func.id}_function'
                         }
                     elif arg_type['type'] in ['list', 'tuple', 'set', 'range']:
-                        # 通用可迭代对象
                         return {
-                            'type': 'numeric',  # 通常是数值
+                            'type': 'numeric',
                             'confidence': 'medium',
                             'source': f'{node.func.id}_function'
                         }
                     else:
-                        # 其他类型
                         return {
                             'type': arg_type['type'],
                             'confidence': arg_type.get('confidence', 'low'),
                             'source': f'{node.func.id}_function'
                         }
-        
-        # 9. 用户自定义函数调用 - 查找函数返回类型
+
         if isinstance(node.func, ast.Name):
             func_name = node.func.id
             return_type_key = f'{func_name}_return'
-            
-            # 查找该函数的返回类型
             if return_type_key in self.types:
                 func_return_type = self.types[return_type_key].get('type', 'Any')
                 func_confidence = self.types[return_type_key].get('confidence', 'low')
@@ -5423,7 +5592,7 @@ class TypeInferencer(ast.NodeVisitor):
                     'confidence': func_confidence,
                     'source': f'user_function_{func_name}'
                 }
-        
+
         return {'type': 'Any', 'confidence': 'low', 'source': 'unknown_call'}
         
     
@@ -5435,6 +5604,22 @@ class TypeInferencer(ast.NodeVisitor):
                     elt_type = self._enhanced_infer_expression_type(elt)
                     if elt_type:
                         self._add_type(tgt.id, elt_type['type'], 'unpacking_assignment', elt_type.get('confidence', 'medium'))
+            return
+
+        if rhs_type and isinstance(rhs_type, dict):
+            rhs_type_name = rhs_type.get('type', '')
+            rhs_confidence = rhs_type.get('confidence', 'medium')
+            if rhs_type_name.startswith('list[') and rhs_type_name.endswith(']'):
+                elem_type = rhs_type_name[5:-1]
+                for tgt in target.elts:
+                    if isinstance(tgt, ast.Name):
+                        self._add_type(tgt.id, elem_type, 'unpacking_from_iterable', rhs_confidence)
+                return
+            if rhs_type_name in ['tuple', 'list']:
+                for tgt in target.elts:
+                    if isinstance(tgt, ast.Name):
+                        self._add_type(tgt.id, 'Any', 'unpacking_from_iterable', 'low')
+                return
         
         # 处理 *args 解包
         elif isinstance(value, ast.Starred):
@@ -5568,6 +5753,141 @@ class TypeInferencer(ast.NodeVisitor):
         
         self.generic_visit(node)
         return return_type
+
+    def _is_readline_attribute(self, node):
+        """判断是否为 sys.stdin.readline 属性访问"""
+        return (
+            isinstance(node, ast.Attribute)
+            and node.attr == 'readline'
+            and isinstance(node.value, ast.Attribute)
+            and node.value.attr == 'stdin'
+            and isinstance(node.value.value, ast.Name)
+            and node.value.value.id == 'sys'
+        )
+
+    def _build_input_recognition_context(self):
+        """构建类型推断阶段的输入识别上下文"""
+        if self._input_recognition_context is not None:
+            return self._input_recognition_context
+
+        context = {
+            'readline_aliases': set(),
+            'input_aliases': set(),
+            'wrapper_functions': {},
+        }
+
+        class InputContextBuilder(ast.NodeVisitor):
+            def __init__(self, outer, ctx):
+                self.outer = outer
+                self.ctx = ctx
+
+            def visit_Assign(self, node):
+                if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+                    target_name = node.targets[0].id
+                    value = node.value
+                    if self.outer._is_readline_attribute(value):
+                        self.ctx['readline_aliases'].add(target_name)
+                    elif isinstance(value, ast.Name):
+                        if value.id == 'input' or value.id in self.ctx['input_aliases']:
+                            self.ctx['input_aliases'].add(target_name)
+                        if value.id in self.ctx['readline_aliases']:
+                            self.ctx['readline_aliases'].add(target_name)
+                    elif isinstance(value, ast.Lambda):
+                        wrapper_format = self._classify_wrapper_return(value.body)
+                        if wrapper_format is not None:
+                            self.ctx['wrapper_functions'][target_name] = {'format': wrapper_format}
+                self.generic_visit(node)
+
+            def visit_FunctionDef(self, node):
+                wrapper = self._analyze_wrapper_function(node)
+                if wrapper is not None:
+                    self.ctx['wrapper_functions'][node.name] = wrapper
+                self.generic_visit(node)
+
+            def _analyze_wrapper_function(self, node):
+                return_nodes = [stmt for stmt in ast.walk(node) if isinstance(stmt, ast.Return) and stmt.value is not None]
+                if not return_nodes:
+                    return None
+
+                formats = []
+                for return_node in return_nodes:
+                    fmt = self._classify_wrapper_return(return_node.value)
+                    if fmt is None:
+                        return None
+                    formats.append(fmt)
+
+                if 'iterator' in formats:
+                    preferred = 'iterator'
+                elif 'list' in formats:
+                    preferred = 'list'
+                elif 'single_value' in formats:
+                    preferred = 'single_value'
+                elif 'split_string' in formats:
+                    preferred = 'split_string'
+                elif 'evaluated' in formats:
+                    preferred = 'evaluated'
+                else:
+                    preferred = 'string'
+
+                return {'format': preferred}
+
+            def _classify_wrapper_return(self, value):
+                if isinstance(value, ast.ListComp):
+                    generator = value.generators[0] if value.generators else None
+                    if generator is not None and self._contains_input_split(generator.iter):
+                        return 'list'
+                    return None
+
+                if not isinstance(value, ast.Call):
+                    return None
+
+                func = value.func
+                if isinstance(func, ast.Name):
+                    if func.id in self.ctx['wrapper_functions']:
+                        return self.ctx['wrapper_functions'][func.id].get('format')
+                    if func.id == 'input' or func.id in self.ctx['readline_aliases'] or func.id in self.ctx['input_aliases']:
+                        return 'string'
+                    if func.id == 'eval' and value.args and self._is_direct_input_call(value.args[0]):
+                        return 'evaluated'
+                    if func.id in ('int', 'float', 'str', 'bool') and value.args and self._is_direct_input_call(value.args[0]):
+                        return 'single_value'
+                    if func.id == 'map' and len(value.args) >= 2 and self._contains_input_split(value.args[1]):
+                        return 'iterator'
+                    if func.id == 'list' and value.args:
+                        inner = value.args[0]
+                        if isinstance(inner, ast.Call):
+                            inner_func = inner.func
+                            if isinstance(inner_func, ast.Name) and inner_func.id == 'map' and len(inner.args) >= 2 and self._contains_input_split(inner.args[1]):
+                                return 'list'
+                            if self._contains_input_split(inner):
+                                return 'list'
+                elif isinstance(func, ast.Attribute):
+                    if func.attr == 'split' and self._is_direct_input_call(func.value):
+                        return 'split_string'
+
+                return None
+
+            def _is_direct_input_call(self, node):
+                if not isinstance(node, ast.Call):
+                    return False
+                func = node.func
+                if isinstance(func, ast.Name):
+                    return func.id == 'input' or func.id in self.ctx['readline_aliases'] or func.id in self.ctx['input_aliases']
+                if isinstance(func, ast.Attribute):
+                    return self.outer._is_readline_attribute(func)
+                return False
+
+            def _contains_input_split(self, node):
+                return (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == 'split'
+                    and self._is_direct_input_call(node.func.value)
+                )
+
+        InputContextBuilder(self, context).visit(self.ast_tree)
+        self._input_recognition_context = context
+        return context
     
     def _infer_add_type(self, left_type, right_type):
         """推断加法运算的类型"""

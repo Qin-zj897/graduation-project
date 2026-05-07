@@ -1,0 +1,62 @@
+================================================================================
+测试用例集 - f_03039_190  （共 1 个）
+代码文件: 03039/failure/f_03039_190.py    XML种子: 03039.xml    耗时: 24.5s
+================================================================================
+
+[01] 输入    : 2 2 2
+     期望输出: 8
+     实际输出: ERROR: NameError: name 'cmb' is not defined
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+================================================================================
+覆盖率报告
+================================================================================
+  分支覆盖率 : 0/3 = 0.00%
+  边覆盖率   : 0/6 = 0.00%  (已排除 11 条结构边)
+  块覆盖率   : 0/3 = 0.00%
+  已覆盖分支 : （无）
+  代码类型判断 : 应为错误程序（failure）
+  代码是否正确判断成功 : 是
+  未覆盖分支 :
+    - B1  (pred_id=P1)  node=if_condition_5
+    - B2  (for循环 第8行)  node=for_header_9
+    - B3  (for循环 第10行)  node=for_header_12
+  未覆盖真实CFG边 :
+    - for_header_12 -[iterate]->for_body_start_13  line=10  [B3]
+    - for_header_12 -[exhausted]->for_exit_14  line=10  [B3]
+    - for_header_9 -[iterate]->for_body_start_10  line=8  [B2]
+    - for_header_9 -[exhausted]->for_exit_11  line=8  [B2]
+    - if_condition_5 -[false]->if_false_7  line=4  [B1]
+    - if_condition_5 -[true]->if_true_6  line=4  [B1]
+  未覆盖真实块 :
+    - for_header_12  line=10  [B3]
+    - for_header_9  line=8  [B2]
+    - if_condition_5  line=4  [B1]
+  结构节点/边（不计入覆盖率，共 22 项）:
+    □ 边: for_body_start_10 -[continue]->for_header_9  [分支体内部连接边]
+    □ 边: for_body_start_13 -[continue]->for_header_12  [分支体内部连接边]
+    □ 边: for_exit_11 -[]->for_header_12  [分支体内部连接边]
+    □ 边: for_exit_14 -[return]->func_exit_2  [分支体内部连接边]
+    □ 边: func_entry_1 -[]->for_header_9  [分支体内部连接边]
+    □ 边: func_entry_3 -[]->if_condition_5  [分支体内部连接边]
+    □ 边: func_exit_4 -[return]->if_false_7  [分支体内部连接边]
+    □ 边: if_false_7 -[call]->func_entry_3  [分支体内部连接边]
+    □ 边: if_false_7 -[false_end]->if_merge_8  [分支体内部连接边]
+    □ 边: if_merge_8 -[return]->func_exit_4  [分支体内部连接边]
+    □ 边: if_true_6 -[return]->func_exit_4  [分支体内部连接边]
+    □ 块: for_body_start_10  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_13  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_11  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_14  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_1  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_3  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_2  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_4  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_7  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_8  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_6  [纯合并/入口节点，无实际语句]
+
+================================================================================
+结果已保存到: testcase_result\testcase_f_03039_190_20260419_014109.txt
+================================================================================

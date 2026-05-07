@@ -1,0 +1,162 @@
+COMMAND:
+C:\Python314\python.exe -m pynguin --project_path C:\Users\22954\Desktop\毕业设计\datasets\pynguin_wrapped\02882\failure --module_name f_02882_015 --algorithm MIO --output-path C:\Users\22954\Desktop\毕业设计\datasets\testcase_result\pynguin\mio\02882\failure\f_02882_015 --maximum-search-time 15 --maximum-memory 700 --assertion_generation NONE --coverage-metrics BRANCH --statistics-backend NONE --use-master-worker False --subprocess-if-recommended False --no-rich
+
+STDOUT:
+
+
+STDERR:
+[06:18:17] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-451 (_writerthread), started daemon 24316)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not int
+[06:18:17] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-455 (_writerthread), started daemon 4536)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not int
+[06:18:17] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-459 (_writerthread), started daemon 20940)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not int
+[06:18:17] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-464 (_writerthread), started daemon 24024)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not int
+[06:18:17] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-468 (_writerthread), started daemon 27180)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not int
+[06:18:17] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-472 (_writerthread), started daemon 19412)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not int
+[06:18:17] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-476 (_writerthread), started daemon 25848)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not int
+[06:18:17] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-480 (_writerthread), started daemon 20936)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not int
+[06:18:17] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-484 (_writerthread), started daemon 5672)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not int
+[06:18:17] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-488 (_writerthread), started daemon 25484)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not int
+[06:18:24] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[06:18:24] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[06:18:24] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[06:18:24] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[06:18:25] [ERROR](pynguin.generator:_run:751): Failed to write statistics data

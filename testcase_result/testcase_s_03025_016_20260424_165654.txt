@@ -1,0 +1,117 @@
+================================================================================
+测试用例集 - s_03025_016  （共 5 个）
+代码文件: c:\Users\22954\Desktop\毕业设计\datasets\03025\success\s_03025_016.py    XML种子: c:\Users\22954\Desktop\毕业设计\datasets\03025.xml    耗时: 11.6s
+================================================================================
+
+[01] 输入    : 1 25 25 50
+     期望输出: 2
+     实际输出: 2
+     结果判断: 正确
+     覆盖分支: ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B9']
+
+[02] 输入    : 1 1 99 0
+     期望输出: 1
+     实际输出: 1
+     结果判断: 正确
+     覆盖分支: ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B9']
+
+[03] 输入    : 2 1 99 0
+     期望输出: 568600006
+     实际输出: 568600006
+     结果判断: 正确
+     覆盖分支: ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B9']
+
+[04] 输入    : 3 1 99 0
+     期望输出: 281387425
+     实际输出: 281387425
+     结果判断: 正确
+     覆盖分支: ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B9']
+
+[05] 输入    : 10 1 99 0
+     期望输出: 358733447
+     实际输出: 358733447
+     结果判断: 正确
+     覆盖分支: ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B9']
+
+================================================================================
+覆盖率报告
+================================================================================
+  分支覆盖率 : 8/9 = 88.89%
+  边覆盖率   : 1/18 = 5.56%  (已排除 23 条结构边)
+  块覆盖率   : 9/9 = 100.00%
+  已覆盖分支 : ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B9']
+  代码类型判断 : 应为正确程序（success）
+  代码是否正确判断成功 : 是
+  未覆盖分支 :
+    - B8  (pred_id=P2)  node=if_condition_26
+  未覆盖真实CFG边 :
+    - for_header_12 -[iterate]->for_body_start_13  line=36  [B4]
+    - for_header_15 -[iterate]->for_body_start_16  line=45  [B5]
+    - for_header_15 -[exhausted]->for_exit_17  line=45  [B5]
+    - for_header_18 -[iterate]->for_body_start_19  line=56  [B6]
+    - for_header_18 -[exhausted]->for_exit_20  line=56  [B6]
+    - for_header_3 -[iterate]->for_body_start_4  line=14  [B1]
+    - for_header_3 -[exhausted]->for_exit_5  line=14  [B1]
+    - for_header_6 -[iterate]->for_body_start_7  line=18  [B2]
+    - for_header_6 -[exhausted]->for_exit_8  line=18  [B2]
+    - for_header_9 -[iterate]->for_body_start_10  line=28  [B3]
+    - for_header_9 -[exhausted]->for_exit_11  line=28  [B3]
+    - if_condition_26 -[false]->if_false_28  line=73  [B8]
+    - if_condition_26 -[true]->if_true_27  line=73  [B8]
+    - if_condition_30 -[false]->if_false_32  line=77  [B9]
+    - if_condition_30 -[true]->if_true_31  line=77  [B9]
+    - while_header_23 -[true]->while_body_start_24  line=66  [B7]
+    - while_header_23 -[false]->while_exit_25  line=66  [B7]
+  未覆盖真实块   : 无
+  结构节点/边（不计入覆盖率，共 47 项）:
+    □ 边: for_body_start_10 -[continue]->for_header_9  [分支体内部连接边]
+    □ 边: for_body_start_13 -[continue]->for_header_12  [分支体内部连接边]
+    □ 边: for_body_start_16 -[continue]->for_header_15  [分支体内部连接边]
+    □ 边: for_body_start_19 -[continue]->for_header_18  [分支体内部连接边]
+    □ 边: for_body_start_4 -[continue]->for_header_3  [分支体内部连接边]
+    □ 边: for_body_start_7 -[continue]->for_header_6  [分支体内部连接边]
+    □ 边: for_exit_11 -[]->for_header_12  [分支体内部连接边]
+    □ 边: for_exit_17 -[]->for_header_18  [分支体内部连接边]
+    □ 边: for_exit_20 -[implicit_return]->func_exit_2  [分支体内部连接边]
+    □ 边: for_exit_5 -[]->for_header_6  [分支体内部连接边]
+    □ 边: for_exit_8 -[]->for_header_9  [分支体内部连接边]
+    □ 边: func_entry_1 -[]->for_header_3  [分支体内部连接边]
+    □ 边: func_entry_21 -[]->while_header_23  [分支体内部连接边]
+    □ 边: func_exit_2 -[return]->if_true_31  [分支体内部连接边]
+    □ 边: if_false_28 -[false_end]->if_merge_29  [分支体内部连接边]
+    □ 边: if_false_32 -[false_end]->if_merge_33  [分支体内部连接边]
+    □ 边: if_merge_29 -[return]->func_exit_22  [分支体内部连接边]
+    □ 边: if_true_27 -[true_end]->if_merge_29  [分支体内部连接边]
+    □ 边: if_true_31 -[call]->func_entry_1  [分支体内部连接边]
+    □ 边: if_true_31 -[true_end]->if_merge_33  [分支体内部连接边]
+    □ 边: main_entry_0 -[]->if_condition_30  [分支体内部连接边]
+    □ 边: while_body_start_24 -[continue]->while_header_23  [分支体内部连接边]
+    □ 边: while_exit_25 -[]->if_condition_26  [分支体内部连接边]
+    □ 块: for_body_start_10  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_13  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_16  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_19  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_4  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_7  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_11  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_17  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_20  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_5  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_8  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_1  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_21  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_2  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_22  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_28  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_32  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_29  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_33  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_27  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_31  [纯合并/入口节点，无实际语句]
+    □ 块: main_entry_0  [纯合并/入口节点，无实际语句]
+    □ 块: while_body_start_24  [纯合并/入口节点，无实际语句]
+    □ 块: while_exit_25  [纯合并/入口节点，无实际语句]
+
+================================================================================
+结果已保存到: testcase_result\testcase_s_03025_016_20260424_165654.txt
+================================================================================

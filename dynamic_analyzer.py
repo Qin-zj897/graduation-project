@@ -13,8 +13,11 @@ import linecache
 import time
 import re
 import ast
+import io
 from collections import defaultdict
 from typing import Dict, List, Any, Optional, Set, Tuple
+
+from advanced_executor import _fix_main_wrapped_globals
 
 
 class DynamicAnalyzer:
@@ -26,7 +29,7 @@ class DynamicAnalyzer:
                 source_code: str,
                 static_analysis_result: Dict[str, Any],
                 timeout: float = 5.0,
-                max_execution_steps: int = 10000):
+                max_execution_steps: int = 20000000):
         """
         初始化动态分析器
         
@@ -59,6 +62,7 @@ class DynamicAnalyzer:
         self.cfg_edges = set()
         self.cfg_line_to_nodes = defaultdict(list)  # 行号到节点的映射
         self.cfg_node_to_line = {}  # 节点到行号的映射
+        self._cfg_out_edges = defaultdict(set)  # from_node -> {to_node}
         
         if cfg:
             # 提取节点
@@ -77,6 +81,7 @@ class DynamicAnalyzer:
                 to_node = edge.get('to')
                 if from_node and to_node:
                     self.cfg_edges.add((from_node, to_node))
+                    self._cfg_out_edges[from_node].add(to_node)
                     # 所有端点都加入 cfg_nodes
                     self.cfg_nodes.add(from_node)
                     self.cfg_nodes.add(to_node)
@@ -292,6 +297,7 @@ class DynamicAnalyzer:
         self._output_buffer = []
         self._execution_steps = 0
         self._last_line = None
+        self._run_start_time = None
     
     def run_with_input(self, input_data: Any = None) -> Dict[str, Any]:
         """
@@ -306,10 +312,11 @@ class DynamicAnalyzer:
         self._reset_results()
         
         # 将源代码加载到linecache，以便在追踪时能读取代码行
+        source_code = _fix_main_wrapped_globals(self.source_code)
         filename = '<dynamic>'
-        lines = self.source_code.splitlines(keepends=True)
+        lines = source_code.splitlines(keepends=True)
         linecache.cache[filename] = (
-            len(self.source_code),
+            len(source_code),
             None,
             lines,
             filename
@@ -317,12 +324,23 @@ class DynamicAnalyzer:
         
         # 创建安全命名空间
         safe_builtins = self._create_safe_builtins(input_data)
-        global_ns = {'__builtins__': safe_builtins, '__name__': '__main__'}
-        local_ns = {}
+        exec_ns = {'__builtins__': safe_builtins, '__name__': '__main__'}
+
+        original_stdin = sys.stdin
+        if input_data is None:
+            mocked_stdin = None
+        else:
+            if isinstance(input_data, list):
+                input_text = '\n'.join(str(x) for x in input_data)
+            else:
+                input_text = str(input_data)
+            if input_text and not input_text.endswith('\n'):
+                input_text += '\n'
+            mocked_stdin = io.StringIO(input_text)
         
         # 编译代码
         try:
-            compiled_code = compile(self.source_code, filename, 'exec')
+            compiled_code = compile(source_code, filename, 'exec')
         except SyntaxError as e:
             linecache.clearcache()
             return self._error_result(f"语法错误: {e}")
@@ -330,22 +348,28 @@ class DynamicAnalyzer:
         # 追踪函数
         analyzer = self
         def trace_function(frame, event, arg):
+            if frame.f_code.co_filename != filename:
+                return None
             if event == 'line':
-                analyzer._trace_line(frame, local_ns, global_ns)
+                analyzer._trace_line(frame)
             return trace_function
         
         # 执行
         sys.settrace(trace_function)
         start_time = time.time()
+        self._run_start_time = start_time
         success = False
         error = None
         
         try:
-            exec(compiled_code, global_ns, local_ns)
+            if mocked_stdin is not None:
+                sys.stdin = mocked_stdin
+            exec(compiled_code, exec_ns, exec_ns)
             success = True
         except Exception as e:
             error = traceback.format_exc()
         finally:
+            sys.stdin = original_stdin
             sys.settrace(None)
             linecache.clearcache()
         
@@ -488,11 +512,13 @@ class DynamicAnalyzer:
             'type_validation': {}
         }
     
-    def _trace_line(self, frame, local_ns, global_ns):
+    def _trace_line(self, frame):
         """追踪行执行"""
         self._execution_steps += 1
         if self._execution_steps > self.max_execution_steps:
             raise RuntimeError(f"执行步骤超过最大限制")
+        if self._run_start_time is not None and time.time() - self._run_start_time > self.timeout:
+            raise TimeoutError(f"执行超时（>{self.timeout}秒）")
         
         lineno = frame.f_lineno
         filename = frame.f_code.co_filename
@@ -500,12 +526,13 @@ class DynamicAnalyzer:
         if '<dynamic>' not in filename:
             return
         
-        # 捕获关键变量
+        # 捕获关键变量：优先记录局部变量；对全局仅保留输入变量，避免大对象快照过重
         vars_snapshot = {}
+        tracked_global_names = self.input_vars if getattr(self, 'input_vars', None) else set()
         for var in self.key_variables:
             if var in frame.f_locals:
                 vars_snapshot[var] = self._safe_value(frame.f_locals[var])
-            elif var in frame.f_globals:
+            elif var in tracked_global_names and var in frame.f_globals:
                 vars_snapshot[var] = self._safe_value(frame.f_globals[var])
         
         # 记录轨迹（只记录有变量变化的步骤）
@@ -534,77 +561,151 @@ class DynamicAnalyzer:
                 self._runtime_types[var].add(type(val).__name__)
 
         # 更新CFG覆盖
-        self._update_cfg_coverage(lineno)
+        self._update_cfg_coverage(lineno, frame)
         
         # 检查分支条件并计算分支距离
         self._check_branch_condition(lineno, frame)
         
         self._last_line = lineno
     
-    def _update_cfg_coverage(self, current_line):
-        """更新CFG边覆盖"""
-        # 记录当前行覆盖的节点
-        if current_line in self.cfg_line_to_nodes:
-            for node in self.cfg_line_to_nodes[current_line]:
+    def _update_cfg_coverage(self, current_line, frame=None):
+        """更新CFG边覆盖。"""
+        current_nodes = self.cfg_line_to_nodes.get(current_line, [])
+        if current_nodes:
+            for node in current_nodes:
                 self._covered_blocks.add(node)
-        
+            self._mark_line_implied_edges(current_line, current_nodes, frame)
+
         if self._last_line is None:
             return
-        
-        # 策略1: 精确匹配 - 查找从上一行到当前行的边
+
         last_nodes = self.cfg_line_to_nodes.get(self._last_line, [])
-        current_nodes = self.cfg_line_to_nodes.get(current_line, [])
-        
+        if not last_nodes or not current_nodes:
+            return
+
         matched = False
+
+        def mark_edge_path(path):
+            nonlocal matched
+            if len(path) < 2:
+                return
+            for left, right in zip(path, path[1:]):
+                self._covered_edges.add((left, right))
+                self._covered_blocks.add(left)
+                self._covered_blocks.add(right)
+            matched = True
+
         for from_node in last_nodes:
             for to_node in current_nodes:
-                if (from_node, to_node) in self.cfg_edges:
-                    self._covered_edges.add((from_node, to_node))
-                    self._covered_blocks.add(from_node)
-                    self._covered_blocks.add(to_node)
-                    matched = True
-        
+                if to_node in self._cfg_out_edges.get(from_node, set()):
+                    mark_edge_path([from_node, to_node])
+
         if matched:
             return
-        
-        # 策略2: 间接匹配 - 查找通过中间节点连接的边
-        # 例如: last_line(3) -> virtual_node -> current_line(4)
+
         for from_node in last_nodes:
-            # 查找从from_node出发的所有边
-            for edge_from, edge_to in self.cfg_edges:
-                if edge_from == from_node:
-                    # 检查edge_to是否能到达current_nodes
-                    if edge_to in current_nodes:
-                        self._covered_edges.add((edge_from, edge_to))
-                        self._covered_blocks.add(edge_from)
-                        self._covered_blocks.add(edge_to)
-                        matched = True
-                    else:
-                        # 检查edge_to是否是虚拟节点，且能到达current_line
-                        for edge_from2, edge_to2 in self.cfg_edges:
-                            if edge_from2 == edge_to and edge_to2 in current_nodes:
-                                # 找到了路径: from_node -> edge_to -> edge_to2
-                                self._covered_edges.add((edge_from, edge_to))
-                                self._covered_edges.add((edge_from2, edge_to2))
-                                self._covered_blocks.add(edge_from)
-                                self._covered_blocks.add(edge_to)
-                                self._covered_blocks.add(edge_to2)
-                                matched = True
-        
+            mid_nodes = self._cfg_out_edges.get(from_node, set())
+            for mid_node in mid_nodes:
+                for to_node in current_nodes:
+                    if to_node in self._cfg_out_edges.get(mid_node, set()):
+                        mark_edge_path([from_node, mid_node, to_node])
+
         if matched:
             return
-        
-        # 策略3: 全局搜索 - 记录所有可能的边
-        # 这是最后的兜底策略，标记所有边为潜在覆盖
-        for edge_from, edge_to in self.cfg_edges:
-            from_line = self.cfg_node_to_line.get(edge_from)
-            to_line = self.cfg_node_to_line.get(edge_to)
-            
-            # 如果边的起点或终点匹配执行的行号，标记为覆盖
-            if from_line == self._last_line or to_line == current_line:
-                self._covered_edges.add((edge_from, edge_to))
-                self._covered_blocks.add(edge_from)
-                self._covered_blocks.add(edge_to)
+
+        max_depth = 6
+        for from_node in last_nodes:
+            queue = [(from_node, [from_node])]
+            visited = {from_node}
+            while queue:
+                node, path = queue.pop(0)
+                if len(path) > max_depth:
+                    continue
+                for next_node in self._cfg_out_edges.get(node, set()):
+                    if next_node in visited:
+                        continue
+                    next_path = path + [next_node]
+                    if next_node in current_nodes:
+                        mark_edge_path(next_path)
+                        break
+                    visited.add(next_node)
+                    queue.append((next_node, next_path))
+                if matched:
+                    break
+            if matched:
+                break
+
+        if matched:
+            return
+
+        for node in last_nodes:
+            self._covered_blocks.add(node)
+        for node in current_nodes:
+            self._covered_blocks.add(node)
+
+    def _cover_cfg_edge(self, from_node, to_node):
+        if (from_node, to_node) not in self.all_cfg_edges:
+            return False
+        self._covered_edges.add((from_node, to_node))
+        self._covered_blocks.add(from_node)
+        self._covered_blocks.add(to_node)
+        return True
+
+    def _mark_virtual_tail_edges(self, start_node, max_depth=4):
+        node = start_node
+        visited = {node}
+        for _ in range(max_depth):
+            outgoing = list(self._cfg_out_edges.get(node, set()))
+            if len(outgoing) != 1:
+                return
+            next_node = outgoing[0]
+            if next_node in visited:
+                return
+            edge_info = self.all_cfg_edges.get((node, next_node), {})
+            label = edge_info.get('label', '')
+            if label not in {'', 'true_end', 'false_end', 'return', 'implicit_return', 'continue'}:
+                return
+            if not self._cover_cfg_edge(node, next_node):
+                return
+            if self.cfg_node_to_line.get(next_node):
+                return
+            visited.add(next_node)
+            node = next_node
+
+    def _mark_line_implied_edges(self, current_line, current_nodes, frame=None):
+        line = linecache.getline(frame.f_code.co_filename, current_line).strip() if frame is not None else ''
+        is_if = line.startswith(('if ', 'elif '))
+        is_while = line.startswith('while ')
+        is_for = line.startswith('for ')
+
+        branch_label = None
+        if is_if or is_while:
+            condition = self._extract_condition(line)
+            if condition and frame is not None:
+                try:
+                    branch_label = 'true' if bool(eval(condition, frame.f_globals, frame.f_locals)) else 'false'
+                except Exception:
+                    branch_label = None
+        elif is_for:
+            branch_label = 'iterate'
+
+        for node in current_nodes:
+            outgoing = list(self._cfg_out_edges.get(node, set()))
+            if not outgoing:
+                continue
+
+            selected_targets = []
+            if branch_label is not None:
+                selected_targets = [
+                    target for target in outgoing
+                    if self.all_cfg_edges.get((node, target), {}).get('label', '') == branch_label
+                ]
+            elif len(outgoing) == 1:
+                selected_targets = outgoing
+
+            for target in selected_targets:
+                if self._cover_cfg_edge(node, target):
+                    self._mark_virtual_tail_edges(target)
     
     def _check_branch_condition(self, lineno, frame):
         """检查分支条件并计算分支距离"""
@@ -899,18 +1000,28 @@ class DynamicAnalyzer:
         safe_builtins = {}
         SAFE_BUILTINS = {
             'abs', 'all', 'any', 'bin', 'bool', 'chr', 'dict', 'divmod',
-            'enumerate', 'filter', 'float', 'format', 'hex', 'int', 'iter',
-            'len', 'list', 'map', 'max', 'min', 'oct', 'ord', 'pow', 'range',
+            'enumerate', 'filter', 'float', 'format', 'hex', 'int', 'isinstance', 'iter',
+            'len', 'list', 'map', 'max', 'min', 'object', 'oct', 'ord', 'pow', 'range',
             'repr', 'reversed', 'round', 'set', 'slice', 'sorted', 'str',
-            'sum', 'tuple', 'type', 'zip', 'eval'
+            'sum', 'tuple', 'type', 'zip', 'eval', '__import__', '__build_class__'
         }
         
         for name in SAFE_BUILTINS:
             if name in builtins.__dict__:
                 safe_builtins[name] = builtins.__dict__[name]
+
+        def _stable_text(value):
+            if isinstance(value, str):
+                return repr(value)
+            return str(value)
         
         def safe_print(*args, **kwargs):
-            self._output_buffer.append(' '.join(str(a) for a in args))
+            sep = kwargs.get('sep', ' ')
+            end = kwargs.get('end', '\n')
+            text = sep.join(_stable_text(a) for a in args) + end
+            if end:
+                text = text[:-len(end)] if text.endswith(end) else text
+            self._output_buffer.append(text)
         safe_builtins['print'] = safe_print
         
         if input_data is not None:

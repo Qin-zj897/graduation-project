@@ -1,0 +1,118 @@
+COMMAND:
+C:\Python314\python.exe -m pynguin --project_path C:\Users\22954\Desktop\毕业设计\datasets\pynguin_wrapped\03025\success --module_name s_03025_049 --output-path C:\Users\22954\Desktop\毕业设计\datasets\testcase_result\pynguin\03025\success\s_03025_049 --maximum-search-time 15 --maximum-memory 700 --assertion_generation NONE --coverage-metrics BRANCH --statistics-backend NONE --use-master-worker False --subprocess-if-recommended False --no-rich
+
+STDOUT:
+
+
+STDERR:
+[00:20:26] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-760 (_writerthread), started daemon 16524)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not dict
+[00:20:27] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-1432 (_writerthread), started daemon 22024)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not set
+[00:20:28] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-1945 (_writerthread), started daemon 28888)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not bool
+[00:20:30] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-2764 (_writerthread), started daemon 21172)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not bool
+[00:20:31] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-2994 (_writerthread), started daemon 10904)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not bool
+[00:20:34] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-4325 (_writerthread), started daemon 1796)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not object
+[00:20:39] [WARNING](pynguin:_log_thread_exception:73): Exception in Thread: <Thread(Thread-5970 (_writerthread), started daemon 12256)>
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1618, in _writerthread
+    self._stdin_write(input)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1154, in _stdin_write
+    self.stdin.write(input)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: write() argument must be str, not int
+[00:20:39] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[00:20:39] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[00:20:39] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[00:20:39] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[00:20:39] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[00:20:39] [ERROR](pynguin.generator:_run:751): Failed to write statistics data

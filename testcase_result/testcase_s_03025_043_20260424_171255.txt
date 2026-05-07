@@ -1,0 +1,172 @@
+================================================================================
+测试用例集 - s_03025_043  （共 5 个）
+代码文件: c:\Users\22954\Desktop\毕业设计\datasets\03025\success\s_03025_043.py    XML种子: c:\Users\22954\Desktop\毕业设计\datasets\03025.xml    耗时: 1.9s
+================================================================================
+
+[01] 输入    : 1 25 25 50
+     期望输出: 2
+     实际输出: ERROR: name 'next' is not defined
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[02] 输入    : 1 1 99 0
+     期望输出: 1
+     实际输出: ERROR: name 'next' is not defined
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[03] 输入    : 2 1 99 0
+     期望输出: 568600006
+     实际输出: ERROR: name 'next' is not defined
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[04] 输入    : 3 1 99 0
+     期望输出: 281387425
+     实际输出: ERROR: name 'next' is not defined
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[05] 输入    : 10 1 99 0
+     期望输出: 358733447
+     实际输出: ERROR: name 'next' is not defined
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+================================================================================
+覆盖率报告
+================================================================================
+  分支覆盖率 : 0/9 = 0.00%
+  边覆盖率   : 0/18 = 0.00%  (已排除 48 条结构边)
+  块覆盖率   : 1/9 = 11.11%
+  已覆盖分支 : （无）
+  代码类型判断 : 应为正确程序（success）
+  代码是否正确判断成功 : 否
+  未覆盖分支 :
+    - B1  (pred_id=P1)  node=if_condition_3
+    - B2  (for循环 第21行)  node=for_header_13
+    - B3  (for循环 第25行)  node=for_header_16
+    - B4  (for循环 第36行)  node=for_header_21
+    - B5  (for循环 第39行)  node=for_header_24
+    - B6  (for循环 第56行)  node=for_header_29
+    - B7  (for循环 第74行)  node=for_header_36
+    - B8  (for循环 第75行)  node=for_header_39
+    - B9  (pred_id=P2)  node=if_condition_42
+  未覆盖真实CFG边 :
+    - for_header_13 -[iterate]->for_body_start_14  line=21  [B2]
+    - for_header_13 -[exhausted]->for_exit_15  line=21  [B2]
+    - for_header_16 -[iterate]->for_body_start_17  line=25  [B3]
+    - for_header_16 -[exhausted]->for_exit_18  line=25  [B3]
+    - for_header_21 -[iterate]->for_body_start_22  line=36  [B4]
+    - for_header_21 -[exhausted]->for_exit_23  line=36  [B4]
+    - for_header_24 -[iterate]->for_body_start_25  line=39  [B5]
+    - for_header_24 -[exhausted]->for_exit_26  line=39  [B5]
+    - for_header_29 -[iterate]->for_body_start_30  line=56  [B6]
+    - for_header_29 -[exhausted]->for_exit_31  line=56  [B6]
+    - for_header_36 -[iterate]->for_body_start_37  line=74  [B7]
+    - for_header_36 -[exhausted]->for_exit_38  line=74  [B7]
+    - for_header_39 -[iterate]->for_body_start_40  line=75  [B8]
+    - for_header_39 -[exhausted]->for_exit_41  line=75  [B8]
+    - if_condition_3 -[false]->if_false_5  line=7  [B1]
+    - if_condition_3 -[true]->if_true_4  line=7  [B1]
+    - if_condition_42 -[false]->if_false_44  line=84  [B9]
+    - if_condition_42 -[true]->if_true_43  line=84  [B9]
+  未覆盖真实块 :
+    - for_header_13  line=21  [B2]
+    - for_header_16  line=25  [B3]
+    - for_header_21  line=36  [B4]
+    - for_header_24  line=39  [B5]
+    - for_header_29  line=56  [B6]
+    - for_header_36  line=74  [B7]
+    - for_header_39  line=75  [B8]
+    - if_condition_3  line=7  [B1]
+  结构节点/边（不计入覆盖率，共 85 项）:
+    □ 边: for_body_start_14 -[continue]->for_header_13  [分支体内部连接边]
+    □ 边: for_body_start_17 -[continue]->for_header_16  [分支体内部连接边]
+    □ 边: for_body_start_17 -[call]->func_entry_9  [分支体内部连接边]
+    □ 边: for_body_start_22 -[continue]->for_header_21  [分支体内部连接边]
+    □ 边: for_body_start_25 -[continue]->for_header_24  [分支体内部连接边]
+    □ 边: for_body_start_25 -[call]->func_entry_9  [分支体内部连接边]
+    □ 边: for_body_start_30 -[continue]->for_header_29  [分支体内部连接边]
+    □ 边: for_body_start_37 -[]->for_header_39  [分支体内部连接边]
+    □ 边: for_body_start_40 -[continue]->for_header_39  [分支体内部连接边]
+    □ 边: for_exit_15 -[]->for_header_16  [分支体内部连接边]
+    □ 边: for_exit_18 -[return]->func_exit_12  [分支体内部连接边]
+    □ 边: for_exit_23 -[]->for_header_24  [分支体内部连接边]
+    □ 边: for_exit_26 -[return]->func_exit_20  [分支体内部连接边]
+    □ 边: for_exit_31 -[call]->func_entry_9  [分支体内部连接边]
+    □ 边: for_exit_31 -[return]->func_exit_28  [分支体内部连接边]
+    □ 边: for_exit_38 -[implicit_return]->func_exit_35  [分支体内部连接边]
+    □ 边: for_exit_41 -[continue]->for_header_36  [分支体内部连接边]
+    □ 边: func_entry_1 -[]->if_condition_3  [分支体内部连接边]
+    □ 边: func_entry_11 -[]->for_header_13  [分支体内部连接边]
+    □ 边: func_entry_19 -[]->for_header_21  [分支体内部连接边]
+    □ 边: func_entry_27 -[]->for_header_29  [分支体内部连接边]
+    □ 边: func_entry_27 -[call]->func_entry_11  [分支体内部连接边]
+    □ 边: func_entry_27 -[call]->func_entry_19  [分支体内部连接边]
+    □ 边: func_entry_27 -[call]->func_entry_7  [分支体内部连接边]
+    □ 边: func_entry_32 -[call]->func_entry_27  [分支体内部连接边]
+    □ 边: func_entry_32 -[call]->func_entry_34  [分支体内部连接边]
+    □ 边: func_entry_32 -[implicit_return]->func_exit_33  [分支体内部连接边]
+    □ 边: func_entry_34 -[]->for_header_36  [分支体内部连接边]
+    □ 边: func_entry_7 -[call]->func_entry_1  [分支体内部连接边]
+    □ 边: func_entry_7 -[return]->func_exit_8  [分支体内部连接边]
+    □ 边: func_entry_9 -[return]->func_exit_10  [分支体内部连接边]
+    □ 边: func_exit_10 -[return]->for_body_start_17  [分支体内部连接边]
+    □ 边: func_exit_10 -[return]->for_body_start_25  [分支体内部连接边]
+    □ 边: func_exit_10 -[return]->for_exit_31  [分支体内部连接边]
+    □ 边: func_exit_12 -[return]->func_entry_27  [分支体内部连接边]
+    □ 边: func_exit_2 -[return]->func_entry_7  [分支体内部连接边]
+    □ 边: func_exit_20 -[return]->func_entry_27  [分支体内部连接边]
+    □ 边: func_exit_28 -[return]->func_entry_32  [分支体内部连接边]
+    □ 边: func_exit_33 -[return]->if_true_43  [分支体内部连接边]
+    □ 边: func_exit_35 -[return]->func_entry_32  [分支体内部连接边]
+    □ 边: func_exit_8 -[return]->func_entry_27  [分支体内部连接边]
+    □ 边: if_false_44 -[false_end]->if_merge_45  [分支体内部连接边]
+    □ 边: if_false_5 -[false_end]->if_merge_6  [分支体内部连接边]
+    □ 边: if_merge_6 -[return]->func_exit_2  [分支体内部连接边]
+    □ 边: if_true_4 -[return]->func_exit_2  [分支体内部连接边]
+    □ 边: if_true_43 -[call]->func_entry_32  [分支体内部连接边]
+    □ 边: if_true_43 -[true_end]->if_merge_45  [分支体内部连接边]
+    □ 边: main_entry_0 -[]->if_condition_42  [分支体内部连接边]
+    □ 块: for_body_start_14  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_17  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_22  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_25  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_30  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_37  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_40  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_15  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_18  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_23  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_26  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_31  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_38  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_41  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_1  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_11  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_19  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_27  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_32  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_34  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_7  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_9  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_10  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_12  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_2  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_20  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_28  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_33  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_35  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_8  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_44  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_5  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_45  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_6  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_4  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_43  [纯合并/入口节点，无实际语句]
+    □ 块: main_entry_0  [纯合并/入口节点，无实际语句]
+
+================================================================================
+结果已保存到: testcase_result\testcase_s_03025_043_20260424_171255.txt
+================================================================================

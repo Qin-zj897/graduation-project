@@ -1,12 +1,43 @@
 import sys
 import io
 import traceback
-import threading
 import time
-import ctypes
-import inspect
 import re
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
+import builtins
+import multiprocessing
+from queue import Empty
+
+
+def _fix_main_wrapped_globals(source_code: str) -> str:
+    """兼容旧调用点：当前不再对 main 包装做额外改写。"""
+    return source_code
+
+
+def _execute_with_protection_worker(mode, code_str, input_str, timeout, max_iterations, max_appends, result_queue):
+    """子进程执行包装，确保超时后可被强制终止。"""
+    executor = AdvancedExecutor(timeout=timeout, max_iterations=max_iterations, max_appends=max_appends)
+    try:
+        result = executor._execute_with_protection(code_str, input_str, collect_coverage=(mode == 'coverage'))
+        payload = {
+            'output': result.get('output', ''),
+            'success': result.get('success', False),
+            'error': result.get('error', ''),
+            'timeout': False,
+            'interrupted': result.get('interrupted', False),
+        }
+        if mode == 'coverage':
+            payload['coverage'] = result.get('coverage', [])
+        result_queue.put(payload)
+    except BaseException:
+        result_queue.put({
+            'output': 'ERROR: 子进程执行失败',
+            'success': False,
+            'error': traceback.format_exc(),
+            'timeout': False,
+            'interrupted': True,
+            'coverage': [] if mode == 'coverage' else None,
+        })
+
 
 # ========== 异常定义 ==========
 
@@ -27,33 +58,67 @@ class TimeoutExceeded(Exception):
 class AdvancedExecutor:
     """增强版代码执行器，支持覆盖收集、超时控制、死循环防护"""
     
-    def __init__(self, timeout=5, max_iterations=10000, max_appends=10000):
+    def __init__(self, timeout=5, max_iterations=10000, max_appends=10000, use_subprocess=True):
         self.coverage_lines = set()
         self.original_trace = None
         self.timeout = timeout
         self.max_iterations = max_iterations
         self.max_appends = max_appends
-        self._stop_execution = False
-        self._execution_thread = None
+        self.use_subprocess = use_subprocess
         self._iteration_count = 0
-        
-    # ========== 线程控制 ==========
-    
-    def _async_raise(self, tid, exctype):
-        """强制中断线程"""
-        if not inspect.isclass(exctype):
-            raise TypeError("Only types can be raised")
-        
-        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
-            ctypes.c_long(tid), 
-            ctypes.py_object(exctype)
+
+    def _execute_in_subprocess(self, mode, code_str, input_str, timeout):
+        """在子进程中执行代码，超时后强制终止并稳定取回结果。"""
+        ctx = multiprocessing.get_context('spawn')
+        result_queue = ctx.Queue(maxsize=1)
+        process = ctx.Process(
+            target=_execute_with_protection_worker,
+            args=(mode, code_str, input_str, timeout, self.max_iterations, self.max_appends, result_queue),
         )
-        
-        if res == 0:
-            raise ValueError("Invalid thread id")
-        elif res != 1:
-            ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, None)
-            raise SystemError("PyThreadState_SetAsyncExc failed")
+        process.start()
+
+        deadline = time.monotonic() + timeout
+        while process.is_alive() and time.monotonic() < deadline:
+            process.join(0.05)
+
+        if process.is_alive():
+            process.kill()
+            process.join(1)
+            try:
+                result_queue.close()
+                result_queue.join_thread()
+            except:
+                pass
+            return {
+                'output': f"TIMEOUT_ERROR: 执行超时（{timeout}秒）",
+                'success': False,
+                'error': f"执行超时（{timeout}秒）",
+                'timeout': True,
+                'interrupted': True,
+                'coverage': [] if mode == 'coverage' else None,
+            }
+
+        try:
+            payload = result_queue.get(timeout=0.2)
+        except Empty:
+            payload = {
+                'output': 'EXECUTION_ERROR: 子进程未返回结果',
+                'success': False,
+                'error': '子进程未返回结果',
+                'timeout': False,
+                'interrupted': False,
+                'coverage': [] if mode == 'coverage' else None,
+            }
+        finally:
+            try:
+                result_queue.close()
+                result_queue.join_thread()
+            except:
+                pass
+
+        if mode != 'coverage':
+            payload.pop('coverage', None)
+        return payload
     
     # ========== 覆盖收集 ==========
     
@@ -172,7 +237,7 @@ class AdvancedExecutor:
     
     # ========== 核心执行方法 ==========
     
-    def _execute_with_protection(self, code_str, input_str):
+    def _execute_with_protection(self, code_str, input_str, collect_coverage=True):
         """带保护的代码执行"""
         self.coverage_lines.clear()
         
@@ -182,8 +247,9 @@ class AdvancedExecutor:
         self.original_trace = sys.gettrace()
         
         try:
-            # 设置覆盖收集
-            sys.settrace(self.trace_hook)
+            # 仅在需要覆盖时开启逐行追踪
+            if collect_coverage:
+                sys.settrace(self.trace_hook)
             
             # 重定向IO
             sys.stdin = io.StringIO(input_str)
@@ -208,6 +274,8 @@ class AdvancedExecutor:
                 'sum': sum,
                 'abs': abs,
                 'round': round,
+                'pow': pow,
+                'divmod': divmod,
                 'sorted': sorted,
                 'list': self.SafeList,
                 'dict': dict,
@@ -221,6 +289,7 @@ class AdvancedExecutor:
                 'map': map,
                 'filter': filter,
                 'reversed': reversed,
+                '__build_class__': builtins.__build_class__,
                 '__import__': __import__
             }
             
@@ -230,7 +299,8 @@ class AdvancedExecutor:
             safe_globals = {
                 '__builtins__': safe_builtins,
                 'SafeList': self.SafeList,
-                '__name__': '__main__'
+                '__name__': '__main__',
+                '__package__': None
             }
             
             # 执行代码
@@ -277,116 +347,33 @@ class AdvancedExecutor:
     
     def execute_with_coverage(self, code_str, input_str):
         """执行代码并收集覆盖（带超时和死循环防护）"""
-        self._execution_thread = None
-        self._stop_execution = False
-        
-        def run_in_thread():
-            self._execution_thread = threading.current_thread().ident
-            return self._execute_with_protection(code_str, input_str)
-        
-        try:
-            # 先检测危险模式
-            dangerous_patterns = self._detect_dangerous_patterns(code_str)
-            if dangerous_patterns:
-                print(f"  检测到危险模式: {dangerous_patterns}")
-            
-            with ThreadPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(run_in_thread)
-                result = future.result(timeout=self.timeout)
-                return result
-        except FutureTimeoutError:
-            # 超时后强制中断
-            self._stop_execution = True
-            
-            if self._execution_thread:
-                try:
-                    self._async_raise(self._execution_thread, KeyboardInterrupt)
-                except:
-                    pass
-            
-            time.sleep(0.1)
-            
-            return {
-                'output': f"TIMEOUT_ERROR: 执行超时（{self.timeout}秒）",
-                'coverage': [],
-                'success': False,
-                'error': f"执行超时（{self.timeout}秒）",
-                'timeout': True,
-                'interrupted': True
-            }
-        except Exception as e:
-            return {
-                'output': f"EXECUTION_ERROR: {str(e)}",
-                'coverage': [],
-                'success': False,
-                'error': str(e),
-                'timeout': False,
-                'interrupted': False
-            }
+        dangerous_patterns = self._detect_dangerous_patterns(code_str)
+        if dangerous_patterns:
+            print(f"  检测到危险模式: {dangerous_patterns}")
+        if self.use_subprocess:
+            result = self._execute_in_subprocess('coverage', code_str, input_str, self.timeout)
+            result['coverage'] = result.get('coverage') or []
+            return result
+        result = self._execute_with_protection(code_str, input_str, collect_coverage=True)
+        result['coverage'] = result.get('coverage') or []
+        result['timeout'] = result.get('timeout', False)
+        return result
     
     def execute_with_timeout(self, code_str, input_str, timeout=None):
         """执行代码（带超时，不收集覆盖）"""
         if timeout is None:
             timeout = self.timeout
-        
-        def run_code():
+        if self.use_subprocess:
+            result = self._execute_in_subprocess('timeout', code_str, input_str, timeout)
+        else:
+            original_timeout = self.timeout
             try:
-                old_stdin = sys.stdin
-                old_stdout = sys.stdout
-                
-                sys.stdin = io.StringIO(input_str)
-                sys.stdout = io.StringIO()
-                
-                # 使用保护执行
-                result = self._execute_with_protection(code_str, input_str)
-                
-                sys.stdin = old_stdin
-                sys.stdout = old_stdout
-                
-                return {
-                    'output': result['output'],
-                    'success': result['success'],
-                    'error': result.get('error', ''),
-                    'timeout': False,
-                    'interrupted': result.get('interrupted', False)
-                }
-                
-            except Exception as e:
-                return {
-                    'output': f"ERROR: {str(e)}",
-                    'success': False,
-                    'error': str(e),
-                    'timeout': False,
-                    'interrupted': False
-                }
+                self.timeout = timeout
+                result = self._execute_with_protection(code_str, input_str, collect_coverage=False)
             finally:
-                try:
-                    sys.stdin = sys.__stdin__
-                    sys.stdout = sys.__stdout__
-                except:
-                    pass
-        
-        try:
-            with ThreadPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(run_code)
-                result = future.result(timeout=timeout)
-                return result
-        except FutureTimeoutError:
-            return {
-                'output': f"TIMEOUT_ERROR: 执行超时（{timeout}秒）",
-                'success': False,
-                'error': "执行超时",
-                'timeout': True,
-                'interrupted': True
-            }
-        except Exception as e:
-            return {
-                'output': f"EXECUTION_ERROR: {str(e)}",
-                'success': False,
-                'error': str(e),
-                'timeout': False,
-                'interrupted': False
-            }
+                self.timeout = original_timeout
+        result.pop('coverage', None)
+        return result
 
 # ========== 便捷函数 ==========
 

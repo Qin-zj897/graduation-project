@@ -1,0 +1,40 @@
+{
+  "problem_id": "2910",
+  "file_count": 181,
+  "success": {
+    "program_count": 81,
+    "valid_program_count": 81,
+    "generation_failed_ids": [],
+    "generation_failed_count": 0,
+    "avg_edge_coverage": 97.32,
+    "avg_block_coverage": 98.35,
+    "hidden_bug_detected_ids": [
+      "s_2910_016",
+      "s_2910_018",
+      "s_2910_025",
+      "s_2910_033",
+      "s_2910_038",
+      "s_2910_039",
+      "s_2910_041",
+      "s_2910_048",
+      "s_2910_066",
+      "s_2910_069"
+    ],
+    "hidden_bug_detected_count": 10,
+    "hidden_bug_detection_rate": 12.35,
+    "consistent_code_count": 71,
+    "consistent_rate": 87.65
+  },
+  "failure": {
+    "program_count": 100,
+    "valid_program_count": 100,
+    "generation_failed_ids": [],
+    "generation_failed_count": 0,
+    "avg_edge_coverage": 89.83,
+    "avg_block_coverage": 91.33,
+    "bug_detected_count": 100,
+    "bug_detection_rate": 100.0,
+    "undetected_failure_ids": [],
+    "undetected_failure_count": 0
+  }
+}

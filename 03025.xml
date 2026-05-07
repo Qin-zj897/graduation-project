@@ -1,0 +1,44 @@
+<testDataSet count="7">
+    <testData1>
+        <input>1 25 25 50
+</input>
+        <output>2
+</output>
+    </testData1>
+    <testData2>
+        <input>1 1 99 0
+</input>
+        <output>1
+</output>
+    </testData2>
+    <testData3>
+        <input>2 1 99 0
+</input>
+        <output>568600006
+</output>
+    </testData3>
+    <testData4>
+        <input>3 1 99 0
+</input>
+        <output>281387425
+</output>
+    </testData4>
+    <testData5>
+        <input>10 1 99 0
+</input>
+        <output>358733447
+</output>
+    </testData5>
+    <testData6>
+        <input>100 1 1 98
+</input>
+        <output>171611123
+</output>
+    </testData6>
+    <testData7>
+        <input>100 33 33 34
+</input>
+        <output>883988222
+</output>
+    </testData7>
+</testDataSet>

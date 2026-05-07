@@ -1,0 +1,8 @@
+COMMAND:
+C:\Python314\python.exe -m pynguin --project_path C:\Users\22954\Desktop\毕业设计\datasets\3226\success --module_name s_3226_209 --algorithm MIO --output-path C:\Users\22954\Desktop\毕业设计\datasets\testcase_result\pynguin\mio\3226\success\s_3226_209 --maximum-search-time 15 --maximum-memory 700 --assertion_generation NONE --coverage-metrics BRANCH --statistics-backend NONE --use-master-worker False --subprocess-if-recommended False --no-rich
+
+STDOUT:
+
+
+STDERR:
+[00:50:12] [ERROR](pynguin.generator:_run:751): Failed to write statistics data

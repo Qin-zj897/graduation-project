@@ -1,0 +1,56 @@
+{
+  "algorithm": "pynguin",
+  "problem_id": "03025",
+  "file_count": 140,
+  "input_validity_rule": "reference_program_accepts_input",
+  "success": {
+    "program_count": 74,
+    "valid_program_count": 74,
+    "generation_failed_ids": [],
+    "generation_failed_count": 0,
+    "raw_case_count": 452,
+    "valid_case_count": 370,
+    "invalid_input_count": 82,
+    "auxiliary_call_count": 0,
+    "avg_edge_coverage": 6.83,
+    "avg_block_coverage": 25.54,
+    "hidden_bug_detected_ids": [
+      "s_03025_004",
+      "s_03025_006",
+      "s_03025_020",
+      "s_03025_023",
+      "s_03025_029",
+      "s_03025_032",
+      "s_03025_049",
+      "s_03025_052",
+      "s_03025_059",
+      "s_03025_061"
+    ],
+    "hidden_bug_detected_count": 10,
+    "hidden_bug_detection_rate": 13.51,
+    "consistent_code_count": 64,
+    "consistent_rate": 86.49
+  },
+  "failure": {
+    "program_count": 66,
+    "valid_program_count": 66,
+    "generation_failed_ids": [],
+    "generation_failed_count": 0,
+    "raw_case_count": 399,
+    "valid_case_count": 333,
+    "invalid_input_count": 66,
+    "auxiliary_call_count": 0,
+    "avg_edge_coverage": 45.68,
+    "avg_block_coverage": 52.69,
+    "bug_detected_count": 61,
+    "bug_detection_rate": 92.42,
+    "undetected_failure_ids": [
+      "f_03025_020",
+      "f_03025_031",
+      "f_03025_038",
+      "f_03025_041",
+      "f_03025_063"
+    ],
+    "undetected_failure_count": 5
+  }
+}

@@ -1,0 +1,6 @@
+import math
+n, a, b, c = map(int,input().split())
+prob=(a+b)/100.0
+answer = math.floor(1/(1-prob))
+
+print(n*int(answer))

@@ -1,0 +1,31 @@
+Selected statistics files
+
+Problem 03039
+我的方法: stats_03039_20260421_134300.json
+Pynguin-DynaMOSA: pynguin_stats_03039_20260422_002036.json
+Pynguin-MIO: mio_stats_03039_20260426_114940.json
+
+Problem 03025
+我的方法: stats_03025_20260426_170436.json
+Pynguin-DynaMOSA: pynguin_stats_03025_20260425_193907.json
+Pynguin-MIO: mio_stats_03025_20260426_154616.json
+
+Problem 02882
+我的方法: stats_02882_20260426_170135.json
+Pynguin-DynaMOSA: pynguin_stats_02882_20260423_192307.json
+Pynguin-MIO: mio_stats_02882_20260426_165336.json
+
+Problem 2910
+我的方法: stats_2910_20260421_134307.json
+Pynguin-DynaMOSA: pynguin_stats_2910_20260421_134803.json
+Pynguin-MIO: mio_stats_2910_20260426_104231.json
+
+Problem 3039
+我的方法: stats_3039_20260421_134325.json
+Pynguin-DynaMOSA: pynguin_stats_3039_20260421_143616.json
+Pynguin-MIO: mio_stats_3039_20260426_104628.json
+
+Problem 3226
+我的方法: stats_3226_20260421_134329.json
+Pynguin-DynaMOSA: pynguin_stats_3226_20260421_143815.json
+Pynguin-MIO: mio_stats_3226_20260426_104435.json

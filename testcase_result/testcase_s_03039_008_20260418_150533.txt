@@ -1,0 +1,92 @@
+================================================================================
+测试用例集 - s_03039_008  （共 1 个）
+代码文件: 03039/success/s_03039_008.py    XML种子: 03039.xml    耗时: 169.2s
+================================================================================
+
+[01] 输入    : 2 2 2
+     期望输出: 8
+     实际输出: ERROR: TimeoutError: 执行超时（>2.0秒）
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+================================================================================
+覆盖率报告
+================================================================================
+  分支覆盖率 : 0/6 = 0.00%
+  边覆盖率   : 2/12 = 16.67%  (已排除 21 条结构边)
+  块覆盖率   : 1/6 = 16.67%
+  已覆盖分支 : （无）
+  代码类型判断 : 应为正确程序（success）
+  代码是否正确判断成功 : 否
+  未覆盖分支 :
+    - B1  (for循环 第7行)  node=for_header_3
+    - B2  (pred_id=P1)  node=if_condition_8
+    - B3  (pred_id=P2)  node=if_condition_14
+    - B4  (for循环 第26行)  node=for_header_20
+    - B5  (for循环 第36行)  node=for_header_25
+    - B6  (for循环 第42行)  node=for_header_28
+  未覆盖真实CFG边 :
+    - for_header_20 -[iterate]->for_body_start_21  line=26  [B4]
+    - for_header_20 -[exhausted]->for_exit_22  line=26  [B4]
+    - for_header_25 -[iterate]->for_body_start_26  line=36  [B5]
+    - for_header_25 -[exhausted]->for_exit_27  line=36  [B5]
+    - for_header_28 -[iterate]->for_body_start_29  line=42  [B6]
+    - for_header_28 -[exhausted]->for_exit_30  line=42  [B6]
+    - if_condition_14 -[false]->if_false_16  line=18  [B3]
+    - if_condition_14 -[true]->if_true_15  line=18  [B3]
+    - if_condition_8 -[false]->if_false_10  line=13  [B2]
+    - if_condition_8 -[true]->if_true_9  line=13  [B2]
+  未覆盖真实块 :
+    - for_header_20  line=26  [B4]
+    - for_header_25  line=36  [B5]
+    - for_header_28  line=42  [B6]
+    - if_condition_14  line=18  [B3]
+    - if_condition_8  line=13  [B2]
+  结构节点/边（不计入覆盖率，共 43 项）:
+    □ 边: for_body_start_21 -[continue]->for_header_20  [分支体内部连接边]
+    □ 边: for_body_start_26 -[continue]->for_header_25  [分支体内部连接边]
+    □ 边: for_body_start_29 -[continue]->for_header_28  [分支体内部连接边]
+    □ 边: for_exit_22 -[return]->func_exit_19  [分支体内部连接边]
+    □ 边: for_exit_27 -[]->for_header_28  [分支体内部连接边]
+    □ 边: for_exit_30 -[return]->func_exit_24  [分支体内部连接边]
+    □ 边: for_exit_5 -[implicit_return]->func_exit_2  [分支体内部连接边]
+    □ 边: func_entry_12 -[]->if_condition_14  [分支体内部连接边]
+    □ 边: func_entry_18 -[]->for_header_20  [分支体内部连接边]
+    □ 边: func_entry_23 -[]->for_header_25  [分支体内部连接边]
+    □ 边: func_entry_23 -[call]->func_entry_6  [分支体内部连接边]
+    □ 边: func_entry_6 -[]->if_condition_8  [分支体内部连接边]
+    □ 边: func_exit_24 -[return]->main_entry_0  [分支体内部连接边]
+    □ 边: func_exit_7 -[return]->func_entry_23  [分支体内部连接边]
+    □ 边: if_false_10 -[false_end]->if_merge_11  [分支体内部连接边]
+    □ 边: if_false_16 -[false_end]->if_merge_17  [分支体内部连接边]
+    □ 边: if_merge_11 -[return]->func_exit_7  [分支体内部连接边]
+    □ 边: if_merge_17 -[return]->func_exit_13  [分支体内部连接边]
+    □ 边: if_true_15 -[return]->func_exit_13  [分支体内部连接边]
+    □ 边: if_true_9 -[return]->func_exit_7  [分支体内部连接边]
+    □ 边: main_entry_0 -[call]->func_entry_23  [分支体内部连接边]
+    □ 块: for_body_start_21  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_26  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_29  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_22  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_27  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_30  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_12  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_18  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_23  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_6  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_13  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_19  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_2  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_24  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_7  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_10  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_16  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_11  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_17  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_15  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_9  [纯合并/入口节点，无实际语句]
+    □ 块: main_entry_0  [纯合并/入口节点，无实际语句]
+
+================================================================================
+结果已保存到: testcase_result\testcase_s_03039_008_20260418_150533.txt
+================================================================================

@@ -1,0 +1,84 @@
+================================================================================
+测试用例集 - f_2910_068  （共 5 个）
+代码文件: 2910\failure\f_2910_068.py    XML种子: 2910.xml    耗时: 3.2s
+================================================================================
+
+[01] 输入    : 1 | 5
+     期望输出: 2.88
+     实际输出: ERROR: TypeError: 'str' object cannot be interpreted as an integer
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[02] 输入    : 9 | 10
+     期望输出: 26.96
+     实际输出: ERROR: TypeError: 'str' object cannot be interpreted as an integer
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[03] 输入    : 7 | 30
+     期望输出: 21.00
+     实际输出: ERROR: TypeError: 'str' object cannot be interpreted as an integer
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[04] 输入    : 6 | 20
+     期望输出: 18.00
+     实际输出: ERROR: TypeError: 'str' object cannot be interpreted as an integer
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[05] 输入    : 2 | 60
+     期望输出: 6.00
+     实际输出: ERROR: TypeError: 'str' object cannot be interpreted as an integer
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+================================================================================
+覆盖率报告
+================================================================================
+  分支覆盖率 : 0/3 = 0.00%
+  边覆盖率   : 2/6 = 33.33%  (已排除 14 条结构边)
+  块覆盖率   : 2/3 = 66.67%
+  已覆盖分支 : （无）
+  代码类型判断 : 应为错误程序（failure）
+  代码是否正确判断成功 : 是
+  未覆盖分支 :
+    - B1  (for循环 第17行)  node=for_header_7
+    - B2  (pred_id=P1)  node=if_condition_10
+    - B3  (pred_id=P2)  node=if_condition_14
+  未覆盖真实CFG边 :
+    - for_header_7 -[iterate]->for_body_start_8  line=17  [B1]
+    - for_header_7 -[exhausted]->for_exit_9  line=17  [B1]
+    - if_condition_14 -[false]->if_false_16  line=29  [B3]
+    - if_condition_14 -[true]->if_true_15  line=29  [B3]
+  未覆盖真实块 :
+    - if_condition_14  line=29  [B3]
+  结构节点/边（不计入覆盖率，共 24 项）:
+    □ 边: for_exit_9 -[call]->func_entry_5  [分支体内部连接边]
+    □ 边: for_exit_9 -[return]->func_exit_2  [分支体内部连接边]
+    □ 边: func_entry_1 -[call]->func_entry_3  [分支体内部连接边]
+    □ 边: func_entry_3 -[return]->func_exit_4  [分支体内部连接边]
+    □ 边: func_entry_5 -[implicit_return]->func_exit_6  [分支体内部连接边]
+    □ 边: func_exit_2 -[return]->if_true_11  [分支体内部连接边]
+    □ 边: func_exit_4 -[return]->func_entry_1  [分支体内部连接边]
+    □ 边: func_exit_6 -[return]->for_exit_9  [分支体内部连接边]
+    □ 边: if_false_12 -[false_end]->if_merge_13  [分支体内部连接边]
+    □ 边: if_false_16 -[false_end]->if_merge_17  [分支体内部连接边]
+    □ 边: if_merge_17 -[true_end]->if_merge_13  [分支体内部连接边]
+    □ 边: if_true_11 -[call]->func_entry_1  [分支体内部连接边]
+    □ 边: if_true_11 -[]->if_condition_14  [分支体内部连接边]
+    □ 边: if_true_15 -[true_end]->if_merge_17  [分支体内部连接边]
+    □ 块: for_exit_9  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_3  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_5  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_2  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_4  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_6  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_16  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_13  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_17  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_15  [纯合并/入口节点，无实际语句]
+
+================================================================================
+结果已保存到: testcase_result\testcase_f_2910_068_20260410_193823.txt
+================================================================================

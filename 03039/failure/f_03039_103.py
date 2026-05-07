@@ -1,0 +1,42 @@
+n,m,k=map(int,input().split())
+ans=0
+INF=10**9+7
+if n<=m:
+    M=-(m-1)*m*(2*m-1)//3+m*m*(m-1)
+    Ms=m*m*(m-1)//2-(m-1)*m*(2*m-1)//6
+    M=M%INF
+    Ms=Ms%INF
+    for i in range(1,n+1):
+        for j in range(i,n+1):
+            if i==j:
+                ans=ans+Ms
+            else:
+                d=j-i
+                ans=ans+d*m**2+M
+            ans=ans%INF
+else:
+    (n,m)=(m,n)
+    M=-(m-1)*m*(2*m-1)//3+m*m*(m-1)
+    Ms=m*m*(m-1)//2-(m-1)*m*(2*m-1)//6
+    M=M%INF
+    Ms=Ms%INF
+    for i in range(1,n+1):
+        for j in range(i,n+1):
+            if i==j:
+                ans=ans+Ms
+            else:
+                d=j-i
+                ans=ans+d*m**2+M
+            ans=ans%INF
+a=1
+b=1
+c=n*m-2
+x=min(c,k-2)
+for i in range(x):
+    a=a*(c-i)
+    b=b*(i+1)
+    a=a%INF
+ans=(ans*a//b)%INF
+print(1)
+print(ans)
+

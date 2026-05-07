@@ -1,0 +1,144 @@
+================================================================================
+测试用例集 - s_03039_388  （共 5 个）
+代码文件: 03039/success/s_03039_388.py    XML种子: 03039.xml    耗时: 4.7s
+================================================================================
+
+[01] 输入    : 2 2 2
+     期望输出: 8
+     实际输出: 8
+     结果判断: 正确
+     覆盖分支: ['B1', 'B11', 'B12', 'B3', 'B4']
+
+[02] 输入    : 39 5 7
+     期望输出: 702364735
+     实际输出: 702364735
+     结果判断: 正确
+     覆盖分支: ['B1', 'B10', 'B11', 'B12', 'B3', 'B4']
+
+[03] 输入    : -1 9 4
+     期望输出: 963983327
+     实际输出: 0
+     结果判断: 错误
+     覆盖分支: ['B1', 'B12', 'B9']
+
+[04] 输入    : 1 35 1
+     期望输出: 355507437
+     实际输出: 7140
+     结果判断: 错误
+     覆盖分支: ['B1', 'B12', 'B3', 'B4']
+
+[05] 输入    : 0 6 6
+     期望输出: 0
+     实际输出: 0
+     结果判断: 正确
+     覆盖分支: ['B1', 'B12', 'B9']
+
+================================================================================
+覆盖率报告
+================================================================================
+  分支覆盖率 : 7/12 = 58.33%
+  边覆盖率   : 14/24 = 58.33%  (已排除 36 条结构边)
+  块覆盖率   : 7/12 = 58.33%
+  已覆盖分支 : ['B1', 'B10', 'B11', 'B12', 'B3', 'B4', 'B9']
+  代码类型判断 : 应为正确程序（success）
+  代码是否正确判断成功 : 否
+  未覆盖分支 :
+    - B2  (pred_id=P2)  node=if_condition_13
+    - B5  (pred_id=P5)  node=if_condition_31
+    - B6  (pred_id=P6)  node=if_condition_37
+    - B7  (pred_id=P7)  node=if_condition_43
+    - B8  (pred_id=P8)  node=if_condition_49
+  未覆盖真实CFG边 :
+    - if_condition_13 -[false]->if_false_15  line=28  [B2]
+    - if_condition_13 -[true]->if_true_14  line=28  [B2]
+    - if_condition_31 -[false]->if_false_33  line=46  [B5]
+    - if_condition_31 -[true]->if_true_32  line=46  [B5]
+    - if_condition_37 -[false]->if_false_39  line=54  [B6]
+    - if_condition_37 -[true]->if_true_38  line=54  [B6]
+    - if_condition_43 -[false]->if_false_45  line=62  [B7]
+    - if_condition_43 -[true]->if_true_44  line=62  [B7]
+    - if_condition_49 -[false]->if_false_51  line=68  [B8]
+    - if_condition_49 -[true]->if_true_50  line=68  [B8]
+  未覆盖真实块 :
+    - if_condition_13  line=28  [B2]
+    - if_condition_31  line=46  [B5]
+    - if_condition_37  line=54  [B6]
+    - if_condition_43  line=62  [B7]
+    - if_condition_49  line=68  [B8]
+  结构节点/边（不计入覆盖率，共 72 项）:
+    □ 边: for_exit_61 -[return]->func_exit_54  [分支体内部连接边]
+    □ 边: func_entry_1 -[implicit_return]->func_exit_2  [分支体内部连接边]
+    □ 边: func_entry_11 -[]->if_condition_13  [分支体内部连接边]
+    □ 边: func_entry_29 -[]->if_condition_31  [分支体内部连接边]
+    □ 边: func_entry_3 -[return]->func_exit_4  [分支体内部连接边]
+    □ 边: func_entry_35 -[]->if_condition_37  [分支体内部连接边]
+    □ 边: func_entry_41 -[]->if_condition_43  [分支体内部连接边]
+    □ 边: func_entry_47 -[]->if_condition_49  [分支体内部连接边]
+    □ 边: func_exit_54 -[return]->main_entry_0  [分支体内部连接边]
+    □ 边: if_false_15 -[return]->func_exit_12  [分支体内部连接边]
+    □ 边: if_false_21 -[return]->func_exit_18  [分支体内部连接边]
+    □ 边: if_false_27 -[return]->func_exit_24  [分支体内部连接边]
+    □ 边: if_false_33 -[return]->func_exit_30  [分支体内部连接边]
+    □ 边: if_false_39 -[return]->func_exit_36  [分支体内部连接边]
+    □ 边: if_false_45 -[return]->func_exit_42  [分支体内部连接边]
+    □ 边: if_false_51 -[return]->func_exit_48  [分支体内部连接边]
+    □ 边: if_false_57 -[false_end]->if_merge_58  [分支体内部连接边]
+    □ 边: if_false_9 -[return]->func_exit_6  [分支体内部连接边]
+    □ 边: if_merge_10 -[implicit_return]->func_exit_6  [分支体内部连接边]
+    □ 边: if_merge_16 -[implicit_return]->func_exit_12  [分支体内部连接边]
+    □ 边: if_merge_22 -[implicit_return]->func_exit_18  [分支体内部连接边]
+    □ 边: if_merge_28 -[implicit_return]->func_exit_24  [分支体内部连接边]
+    □ 边: if_merge_34 -[implicit_return]->func_exit_30  [分支体内部连接边]
+    □ 边: if_merge_40 -[implicit_return]->func_exit_36  [分支体内部连接边]
+    □ 边: if_merge_46 -[implicit_return]->func_exit_42  [分支体内部连接边]
+    □ 边: if_merge_52 -[implicit_return]->func_exit_48  [分支体内部连接边]
+    □ 边: if_true_14 -[return]->func_exit_12  [分支体内部连接边]
+    □ 边: if_true_20 -[return]->func_exit_18  [分支体内部连接边]
+    □ 边: if_true_26 -[return]->func_exit_24  [分支体内部连接边]
+    □ 边: if_true_32 -[return]->func_exit_30  [分支体内部连接边]
+    □ 边: if_true_38 -[return]->func_exit_36  [分支体内部连接边]
+    □ 边: if_true_44 -[return]->func_exit_42  [分支体内部连接边]
+    □ 边: if_true_50 -[return]->func_exit_48  [分支体内部连接边]
+    □ 边: if_true_56 -[return]->func_exit_54  [分支体内部连接边]
+    □ 边: if_true_8 -[return]->func_exit_6  [分支体内部连接边]
+    □ 边: main_entry_0 -[call]->func_entry_53  [分支体内部连接边]
+    □ 块: func_entry_1  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_11  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_29  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_3  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_35  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_41  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_47  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_12  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_18  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_2  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_24  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_30  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_36  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_4  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_42  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_48  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_54  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_6  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_15  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_33  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_39  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_45  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_51  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_10  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_16  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_22  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_28  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_34  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_40  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_46  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_52  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_14  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_32  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_38  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_44  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_50  [纯合并/入口节点，无实际语句]
+
+================================================================================
+结果已保存到: testcase_result\testcase_s_03039_388_20260418_231239.txt
+================================================================================

@@ -1,0 +1,1 @@
+from scipy.misc import*;M=10**9+7;n,m,k=map(int,input().split());s=lambda x,y:sum(y*y*i*(x-i)for i in range(x));print((s(n,m)+s(m,n))%M*comb(n*m-2,k-2,1)%M)

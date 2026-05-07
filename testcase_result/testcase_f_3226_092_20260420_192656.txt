@@ -1,0 +1,82 @@
+================================================================================
+测试用例集 - f_3226_092  （共 5 个）
+代码文件: C:\Users\22954\Desktop\毕业设计\datasets\3226\failure\f_3226_092.py    XML种子: c:\Users\22954\Desktop\毕业设计\datasets\3226.xml    耗时: 44.7s
+================================================================================
+
+[01] 输入    : [1,1,2,2]
+     期望输出: False
+     实际输出: ERROR: AttributeError: 'int' object has no attribute 'count'
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[02] 输入    : [2,2,1,1,1,2,2]
+     期望输出: 2
+     实际输出: ERROR: AttributeError: 'int' object has no attribute 'count'
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[03] 输入    : [3,3,3,3,3,3,3]
+     期望输出: 3
+     实际输出: ERROR: AttributeError: 'int' object has no attribute 'count'
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[04] 输入    : [5,3,4,5,5,1,1,5,10,5,5,6]
+     期望输出: False
+     实际输出: ERROR: AttributeError: 'int' object has no attribute 'count'
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[05] 输入    : [5,3,4,5,5,1,1,5,10,5,5]
+     期望输出: 5
+     实际输出: ERROR: AttributeError: 'int' object has no attribute 'count'
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+================================================================================
+覆盖率报告
+================================================================================
+  分支覆盖率 : 0/5 = 0.00%
+  边覆盖率   : 8/10 = 80.00%  (已排除 15 条结构边)
+  块覆盖率   : 4/5 = 80.00%
+  已覆盖分支 : （无）
+  代码类型判断 : 应为错误程序（failure）
+  代码是否正确判断成功 : 是
+  未覆盖分支 :
+    - B1  (for循环 第5行)  node=for_header_5
+    - B2  (pred_id=P1)  node=if_condition_8
+    - B3  (pred_id=P2)  node=if_condition_12
+    - B4  (pred_id=P3)  node=if_condition_16
+    - B5  (pred_id=P4)  node=if_condition_20
+  未覆盖真实CFG边 :
+    - if_condition_16 -[false]->if_false_18  line=13  [B4]
+    - if_condition_16 -[true]->if_true_17  line=13  [B4]
+  未覆盖真实块 :
+    - if_condition_16  line=13  [B4]
+  结构节点/边（不计入覆盖率，共 22 项）:
+    □ 边: for_exit_7 -[]->if_condition_16  [分支体内部连接边]
+    □ 边: func_entry_1 -[call]->func_entry_3  [分支体内部连接边]
+    □ 边: func_entry_1 -[return]->func_exit_2  [分支体内部连接边]
+    □ 边: func_exit_2 -[return]->if_true_21  [分支体内部连接边]
+    □ 边: func_exit_4 -[return]->func_entry_1  [分支体内部连接边]
+    □ 边: if_false_10 -[false_end]->if_merge_11  [分支体内部连接边]
+    □ 边: if_false_14 -[false_end]->if_merge_15  [分支体内部连接边]
+    □ 边: if_false_18 -[return]->func_exit_4  [分支体内部连接边]
+    □ 边: if_false_22 -[false_end]->if_merge_23  [分支体内部连接边]
+    □ 边: if_merge_19 -[implicit_return]->func_exit_4  [分支体内部连接边]
+    □ 边: if_true_13 -[true_end]->if_merge_15  [分支体内部连接边]
+    □ 边: if_true_17 -[return]->func_exit_4  [分支体内部连接边]
+    □ 边: if_true_21 -[call]->func_entry_1  [分支体内部连接边]
+    □ 边: if_true_21 -[true_end]->if_merge_23  [分支体内部连接边]
+    □ 边: if_true_9 -[true_end]->if_merge_11  [分支体内部连接边]
+    □ 块: func_entry_1  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_2  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_4  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_18  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_19  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_23  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_17  [纯合并/入口节点，无实际语句]
+
+================================================================================
+结果已保存到: testcase_result\testcase_f_3226_092_20260420_192656.txt
+================================================================================

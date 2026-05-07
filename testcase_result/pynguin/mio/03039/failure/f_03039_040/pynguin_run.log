@@ -1,0 +1,13 @@
+COMMAND:
+C:\Python314\python.exe -m pynguin --project_path C:\Users\22954\Desktop\毕业设计\datasets\pynguin_wrapped\03039\failure --module_name f_03039_040 --algorithm MIO --output-path C:\Users\22954\Desktop\毕业设计\datasets\testcase_result\pynguin\mio\03039\failure\f_03039_040 --maximum-search-time 15 --maximum-memory 700 --assertion_generation NONE --coverage-metrics BRANCH --statistics-backend NONE --use-master-worker False --subprocess-if-recommended False --no-rich
+
+STDOUT:
+
+
+STDERR:
+[03:20:36] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[03:20:51] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[03:20:56] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[03:21:01] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[03:21:06] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[03:21:06] [ERROR](pynguin.generator:_run:751): Failed to write statistics data

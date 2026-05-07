@@ -1,0 +1,8 @@
+<testDataSet count="1">
+    <testData1>
+        <input>2 2 2
+</input>
+        <output>8
+</output>
+    </testData1>
+</testDataSet>

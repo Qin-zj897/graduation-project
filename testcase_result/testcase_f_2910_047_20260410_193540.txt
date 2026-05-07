@@ -1,0 +1,89 @@
+================================================================================
+测试用例集 - f_2910_047  （共 5 个）
+代码文件: 2910\failure\f_2910_047.py    XML种子: 2910.xml    耗时: 3.3s
+================================================================================
+
+[01] 输入    : 1 | 5
+     期望输出: 2.88
+     实际输出: ERROR: IndexError: list index out of range
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[02] 输入    : 9 | 10
+     期望输出: 26.96
+     实际输出: ERROR: IndexError: list index out of range
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[03] 输入    : 7 | 30
+     期望输出: 21.00
+     实际输出: ERROR: IndexError: list index out of range
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[04] 输入    : 6 | 20
+     期望输出: 18.00
+     实际输出: ERROR: IndexError: list index out of range
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+[05] 输入    : 2 | 60
+     期望输出: 6.00
+     实际输出: ERROR: IndexError: list index out of range
+     结果判断: 错误
+     覆盖分支: （无分支信息）
+
+================================================================================
+覆盖率报告
+================================================================================
+  分支覆盖率 : 0/4 = 0.00%
+  边覆盖率   : 4/8 = 50.00%  (已排除 16 条结构边)
+  块覆盖率   : 2/4 = 50.00%
+  已覆盖分支 : （无）
+  代码类型判断 : 应为错误程序（failure）
+  代码是否正确判断成功 : 是
+  未覆盖分支 :
+    - B1  (for循环 第16行)  node=for_header_7
+    - B2  (for循环 第19行)  node=for_header_10
+    - B3  (pred_id=P1)  node=if_condition_13
+    - B4  (pred_id=P2)  node=if_condition_17
+  未覆盖真实CFG边 :
+    - for_header_10 -[iterate]->for_body_start_11  line=19  [B2]
+    - for_header_10 -[exhausted]->for_exit_12  line=19  [B2]
+    - if_condition_17 -[false]->if_false_19  line=29  [B4]
+    - if_condition_17 -[true]->if_true_18  line=29  [B4]
+  未覆盖真实块 :
+    - for_header_10  line=19  [B2]
+    - if_condition_17  line=29  [B4]
+  结构节点/边（不计入覆盖率，共 27 项）:
+    □ 边: for_body_start_11 -[continue]->for_header_10  [分支体内部连接边]
+    □ 边: for_body_start_11 -[call]->func_entry_5  [分支体内部连接边]
+    □ 边: for_exit_12 -[return]->func_exit_2  [分支体内部连接边]
+    □ 边: for_exit_9 -[]->for_header_10  [分支体内部连接边]
+    □ 边: func_entry_1 -[call]->func_entry_3  [分支体内部连接边]
+    □ 边: func_entry_3 -[return]->func_exit_4  [分支体内部连接边]
+    □ 边: func_entry_5 -[implicit_return]->func_exit_6  [分支体内部连接边]
+    □ 边: func_exit_2 -[return]->if_true_14  [分支体内部连接边]
+    □ 边: func_exit_4 -[return]->func_entry_1  [分支体内部连接边]
+    □ 边: func_exit_6 -[return]->for_body_start_11  [分支体内部连接边]
+    □ 边: if_false_15 -[false_end]->if_merge_16  [分支体内部连接边]
+    □ 边: if_false_19 -[false_end]->if_merge_20  [分支体内部连接边]
+    □ 边: if_merge_20 -[true_end]->if_merge_16  [分支体内部连接边]
+    □ 边: if_true_14 -[call]->func_entry_1  [分支体内部连接边]
+    □ 边: if_true_14 -[]->if_condition_17  [分支体内部连接边]
+    □ 边: if_true_18 -[true_end]->if_merge_20  [分支体内部连接边]
+    □ 块: for_body_start_11  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_12  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_3  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_5  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_2  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_4  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_6  [纯合并/入口节点，无实际语句]
+    □ 块: if_false_19  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_16  [纯合并/入口节点，无实际语句]
+    □ 块: if_merge_20  [纯合并/入口节点，无实际语句]
+    □ 块: if_true_18  [纯合并/入口节点，无实际语句]
+
+================================================================================
+结果已保存到: testcase_result\testcase_f_2910_047_20260410_193540.txt
+================================================================================

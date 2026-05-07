@@ -1,0 +1,17 @@
+COMMAND:
+C:\Python314\python.exe -m pynguin --project_path C:\Users\22954\Desktop\毕业设计\datasets\pynguin_wrapped\03025\failure --module_name f_03025_005 --algorithm MIO --output-path C:\Users\22954\Desktop\毕业设计\datasets\testcase_result\pynguin\mio\03025\failure\f_03025_005 --maximum-search-time 60 --maximum-memory 900 --assertion_generation NONE --coverage-metrics BRANCH --statistics-backend NONE --use-master-worker False --subprocess-if-recommended False --no-rich
+
+STDOUT:
+
+
+STDERR:
+[14:09:11] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[14:09:20] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[14:09:28] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[14:09:36] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[14:09:46] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[14:09:54] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[14:10:02] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[14:10:02] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[14:10:02] [WARNING](pynguin.testcase.execution:execute:1091): Experienced timeout from test-case execution
+[14:10:03] [ERROR](pynguin.generator:_run:751): Failed to write statistics data

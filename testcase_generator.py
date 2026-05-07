@@ -15,7 +15,7 @@
     e. 变异产生新个体（引导变异）
     f. 合并种群，保留精英
     g. 若某分支长期未覆盖，调用约束求解
-5. 精简测试集（贪心选择最小覆盖集）
+5. 精简测试集
 6. 返回测试用例集
 """
 
@@ -25,8 +25,9 @@ import ast
 import random
 import copy
 import xml.etree.ElementTree as ET
+from itertools import product
 from collections import defaultdict
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Set
 
 from static_analyzer import StaticAnalyzer
 from dynamic_analyzer import DynamicAnalyzer
@@ -77,8 +78,31 @@ def _build_input_lines(value: Any, input_structure: Dict) -> List[str]:
     if len(inputs) == 1:
         return [_value_to_input_line(value, inputs[0].get('format', 'evaluated'))]
     if isinstance(value, (list, tuple)) and len(value) == len(inputs):
-        return [_value_to_input_line(v, inp.get('format', 'evaluated'))
-                for v, inp in zip(value, inputs)]
+        grouped_lines: List[str] = []
+        idx = 0
+        while idx < len(inputs):
+            inp = inputs[idx]
+            fmt = inp.get('format', 'evaluated')
+            entry_point = inp.get('entry_point')
+            line_no = inp.get('line')
+            if fmt in ('iterator', 'multi_value', 'split', 'split_string'):
+                parts = [str(value[idx])]
+                j = idx + 1
+                while j < len(inputs):
+                    other = inputs[j]
+                    other_fmt = other.get('format', 'evaluated')
+                    if other_fmt != fmt:
+                        break
+                    if other.get('entry_point') != entry_point or other.get('line') != line_no:
+                        break
+                    parts.append(str(value[j]))
+                    j += 1
+                grouped_lines.append(' '.join(parts))
+                idx = j
+                continue
+            grouped_lines.append(_value_to_input_line(value[idx], fmt))
+            idx += 1
+        return grouped_lines
     return [_value_to_input_line(value, inputs[0].get('format', 'evaluated'))]
 
 
@@ -101,10 +125,6 @@ def _normalize_distance(d: float) -> float:
         return 0.0
     return d / (d + 1.0)
 
-
-# ---------------------------------------------------------------------------
-# TestcaseGenerator
-# ---------------------------------------------------------------------------
 
 class TestcaseGenerator:
     """
@@ -148,7 +168,7 @@ class TestcaseGenerator:
         if random_seed is not None:
             random.seed(random_seed)
 
-        self._sa = StaticAnalyzer(source_code=source_code)
+        self._sa = StaticAnalyzer(source_code=self.source_code)
         self._static_result: Dict = {}
         self._branches: List[Dict] = []
         self._input_structure: Dict = {}
@@ -157,16 +177,63 @@ class TestcaseGenerator:
         self._mutation_candidates: Dict = {}
         self._pred_map: Dict[str, Dict] = {}
         self._da: Optional[DynamicAnalyzer] = None
-        self._covered_branches: set = set()
+        self._cov_key_to_branch_id: Dict[str, str] = {}
+        self._covered_branches: Set[str] = set()
         self._stagnation_counter: Dict[str, int] = defaultdict(int)
         self._best_distance: Dict[str, float] = {}
 
         self._base_dir = os.path.dirname(os.path.abspath(__file__))
         self._problem_id = self._detect_problem_id(file_path, xml_file)
         self._reference_code = self._load_reference_code(self._problem_id)
-        self._reference_executor = AdvancedExecutor(timeout=self.timeout) if self._reference_code else None
+        self._reference_executor = AdvancedExecutor(timeout=self.timeout, use_subprocess=False) if self._reference_code else None
+        self._reference_result_cache: Dict[str, Dict[str, Any]] = {}
+        self._expected_output_cache: Dict[str, str] = {}
+        self._legal_input_cache: Dict[str, bool] = {}
+        self._output_tolerance = 1e-3
+        self._failure_bonus = 2.5
+        self._failure_diff_weight = 1.0
 
         self._input_mutation_budget = max(6, population_size // 2)
+        self._hard_min_valid_cases = 5
+        self._supplement_retry_budget = max(40, population_size * 3)
+
+    def _problem_numeric_bounds(self, inp: Dict, idx: int) -> Optional[tuple]:
+        """按题目为数值输入提供轻量范围约束。"""
+        if self._problem_id == '03039' and inp.get('type', 'Any') == 'int':
+            if idx in (0, 1):
+                return (1, 40)
+            if idx == 2:
+                return (2, 1600)
+        return None
+
+    def _clamp_problem_value(self, value: Any, inp: Dict, idx: int) -> Any:
+        """将数值限制在题目感知范围内。"""
+        bounds = self._problem_numeric_bounds(inp, idx)
+        if bounds is None or not isinstance(value, (int, float)) or isinstance(value, bool):
+            return value
+        low, high = bounds
+        value = max(low, min(high, value))
+        if inp.get('type', 'Any') == 'int':
+            return int(round(value))
+        return value
+
+    def _normalize_individual(self, individual: Any) -> Any:
+        """对个体应用题目感知范围约束。"""
+        if not self._input_vars:
+            return individual
+        if isinstance(individual, tuple):
+            values = list(individual)
+            for idx, inp in enumerate(self._input_vars[:len(values)]):
+                values[idx] = self._clamp_problem_value(values[idx], inp, idx)
+            if self._problem_id == '03039' and len(values) >= 3:
+                n = max(1, int(values[0]))
+                m = max(1, int(values[1]))
+                max_k = max(2, n * m)
+                values[2] = max(2, min(max_k, int(values[2])))
+            return tuple(values)
+        if len(self._input_vars) == 1:
+            return self._clamp_problem_value(individual, self._input_vars[0], 0)
+        return individual
 
     def generate(self) -> List[Dict]:
         """
@@ -197,19 +264,24 @@ class TestcaseGenerator:
                     xml_individuals.append(inp_lines)
                 # 用动态分析执行一次，收集覆盖信息
                 try:
+                    if self._da is None:
+                        continue
                     res = _run_one(self._da, inp_lines, self._input_structure)
+                    expected_output = self._compute_expected_output(inp_lines) or xtc.get('expected_output', '')
+                    actual_output = self._actual_output_from_result(res)
                     self._update_covered_branches(res)
                     tc = self._make_test_case(inp_lines, res)
                     if tc:
                         all_test_cases.append(tc)
                     else:
-                        # 执行成功但格式化失败时保留原始 XML 信息
                         all_test_cases.append({
                             'input'           : inp_lines,
                             'input_display'   : xtc.get('input_display', '\n'.join(inp_lines)),
                             'covered_branches': [],
-                            'output'          : xtc.get('expected_output', ''),
-                            'expected_output' : self._compute_expected_output(inp_lines) or xtc.get('expected_output', ''),
+                            'output'          : actual_output,
+                            'expected_output' : expected_output,
+                            'kills_reference' : bool(expected_output) and not self._is_output_match(actual_output, expected_output),
+                            'output_difference_score': self._output_difference_score(actual_output, expected_output),
                         })
                 except Exception:
                     pass
@@ -271,7 +343,10 @@ class TestcaseGenerator:
             if tc:
                 all_test_cases.append(tc)
 
-        # 步骤5：按覆盖率 + 边界多样性精简测试集
+        # 步骤5：若唯一有效样例不足，则继续定向补生成（关注输入合法性）
+        all_test_cases = self._supplement_unique_valid_cases(all_test_cases, population, final_results)
+
+        # 步骤6：按覆盖率 + 边界多样性精简测试集
         minimized = self._greedy_minimize(all_test_cases)
         return minimized
 
@@ -283,7 +358,7 @@ class TestcaseGenerator:
         for path in candidates:
             if not path:
                 continue
-            m = re.search(r'(2910|3039|3226)', str(path))
+            m = re.search(r'(02882|03025|03039|2910|3039|3226)', str(path))
             if m:
                 return m.group(1)
         return None
@@ -301,15 +376,325 @@ class TestcaseGenerator:
         except Exception:
             return None
 
+    def _run_reference(self, inp_lines: List[str]) -> Dict:
+        """运行参考代码并返回原始结果。"""
+        if not self._reference_executor or not self._reference_code:
+            return {'success': False, 'output': ''}
+        normalized = [str(x) for x in inp_lines]
+        input_str = '\n'.join(normalized)
+        cached = self._reference_result_cache.get(input_str)
+        if cached is not None:
+            return dict(cached)
+        result = self._reference_executor.execute_with_timeout(self._reference_code, input_str, timeout=self.timeout)
+        self._reference_result_cache[input_str] = dict(result)
+        return dict(result)
+
     def _compute_expected_output(self, inp_lines: List[str]) -> str:
         """运行参考代码得到期望输出。"""
-        if not self._reference_executor or not self._reference_code:
+        normalized = [str(x) for x in inp_lines]
+        key = '\n'.join(normalized)
+        cached = self._expected_output_cache.get(key)
+        if cached is not None:
+            return cached
+        res = self._run_reference(normalized)
+        output = ''
+        if res.get('success', False):
+            output = str(res.get('output', '')).strip()
+        self._expected_output_cache[key] = output
+        return output
+
+    def _is_legal_input(self, inp_lines: List[str]) -> bool:
+        """输入是否合法：优先以参考实现可成功执行为准。"""
+        normalized = [str(x) for x in inp_lines]
+        key = '\n'.join(normalized)
+        cached = self._legal_input_cache.get(key)
+        if cached is not None:
+            return cached
+        if self._reference_executor and self._reference_code:
+            ref_res = self._run_reference(normalized)
+            result = ref_res.get('success', False)
+            self._legal_input_cache[key] = result
+            return result
+        try:
+            probe = _run_one(self._da, normalized, self._input_structure)
+            result = probe.get('execution_info', {}).get('success', False)
+            self._legal_input_cache[key] = result
+            return result
+        except Exception:
+            self._legal_input_cache[key] = False
+            return False
+
+    def _collect_unique_valid_cases(self, test_cases: List[Dict]) -> List[Dict]:
+        """按输入去重，并只保留合法且执行成功的样例。"""
+        unique: Dict[str, Dict] = {}
+        for tc in test_cases:
+            inp_lines = [str(x) for x in tc.get('input', [])]
+            if not inp_lines:
+                continue
+            if not self._is_legal_input(inp_lines):
+                continue
+            key = '\n'.join(inp_lines)
+            current = unique.get(key)
+            if current is None or tc.get('output_difference_score', 0.0) > current.get('output_difference_score', 0.0):
+                copied = dict(tc)
+                copied['input'] = inp_lines
+                copied['input_display'] = '\n'.join(inp_lines)
+                unique[key] = copied
+        return list(unique.values())
+
+    def _candidate_seed_pool(self, population: List[Any], results: List[Dict]) -> List[Any]:
+        """为补生成阶段构造高质量种子池。"""
+        seeds: List[Any] = []
+        for ind, res in zip(population, results):
+            if res.get('execution_info', {}).get('success', False):
+                seeds.append(copy.deepcopy(ind))
+        seeds.extend(self._boundary_seeds())
+        seeds.extend(self._template_seeds())
+        return seeds if seeds else [self._random_individual()]
+
+    def _is_small_scalar_input_structure(self) -> bool:
+        """判断是否属于少量标量输入结构。"""
+        if not self._input_vars or len(self._input_vars) > 4:
+            return False
+        scalar_types = {'int', 'float', 'str', 'Any', 'numeric'}
+        scalar_formats = {'single_value', 'evaluated', 'multi_value', 'iterator'}
+        for inp in self._input_vars:
+            vtype = inp.get('type', 'Any')
+            fmt = inp.get('format', 'single_value')
+            if 'list' in vtype:
+                return False
+            if fmt in {'list', 'split', 'split_string'}:
+                return False
+            if vtype not in scalar_types and fmt not in scalar_formats:
+                return False
+        return True
+
+    def _individual_to_scalar_vector(self, individual: Any) -> Optional[List[Any]]:
+        """将个体转换为按输入位置排列的标量向量。"""
+        if not self._input_vars:
+            return [individual]
+        input_lines = individual if isinstance(individual, list) and individual and all(isinstance(x, str) for x in individual) else _build_input_lines(individual, self._input_structure)
+        normalized = [str(x).strip() for x in input_lines]
+
+        expanded: List[str] = []
+        line_idx = 0
+        idx = 0
+        while idx < len(self._input_vars):
+            if line_idx >= len(normalized):
+                return None
+            inp = self._input_vars[idx]
+            fmt = inp.get('format', 'single_value')
+            entry_point = inp.get('entry_point')
+            line_no = inp.get('line')
+            current_line = normalized[line_idx]
+            if fmt in {'iterator', 'multi_value', 'split', 'split_string'}:
+                parts = current_line.split()
+                group_size = 1
+                j = idx + 1
+                while j < len(self._input_vars):
+                    other = self._input_vars[j]
+                    if other.get('format', 'single_value') != fmt:
+                        break
+                    if other.get('entry_point') != entry_point or other.get('line') != line_no:
+                        break
+                    group_size += 1
+                    j += 1
+                if len(parts) != group_size:
+                    return None
+                expanded.extend(parts)
+                line_idx += 1
+                idx = j
+                continue
+            expanded.append(current_line)
+            line_idx += 1
+            idx += 1
+
+        if line_idx != len(normalized) or len(expanded) != len(self._input_vars):
+            return None
+
+        values: List[Any] = []
+        for idx, inp in enumerate(self._input_vars):
+            parsed = self._safe_parse_value(expanded[idx])
+            if isinstance(parsed, (list, tuple, dict, set)):
+                return None
+            fmt = inp.get('format', 'single_value')
+            vtype = inp.get('type', 'Any')
+            if fmt in {'iterator', 'multi_value', 'split', 'split_string'} and 'list' not in vtype:
+                values.append(parsed)
+            else:
+                values.append(self._coerce_value(parsed, inp))
+        return values
+
+    def _position_candidate_pools(self, seed_pool: List[Any]) -> List[List[Any]]:
+        """为少量标量输入构造按位置分组的候选值池。"""
+        pools: List[List[Any]] = [[] for _ in self._input_vars]
+        seen_tags = [set() for _ in self._input_vars]
+
+        def add_value(idx: int, val: Any):
+            if idx >= len(self._input_vars):
+                return
+            coerced = self._coerce_value(val, self._input_vars[idx])
+            if isinstance(coerced, (list, tuple, dict, set)):
+                return
+            tag = repr(coerced)
+            if tag in seen_tags[idx]:
+                return
+            seen_tags[idx].add(tag)
+            pools[idx].append(coerced)
+
+        generic_numeric = [-1, 0, 1, 2, 3, 5, 10]
+        generic_string = ['', 'a', '0', '1', 'test']
+        boundary_values = self._collect_boundary_values()[:8]
+
+        for idx, inp in enumerate(self._input_vars):
+            vtype = inp.get('type', 'Any')
+            if vtype in {'int', 'float', 'Any', 'numeric'}:
+                for val in generic_numeric:
+                    add_value(idx, val)
+                for val in boundary_values:
+                    add_value(idx, val)
+                    add_value(idx, val - 1)
+                    add_value(idx, val + 1)
+            if vtype == 'str':
+                for val in generic_string:
+                    add_value(idx, val)
+
+        for seed in seed_pool:
+            vector = self._individual_to_scalar_vector(seed)
+            if not vector:
+                continue
+            for idx, val in enumerate(vector):
+                add_value(idx, val)
+                if isinstance(val, (int, float)) and not isinstance(val, bool):
+                    add_value(idx, val - 1)
+                    add_value(idx, val + 1)
+
+        for branch_entry in self._mutation_candidates.values():
+            for branch in branch_entry.get('branches', []):
+                for val in branch.get('candidates', []):
+                    for idx in range(len(self._input_vars)):
+                        add_value(idx, val)
+
+        return [pool[:8] for pool in pools]
+
+    def _scalar_combination_candidates(self, existing_keys: set, seed_pool: List[Any]) -> List[Any]:
+        """针对少量标量输入，生成通用位置组合候选。"""
+        if not self._is_small_scalar_input_structure():
+            return []
+        pools = self._position_candidate_pools(seed_pool)
+        if not pools or any(not pool for pool in pools):
+            return []
+
+        candidates: List[Any] = []
+        local_seen = set(existing_keys)
+        max_combinations = max(self._supplement_retry_budget * 2, 32)
+
+        for values in product(*pools):
+            if len(candidates) >= max_combinations:
+                break
+            if len(self._input_vars) == 1:
+                cand = values[0]
+            else:
+                cand = tuple(values)
+            inp_lines = [str(x) for x in _build_input_lines(cand, self._input_structure)]
+            key = '\n'.join(inp_lines)
+            if key in local_seen:
+                continue
+            if not self._is_legal_input(inp_lines):
+                continue
+            local_seen.add(key)
+            candidates.append(cand)
+        return candidates
+
+    def _generate_legal_candidate_inputs(self, seed_pool: List[Any], existing_keys: set) -> List[Any]:
+        """围绕已有种子生成候选输入，并优先保留新的合法输入。"""
+        target_branch = next((b for b in self._branches if b['branch_id'] in set(self._uncovered_branches())), None)
+        boundary_values = self._collect_boundary_values()
+        candidates: List[Any] = []
+        local_seen = set(existing_keys)
+
+        scalar_candidates = self._scalar_combination_candidates(local_seen, seed_pool)
+        for cand in scalar_candidates:
+            inp_lines = [str(x) for x in _build_input_lines(cand, self._input_structure)]
+            key = '\n'.join(inp_lines)
+            if key in local_seen:
+                continue
+            local_seen.add(key)
+            candidates.append(cand)
+            if len(candidates) >= self._supplement_retry_budget:
+                return candidates
+
+        for seed in seed_pool:
+            trial_inputs = [copy.deepcopy(seed), self._random_perturb(seed)]
+            if target_branch is not None:
+                trial_inputs.append(self._guided_perturb(seed, target_branch))
+            for val in boundary_values[:10]:
+                trial_inputs.append(self._replace_first_numeric(seed, val))
+                trial_inputs.append(self._replace_first_numeric(seed, val - 1))
+                trial_inputs.append(self._replace_first_numeric(seed, val + 1))
+            trial_inputs.extend(self._mutate_list_like(seed))
+
+            for cand in trial_inputs:
+                if isinstance(cand, list) and cand and all(isinstance(x, str) for x in cand):
+                    inp_lines = [str(x) for x in cand]
+                else:
+                    inp_lines = [str(x) for x in _build_input_lines(cand, self._input_structure)]
+                key = '\n'.join(inp_lines)
+                if key in local_seen:
+                    continue
+                if not self._is_legal_input(inp_lines):
+                    continue
+                local_seen.add(key)
+                candidates.append(cand)
+                if len(candidates) >= self._supplement_retry_budget:
+                    return candidates
+        return candidates
+
+    def _supplement_unique_valid_cases(self, test_cases: List[Dict], population: List[Any], results: List[Dict]) -> List[Dict]:
+        """若唯一合法有效样例不足 5 个，则继续定向补生成。"""
+        enriched = list(test_cases)
+        unique_valid = self._collect_unique_valid_cases(enriched)
+        if len(unique_valid) >= self._hard_min_valid_cases:
+            return enriched
+
+        existing_keys = {'\n'.join(str(x) for x in tc.get('input', [])) for tc in unique_valid}
+        seed_pool = self._candidate_seed_pool(population, results)
+        candidates = self._generate_legal_candidate_inputs(seed_pool, existing_keys)
+
+        for cand in candidates:
+            try:
+                res = _run_one(self._da, cand, self._input_structure)
+            except Exception:
+                continue
+            tc = self._make_test_case(cand, res)
+            if not tc:
+                continue
+            inp_lines = [str(x) for x in tc.get('input', [])]
+            key = '\n'.join(inp_lines)
+            if key in existing_keys:
+                continue
+            if not self._is_legal_input(inp_lines):
+                continue
+            enriched.append(tc)
+            existing_keys.add(key)
+            if len(self._collect_unique_valid_cases(enriched)) >= self._hard_min_valid_cases:
+                break
+
+        return enriched
+
+    def _actual_output_from_result(self, res: Dict) -> str:
+        """从执行结果中提取用于展示和比较的实际输出。"""
+        execution_info = res.get('execution_info', {})
+        output = str(execution_info.get('output', '') or '').strip()
+        if output:
+            return output
+        if execution_info.get('success', False):
             return ''
-        input_str = '\n'.join(inp_lines)
-        res = self._reference_executor.execute_with_timeout(self._reference_code, input_str, timeout=self.timeout)
-        if not res.get('success', False):
+        error = str(execution_info.get('error', '') or '').strip()
+        if not error:
             return ''
-        return str(res.get('output', '')).strip()
+        error_line = error.splitlines()[-1].strip()
+        return f"ERROR: {error_line}" if error_line else 'ERROR'
 
     def _is_output_match(self, actual: str, expected: str) -> bool:
         """输出比较：先比较字符串，再尝试浮点容差比较"""
@@ -318,9 +703,24 @@ class TestcaseGenerator:
         if a == e:
             return True
         try:
-            return abs(float(a) - float(e)) < 0.01
+            return abs(float(a) - float(e)) < self._output_tolerance
         except Exception:
             return False
+
+    def _output_difference_score(self, actual: str, expected: str) -> float:
+        """衡量输出与参考实现的差异，差异越大分数越高。"""
+        a = (actual or '').strip()
+        e = (expected or '').strip()
+        if not e:
+            return 0.0
+        if self._is_output_match(a, e):
+            return 0.0
+        try:
+            return abs(float(a) - float(e))
+        except Exception:
+            max_len = max(len(a), len(e), 1)
+            mismatch = sum(1 for x, y in zip(a, e) if x != y) + abs(len(a) - len(e))
+            return mismatch / max_len
 
     def _collect_boundary_values(self) -> List[float]:
         """收集静态分析得到的数值边界，用于输入变异和测试集保留"""
@@ -609,51 +1009,70 @@ class TestcaseGenerator:
         if not self._input_vars:
             return scalar
         if len(self._input_vars) == 1:
-            return self._coerce_value(scalar, self._input_vars[0])
+            return self._normalize_individual(self._coerce_value(scalar, self._input_vars[0]))
         parts = []
         for i, inp in enumerate(self._input_vars):
             parts.append(self._coerce_value(scalar, inp) if i == 0
-                        else self._random_value_for_input(inp))
-        return tuple(parts)
+                        else self._random_value_for_input(inp, i))
+        return self._normalize_individual(tuple(parts))
 
     def _random_individual(self) -> Any:
         """生成完全随机的个体。"""
         if not self._input_vars:
             return random.randint(-100, 100)
         if len(self._input_vars) == 1:
-            return self._random_value_for_input(self._input_vars[0])
-        return tuple(self._random_value_for_input(inp) for inp in self._input_vars)
+            return self._normalize_individual(self._random_value_for_input(self._input_vars[0], 0))
+        return self._normalize_individual(tuple(self._random_value_for_input(inp, idx) for idx, inp in enumerate(self._input_vars)))
 
-    def _random_value_for_input(self, inp: Dict) -> Any:
+    def _random_value_for_input(self, inp: Dict, idx: int = 0) -> Any:
         """根据输入变量的类型生成随机值。"""
         vtype = inp.get('type', 'Any')
         fmt   = inp.get('format', 'single_value')
+        scalar_split_like = fmt in ('multi_value', 'split', 'iterator') and 'list' not in vtype
+        bounds = self._problem_numeric_bounds(inp, idx)
         if vtype == 'int':
+            if bounds is not None:
+                low, high = bounds
+                return random.randint(low, high)
             return random.randint(-100, 1000)
         if vtype == 'float':
+            if bounds is not None:
+                low, high = bounds
+                return round(random.uniform(low, high), 3)
             return round(random.uniform(-100.0, 1000.0), 3)
         if vtype == 'str':
             return ''.join(random.choices('abcdefghijklmnopqrstuvwxyz ', k=random.randint(0, 20)))
-        if 'list' in vtype or fmt in ('list', 'split', 'split_string', 'iterator'):
+        if 'list' in vtype or fmt in ('list', 'split_string'):
             n = random.randint(0, 10)
             if 'float' in vtype:
                 return [round(random.uniform(-100, 100), 2) for _ in range(n)]
             return [random.randint(-100, 100) for _ in range(n)]
+        if scalar_split_like:
+            if bounds is not None:
+                low, high = bounds
+                return random.randint(low, high)
+            return random.randint(-100, 1000)
+        if bounds is not None:
+            low, high = bounds
+            return random.randint(low, high)
         return random.randint(-100, 1000)
 
     def _coerce_value(self, v: Any, inp: Dict) -> Any:
         """将值强制转换为目标输入类型。"""
         vtype = inp.get('type', 'Any')
         fmt   = inp.get('format', 'single_value')
+        scalar_split_like = fmt in ('multi_value', 'split', 'iterator') and 'list' not in vtype
         try:
             if vtype == 'int':
                 return int(round(v)) if isinstance(v, (int, float)) else v
             if vtype == 'float':
                 return float(v) if isinstance(v, (int, float)) else v
-            if 'list' in vtype or fmt in ('list', 'split', 'split_string', 'iterator'):
+            if 'list' in vtype or fmt in ('list', 'split_string'):
                 if isinstance(v, (list, tuple)):
                     return list(v)
                 return [int(round(v))] if isinstance(v, (int, float)) else [v]
+            if scalar_split_like and isinstance(v, (list, tuple)):
+                return v[0] if v else 0
         except Exception:
             pass
         return v
@@ -670,6 +1089,13 @@ class TestcaseGenerator:
                 res = {'execution_info': {'success': False},
                     'coverage': {'covered_edges': [], 'covered_blocks': []},
                     'branch_distances': {}}
+            actual_output = self._actual_output_from_result(res)
+            input_lines = ind if isinstance(ind, list) and ind and isinstance(ind[0], str) else _build_input_lines(ind, self._input_structure)
+            input_lines = [str(x) for x in input_lines]
+            expected_output = self._compute_expected_output(input_lines)
+            res['expected_output'] = expected_output
+            res['output_difference_score'] = self._output_difference_score(actual_output, expected_output)
+            res['killed_reference'] = bool(expected_output) and not self._is_output_match(actual_output, expected_output)
             results.append(res)
             # 更新全局已覆盖分支
             self._update_covered_branches(res)
@@ -693,13 +1119,9 @@ class TestcaseGenerator:
         """
         计算个体适应度（越小越好）。
 
-        算法：
-        1. 初始化总适应度 = 0
-        2. 遍历所有分支：
-            a. 若分支已覆盖（距离 == 0），适应度 += 0
-            b. 若分支未覆盖，取该分支在所有执行步骤中的最小距离
-            c. 适应度 += normalize(最小距离)
-        3. 返回总适应度
+        在分支距离之外，额外将“与参考实现输出差异”作为检错能力目标：
+        - 若能打出与参考实现不同的输出，给予额外奖励；
+        - 输出差异越大，适应度越低。
         """
         total_fitness = 0.0
         branch_dists = res.get('branch_distances', {})
@@ -708,16 +1130,13 @@ class TestcaseGenerator:
             bid = branch['branch_id']
             pid = branch.get('pred_id', '')
 
-            # 查找该分支对应的距离记录（用 pred_id 或 branch_id 作 key）
             dist_list = (branch_dists.get(pid) or
                         branch_dists.get(bid) or [])
 
             if not dist_list:
-                # 没有执行记录，使用最大距离
                 total_fitness += 1.0
                 continue
 
-            # 取所有步骤中的最小距离
             min_dist = min(
                 entry.get('distance', float('inf'))
                 for entry in dist_list
@@ -725,11 +1144,13 @@ class TestcaseGenerator:
             )
 
             if min_dist == 0.0:
-                # 分支已覆盖
                 total_fitness += 0.0
             else:
-                # 标准化距离
                 total_fitness += _normalize_distance(min_dist)
+
+        if res.get('killed_reference'):
+            total_fitness -= self._failure_bonus
+        total_fitness -= self._failure_diff_weight * res.get('output_difference_score', 0.0)
 
         return total_fitness
 
@@ -935,7 +1356,7 @@ class TestcaseGenerator:
         if isinstance(current, int):
             new_val = int(round(new_val))
 
-        return self._set_value_at_index(ind, idx, new_val)
+        return self._normalize_individual(self._set_value_at_index(ind, idx, new_val))
 
     def _get_value_and_index(self, individual: Any, var: Optional[str]):
         """从个体中获取目标变量的当前值和位置索引。"""
@@ -975,11 +1396,18 @@ class TestcaseGenerator:
     def _random_perturb(self, individual: Any) -> Any:
         """纯随机扰动：在当前值基础上加减随机步长。"""
         if isinstance(individual, tuple):
-            return tuple(self._perturb_scalar(v) for v in individual)
+            perturbed = tuple(
+                self._clamp_problem_value(self._perturb_scalar(v), self._input_vars[idx], idx)
+                if idx < len(self._input_vars) else self._perturb_scalar(v)
+                for idx, v in enumerate(individual)
+            )
+            return self._normalize_individual(perturbed)
         if isinstance(individual, list):
             if not individual:
                 return [random.randint(-100, 100)]
             return [self._perturb_scalar(v) for v in individual]
+        if self._input_vars:
+            return self._clamp_problem_value(self._perturb_scalar(individual), self._input_vars[0], 0)
         return self._perturb_scalar(individual)
 
     # 交叉并变异
@@ -1184,7 +1612,7 @@ class TestcaseGenerator:
                 nearest = min(boundaries, key=lambda b: abs(x - b))
                 rounded = str(int(nearest)) if float(nearest).is_integer() else f"{nearest:.3f}"
                 dist = abs(x - nearest)
-                if dist < 1e-9:
+                if dist < 1e-4:
                     boundary.add(f"boundary:eq:{rounded}")
                 elif dist <= 1:
                     side = 'below' if x < nearest else 'above'
@@ -1299,6 +1727,56 @@ class TestcaseGenerator:
                 deduped.append(idx)
         return deduped
 
+    def _classify_input_pattern(self, value: Any) -> str:
+        """对输入做粗粒度分类，用于合并同类检错样例。"""
+        if isinstance(value, bool):
+            return f"bool:{value}"
+        if isinstance(value, (int, float)):
+            if value < 0:
+                return 'num:neg'
+            if value > 0:
+                return 'num:pos'
+            return 'num:zero'
+        if isinstance(value, list):
+            if not value:
+                return 'list:empty'
+            nums = [x for x in value if isinstance(x, (int, float)) and not isinstance(x, bool)]
+            signs = []
+            if any(x < 0 for x in nums):
+                signs.append('neg')
+            if any(x == 0 for x in nums):
+                signs.append('zero')
+            if any(x > 0 for x in nums):
+                signs.append('pos')
+            sign_tag = ','.join(signs) if signs else 'nonnum'
+            return f"list:{len(value)}:{sign_tag}"
+        return f"type:{type(value).__name__}"
+
+    def _killer_signature(self, tc: Dict) -> tuple:
+        """提取检错样例的粗粒度原因签名，避免同因重复保留。"""
+        parsed = [self._safe_parse_value(line) for line in tc.get('input', [])]
+        input_pattern = tuple(self._classify_input_pattern(value) for value in parsed)
+        covered = tuple(sorted(tc.get('covered_branches', [])))
+        actual = str(tc.get('output', '')).strip()
+        expected = str(tc.get('expected_output', '')).strip()
+        try:
+            delta_sign = 'pos' if float(actual) - float(expected) > 0 else 'neg'
+        except Exception:
+            delta_sign = 'text'
+        return covered, input_pattern, delta_sign
+
+    def _select_representative_killers(self, unique_cases: List[Dict]) -> List[int]:
+        """同类检错原因只保留一个代表样例。"""
+        grouped: Dict[tuple, int] = {}
+        for idx, tc in enumerate(unique_cases):
+            if not tc.get('kills_reference'):
+                continue
+            signature = self._killer_signature(tc)
+            current = grouped.get(signature)
+            if current is None or tc.get('output_difference_score', 0.0) > unique_cases[current].get('output_difference_score', 0.0):
+                grouped[signature] = idx
+        return sorted(grouped.values())
+
     def _greedy_minimize(self, test_cases: List[Dict]) -> List[Dict]:
         """
         按题型做精简：
@@ -1310,7 +1788,7 @@ class TestcaseGenerator:
 
         seen_inputs: set = set()
         unique_cases: List[Dict] = []
-        for tc in test_cases:
+        for tc in self._collect_unique_valid_cases(test_cases):
             key = tc.get('input_display', repr(tc.get('input', '')))
             if key not in seen_inputs:
                 seen_inputs.add(key)
@@ -1318,6 +1796,8 @@ class TestcaseGenerator:
 
         if not unique_cases:
             return []
+
+        killer_cases = self._select_representative_killers(unique_cases)
 
         style = self._infer_case_style(unique_cases)
         features_by_idx = [self._derive_case_features(tc) for tc in unique_cases]
@@ -1339,6 +1819,15 @@ class TestcaseGenerator:
         covered = {k: set() for k in essential_targets}
         selected_idx: List[int] = []
         remaining = set(range(len(unique_cases)))
+
+        for idx in killer_cases:
+            if idx in remaining:
+                selected_idx.append(idx)
+                remaining.remove(idx)
+                covered['branches'] |= features_by_idx[idx]['branches']
+                covered['boundary'] |= features_by_idx[idx]['boundary'] & essential_targets['boundary']
+                covered['shape'] |= features_by_idx[idx]['shape'] & essential_targets['shape']
+                covered['output'] |= features_by_idx[idx]['output'] & essential_targets['output']
 
         while remaining:
             best_idx = None
@@ -1372,8 +1861,12 @@ class TestcaseGenerator:
                 selected_idx.append(idx)
 
         minimized = list(selected_idx)
+        protected_idx = set(killer_cases)
         i = 0
         while i < len(minimized):
+            if minimized[i] in protected_idx:
+                i += 1
+                continue
             trial = minimized[:i] + minimized[i + 1:]
             trial_cov = {k: set() for k in essential_targets}
             for idx in trial:
@@ -1449,14 +1942,18 @@ class TestcaseGenerator:
                     covered.append(branch_id)
                     break
 
-        expected_output = self._compute_expected_output(inp_lines)
+        expected_output = res.get('expected_output')
+        if expected_output is None:
+            expected_output = self._compute_expected_output(inp_lines)
 
         return {
             'input'           : inp_lines,
             'input_display'   : display,
             'covered_branches': list(set(covered)),
-            'output'          : res.get('execution_info', {}).get('output', ''),
+            'output'          : self._actual_output_from_result(res),
             'expected_output' : expected_output,
+            'kills_reference' : res.get('killed_reference', False),
+            'output_difference_score': res.get('output_difference_score', 0.0),
         }
 
     @staticmethod

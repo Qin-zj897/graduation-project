@@ -1,0 +1,99 @@
+================================================================================
+测试用例集 - s_03025_063  （共 5 个）
+代码文件: c:\Users\22954\Desktop\毕业设计\datasets\03025\success\s_03025_063.py    XML种子: c:\Users\22954\Desktop\毕业设计\datasets\03025.xml    耗时: 49.7s
+================================================================================
+
+[01] 输入    : 1 25 25 50
+     期望输出: 2
+     实际输出: 2
+     结果判断: 正确
+     覆盖分支: ['B1', 'B2', 'B3', 'B4']
+
+[02] 输入    : 1 1 99 0
+     期望输出: 1
+     实际输出: 1
+     结果判断: 正确
+     覆盖分支: ['B1', 'B2', 'B3', 'B4']
+
+[03] 输入    : 2 1 99 0
+     期望输出: 568600006
+     实际输出: 568600006
+     结果判断: 正确
+     覆盖分支: ['B1', 'B2', 'B3', 'B4']
+
+[04] 输入    : 3 1 99 0
+     期望输出: 281387425
+     实际输出: 281387425
+     结果判断: 正确
+     覆盖分支: ['B1', 'B2', 'B3', 'B4']
+
+[05] 输入    : 0 471 442 827
+     期望输出: 0
+     实际输出: 0
+     结果判断: 正确
+     覆盖分支: （无分支信息）
+
+================================================================================
+覆盖率报告
+================================================================================
+  分支覆盖率 : 4/4 = 100.00%
+  边覆盖率   : 1/8 = 12.50%  (已排除 22 条结构边)
+  块覆盖率   : 4/4 = 100.00%
+  已覆盖分支 : ['B1', 'B2', 'B3', 'B4']
+  代码类型判断 : 应为正确程序（success）
+  代码是否正确判断成功 : 是
+  未覆盖分支 : 无（所有分支均已覆盖）
+  未覆盖真实CFG边 :
+    - for_header_12 -[iterate]->for_body_start_13  line=48  [B2]
+    - for_header_12 -[exhausted]->for_exit_14  line=48  [B2]
+    - for_header_17 -[iterate]->for_body_start_18  line=68  [B3]
+    - for_header_20 -[iterate]->for_body_start_21  line=74  [B4]
+    - for_header_20 -[exhausted]->for_exit_22  line=74  [B4]
+    - for_header_9 -[iterate]->for_body_start_10  line=41  [B1]
+    - for_header_9 -[exhausted]->for_exit_11  line=41  [B1]
+  未覆盖真实块   : 无
+  结构节点/边（不计入覆盖率，共 40 项）:
+    □ 边: for_body_start_10 -[continue]->for_header_9  [分支体内部连接边]
+    □ 边: for_body_start_13 -[continue]->for_header_12  [分支体内部连接边]
+    □ 边: for_body_start_18 -[continue]->for_header_17  [分支体内部连接边]
+    □ 边: for_body_start_18 -[call]->func_entry_15  [分支体内部连接边]
+    □ 边: for_body_start_21 -[continue]->for_header_20  [分支体内部连接边]
+    □ 边: for_body_start_21 -[call]->func_entry_15  [分支体内部连接边]
+    □ 边: for_exit_11 -[]->for_header_12  [分支体内部连接边]
+    □ 边: for_exit_14 -[return]->func_exit_8  [分支体内部连接边]
+    □ 边: for_exit_22 -[call]->func_entry_5  [分支体内部连接边]
+    □ 边: func_entry_1 -[return]->func_exit_2  [分支体内部连接边]
+    □ 边: func_entry_15 -[return]->func_exit_16  [分支体内部连接边]
+    □ 边: func_entry_3 -[return]->func_exit_4  [分支体内部连接边]
+    □ 边: func_entry_5 -[return]->func_exit_6  [分支体内部连接边]
+    □ 边: func_entry_7 -[]->for_header_9  [分支体内部连接边]
+    □ 边: func_exit_16 -[return]->for_body_start_18  [分支体内部连接边]
+    □ 边: func_exit_16 -[return]->for_body_start_21  [分支体内部连接边]
+    □ 边: func_exit_6 -[return]->for_exit_22  [分支体内部连接边]
+    □ 边: func_exit_6 -[return]->main_entry_0  [分支体内部连接边]
+    □ 边: func_exit_8 -[return]->main_entry_0  [分支体内部连接边]
+    □ 边: main_entry_0 -[]->for_header_17  [分支体内部连接边]
+    □ 边: main_entry_0 -[call]->func_entry_5  [分支体内部连接边]
+    □ 边: main_entry_0 -[call]->func_entry_7  [分支体内部连接边]
+    □ 块: for_body_start_10  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_13  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_18  [纯合并/入口节点，无实际语句]
+    □ 块: for_body_start_21  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_11  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_14  [纯合并/入口节点，无实际语句]
+    □ 块: for_exit_22  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_1  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_15  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_3  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_5  [纯合并/入口节点，无实际语句]
+    □ 块: func_entry_7  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_16  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_2  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_4  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_6  [纯合并/入口节点，无实际语句]
+    □ 块: func_exit_8  [纯合并/入口节点，无实际语句]
+    □ 块: main_entry_0  [纯合并/入口节点，无实际语句]
+
+================================================================================
+结果已保存到: testcase_result\testcase_s_03025_063_20260424_172607.txt
+================================================================================

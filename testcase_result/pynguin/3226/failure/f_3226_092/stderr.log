@@ -1,0 +1,37 @@
+Pynguin error in worker process: cannot access free variable 'module' where it is not associated with a value in enclosing scope
+Traceback (most recent call last):
+  File "C:\Users\22954\Desktop\��ҵ���\pynguin-main\src\pynguin\analyses\constants.py", line 292, in _parse_file
+    tree = ast.parse(module_file.read())
+  File "C:\Python314\Lib\ast.py", line 46, in parse
+    return compile(source, filename, mode, flags,
+                   _feature_version=feature_version, optimize=optimize)
+  File "<unknown>", line 7
+    else:
+         ^
+IndentationError: unindent does not match any outer indentation level
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\22954\Desktop\��ҵ���\pynguin-main\src\pynguin\master_worker\worker.py", line 101, in worker_main
+    return_code = run_pynguin()
+  File "C:\Users\22954\Desktop\��ҵ���\pynguin-main\src\pynguin\generator.py", line 148, in run_pynguin
+    return _run()
+  File "C:\Users\22954\Desktop\��ҵ���\pynguin-main\src\pynguin\generator.py", line 659, in _run
+    if (setup_result := _setup_and_check()) is None:
+                        ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\22954\Desktop\��ҵ���\pynguin-main\src\pynguin\generator.py", line 382, in _setup_and_check
+    wrapped_constant_provider, dynamic_constant_provider = _setup_constant_seeding()
+                                                           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\22954\Desktop\��ҵ���\pynguin-main\src\pynguin\generator.py", line 303, in _setup_constant_seeding
+    constant_pool = collect_static_constants(
+        config.configuration.project_path, module_names=module_names
+    )
+  File "C:\Users\22954\Desktop\��ҵ���\pynguin-main\src\pynguin\analyses\constants.py", line 310, in collect_static_constants
+    _parse_file(module_path)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\22954\Desktop\��ҵ���\pynguin-main\src\pynguin\analyses\constants.py", line 297, in _parse_file
+    module,
+    ^^^^^^
+NameError: cannot access free variable 'module' where it is not associated with a value in enclosing scope
+

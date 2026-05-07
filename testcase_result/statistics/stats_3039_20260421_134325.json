@@ -1,0 +1,52 @@
+{
+  "problem_id": "3039",
+  "file_count": 299,
+  "success": {
+    "program_count": 200,
+    "valid_program_count": 200,
+    "generation_failed_ids": [],
+    "generation_failed_count": 0,
+    "avg_edge_coverage": 88.32,
+    "avg_block_coverage": 90.78,
+    "hidden_bug_detected_ids": [
+      "s_3039_010",
+      "s_3039_031",
+      "s_3039_046",
+      "s_3039_047",
+      "s_3039_065",
+      "s_3039_069",
+      "s_3039_073",
+      "s_3039_074",
+      "s_3039_081",
+      "s_3039_088",
+      "s_3039_093",
+      "s_3039_109",
+      "s_3039_114",
+      "s_3039_129",
+      "s_3039_131",
+      "s_3039_143",
+      "s_3039_146",
+      "s_3039_147",
+      "s_3039_149",
+      "s_3039_168",
+      "s_3039_176",
+      "s_3039_193"
+    ],
+    "hidden_bug_detected_count": 22,
+    "hidden_bug_detection_rate": 11.0,
+    "consistent_code_count": 178,
+    "consistent_rate": 89.0
+  },
+  "failure": {
+    "program_count": 99,
+    "valid_program_count": 99,
+    "generation_failed_ids": [],
+    "generation_failed_count": 0,
+    "avg_edge_coverage": 76.97,
+    "avg_block_coverage": 80.7,
+    "bug_detected_count": 99,
+    "bug_detection_rate": 100.0,
+    "undetected_failure_ids": [],
+    "undetected_failure_count": 0
+  }
+}

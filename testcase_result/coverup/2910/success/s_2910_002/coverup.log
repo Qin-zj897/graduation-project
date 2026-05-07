@@ -1,2 +1,0 @@
----- 2026-04-02T18:55:20 startup ----
-Command: C:\Python314\Lib\site-packages\coverup\__main__.py C:\Users\22954\Desktop\毕业设计\datasets\2910\success\s_2910_002.py --tests-dir C:\Users\22954\Desktop\毕业设计\datasets\testcase_result\coverup\2910\success\s_2910_002\tests --model openai/gpt-4o-mini --max-attempts 2 --max-concurrency 8 --repeat-tests 1 --prefix coverup_s_2910_002 --log-file C:\Users\22954\Desktop\毕业设计\datasets\testcase_result\coverup\2910\success\s_2910_002\coverup.log --pytest-args=-q
